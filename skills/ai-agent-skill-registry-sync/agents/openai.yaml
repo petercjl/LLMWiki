@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Agent Skill Registry Sync"
+  short_description: "Scan agent skills into wiki"
+  default_prompt: "Scan my AI agent skill directories and update the wiki skill registry."
