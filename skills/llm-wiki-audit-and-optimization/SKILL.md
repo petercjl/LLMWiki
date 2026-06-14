@@ -343,6 +343,8 @@ Check:
 - Main index has target domain with meaningful one-line descriptions.
 - Domain index groups pages into task-relevant modules.
 - Learning path index exists and has ordered chapter links.
+- If the domain contains many reusable cases, a case library/index exists and
+  maps problem types to cases.
 - Page titles are Chinese/human-readable and problem-oriented.
 - Agent-use template pages are easy to find.
 - Related pages and wikilinks guide cross-domain use.

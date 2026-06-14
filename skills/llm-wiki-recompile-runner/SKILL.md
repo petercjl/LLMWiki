@@ -167,11 +167,15 @@ When reorganizing an existing source-shaped knowledge path, follow this pattern:
 6. Rename for human retrieval: use Chinese names and numeric prefixes for
    ordered folders/pages, including top-level human-facing domain directories
    under `domains/`.
-7. Update all routes: patch domain indexes, root index, query pages, schema or
+7. Build retrieval layers for repeated artifacts: if many reusable cases,
+   templates, or examples are scattered through theory pages, create/update a
+   case library or template index such as `90-样本/`, grouped by problem type
+   and linked back to theory pages.
+8. Update all routes: patch domain indexes, root index, query pages, schema or
    agent notes, and legacy indexes.
-8. Verify mechanically: check missing links, old path residues, placeholder
+9. Verify mechanically: check missing links, old path residues, placeholder
    status, and representative page quality.
-9. Feed the lesson back into skills before publishing the skill repo.
+10. Feed the lesson back into skills before publishing the skill repo.
 
 ### 5.1 Transcript With Built-In Summary
 
@@ -203,6 +207,8 @@ After each learning path repair:
    - ordered domains and formal pages use numeric prefixes so the first-read
      path is visible in file browsers and Obsidian
    - source/course package pages point to content-domain pages
+   - reusable cases are not only buried in chapters; a domain case library/index
+     exists when the source contains many cases
    - duplicate source-shaped pages have been merged or clearly marked as provenance
    - old path residues and stale links are removed from indexes and query pages
    - downstream agents can route to the path

@@ -60,6 +60,13 @@ _meta/extraction-notes/<source-slug>/
 - For brand visual materials, keep strategic asset logic in `domains/品牌策略/04-品牌视觉资产/` and production/execution logic in `domains/视觉制作/02-品牌视觉标准化/` or the relevant AI visual workflow directory.
 - Cross-link overlapping pages through a "相关记忆" section instead of merging the two domains.
 
+## Case Libraries
+
+- If a source or existing domain contains many reusable named cases, build or update a case library layer instead of leaving cases scattered only inside theory chapters.
+- Brand strategy cases belong in `domains/品牌策略/90-样本/` unless the case is primarily a visual-production execution case or another domain owns the durable question.
+- Case pages should be problem-routed and reusable: conclusion, background problem, action moves, why it worked, transferable method, misuse boundary, source links, and related theory pages.
+- The domain index should link to the case library with a clear use case such as "想找相似品牌案例做类比".
+
 ## Index Rules
 
 - Every formal page appears in `/Users/pechen/wiki/index.md`.

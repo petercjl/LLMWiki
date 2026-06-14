@@ -137,6 +137,31 @@ it and connect the new durable page through:
 Use destructive merging only when two pages are genuinely duplicate theories and
 Peter has confirmed the merge.
 
+### 0.4.1 Case Library Layer
+
+Dense business, ecommerce, brand, finance, or visual courses often contain many
+named cases. Do not leave important cases buried only inside theory chapters.
+When a domain contains multiple reusable cases, create or update a domain case
+library/index layer, such as `domains/品牌策略/90-样本/`.
+
+A case library page should not replace the theory page. It should be a retrieval
+layer that helps Peter and agents answer "what case is this problem like?" Each
+case entry should point back to the relevant theory page and preserve source
+traceability.
+
+For each durable case page, prefer this structure:
+
+- case conclusion
+- background problem
+- strategic/action moves
+- why it worked
+- transferable method
+- misuse boundary
+- related theory pages
+
+Case libraries should be organized by problem type as well as by module, so an
+agent can route from a user question to the right example before reasoning.
+
 ### 0.5 Source Packages Are Secondary
 
 Use `raw/` and `_meta/extraction-notes/` for source preservation and audit.
