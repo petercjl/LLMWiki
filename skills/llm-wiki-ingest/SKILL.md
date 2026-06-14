@@ -1,6 +1,6 @@
 ---
 name: llm-wiki-ingest
-description: Unified and only LLM Wiki ingestion skill for Peter's /Users/pechen/wiki. Use for any source that should be compiled into the wiki, including Obsidian Clippings, webpages, books, EPUB/PDF, course transcripts, meeting transcripts, API docs, XMind files, spreadsheets, markdown docs, product/tool docs, PPT/courseware, and unknown source types. Enforces lossless knowledge-unit coverage, raw preservation, extraction notes, formal pages, index/log updates, Obsidian route audit, and audit handoff.
+description: Unified and only LLM Wiki ingestion skill for Peter's /Users/pechen/wiki. Use for any source that should be compiled into the wiki, including Obsidian Clippings, webpages, books, EPUB/PDF, course transcripts, meeting transcripts, API docs, XMind files, spreadsheets, markdown docs, product/tool docs, PPT/courseware, and unknown source types. Enforces memory-first classification, fusion with existing knowledge, lossless knowledge-unit coverage, raw preservation, extraction notes, formal pages, index/log updates, Obsidian route audit, and audit handoff.
 ---
 
 # LLM Wiki Ingest
@@ -26,6 +26,12 @@ Use this skill instead of source-specific ingest skills when the user asks to:
 
 Wiki ingestion is not summarization, abbreviation, or takeaway extraction.
 
+Wiki ingestion is also not source filing. Peter's wiki is a personal memory
+system: new material must be absorbed into the existing knowledge structure
+whenever possible. A course, book, transcript, meeting, web clipping, or report
+is the acquisition path; the final formal knowledge belongs under the content
+domain where Peter will later look for it.
+
 Every meaningful source unit must be preserved at the knowledge-unit level. A meaningful source unit can be a heading, paragraph claim, table row, code block, API field, example, case, formula, diagram meaning, image with information, XMind node, transcript micro-segment, Q&A point, limitation, caveat, decision rule, operational step, or pricing/parameter value.
 
 For each source unit, record exactly one disposition:
@@ -37,6 +43,82 @@ For each source unit, record exactly one disposition:
 - `unresolved`: requires user judgment, current-source verification, or missing context.
 
 The final wiki may be longer than a summary. It should reconstruct implicit logic, add interpretation, relationship maps, decision criteria, examples, Agent-usable templates, caveats, and cross-links. Enrichment must never replace source coverage: first preserve the source's knowledge units, then enrich.
+
+## Memory-First Placement And Fusion
+
+Before planning formal pages, perform a classification and fusion gate.
+
+### 0.1 Classify The Knowledge Domain
+
+Identify the durable content domain before deciding file paths. Peter's wiki is
+broad and may include, among others:
+
+- ecommerce operations, including platform-specific knowledge such as Taobao,
+  Douyin, Xiaohongshu, JD, Pinduoduo, and general ecommerce methods
+- tax, finance, accounting, equity, incentives, and strategic finance
+- visual production, ecommerce images, video, design systems, and aesthetics
+- brand strategy, positioning, product strategy, and consumer mind
+- AI application development, agents, tools, prompts, workflows, and automation
+- personal interest knowledge such as Daoism, Buddhism, philosophy, health, or
+  other long-lived learning areas
+
+If the source crosses domains, split or cross-link by concept. Do not force all
+formal output under the source's original course/book directory.
+
+### 0.2 Search Existing Memory Before Creating Pages
+
+Search existing pages for the source title, core concepts, synonyms, Chinese
+terms, English terms, brands, platforms, tools, formulas, and cases.
+
+For every planned formal page, choose one disposition:
+
+- `merge-into-existing`: add, refine, or correct an existing page.
+- `extend-existing-with-section`: add a new section to an existing page.
+- `split-existing`: existing page is too broad; create a clearer subpage and
+  update links.
+- `create-new`: no suitable existing page exists.
+- `source-package-only`: keep a source map, course map, or audit trail, but do
+  not make it the main knowledge home.
+
+When the choice is ambiguous or would reorganize important knowledge, ask Peter
+to confirm the classification and merge plan before editing.
+
+### 0.3 Human-Facing Chinese Names
+
+Use Chinese titles and Chinese index labels by default for formal knowledge
+pages, because Peter navigates and reviews the wiki in Chinese. English slugs
+can remain in frontmatter (`slug`, `aliases`) or transitional filenames, but
+new or renamed human-facing knowledge should be Chinese-readable. Avoid
+creating a large English-only directory tree for Chinese knowledge.
+
+When a folder or page belongs to an ordered learning/navigation sequence, add a
+numeric prefix to the filename, such as `01-基础概念/`,
+`02-业务模型/`, or `03-风险与例外.md`. The number is part of the
+navigation contract, not decoration: choose it so Peter can tell which file to
+read first in Obsidian or any plain file browser.
+
+### 0.4 Associative Fusion
+
+Do not destroy an older knowledge structure merely because a new source overlaps
+with it. If the old page still has its own context or curriculum value, preserve
+it and connect the new durable page through:
+
+- a "相关记忆" or "Related memory" section on the new page
+- backlinks from old indexes where useful
+- source/course package indexes that point to the durable domain pages
+- short notes explaining how the old knowledge confirms, extends, or constrains
+  the new synthesis
+
+Use destructive merging only when two pages are genuinely duplicate theories and
+Peter has confirmed the merge.
+
+### 0.5 Source Packages Are Secondary
+
+Use `raw/` and `_meta/extraction-notes/` for source preservation and audit.
+If a course/book needs a navigable source-oriented overview, place it in a
+source/course package area such as `source-packages/`, `course-packages/`, or a
+Chinese equivalent like `课程包/`. The package should point to the formal domain
+pages; it should not become the only home of the knowledge.
 
 ## Required Orientation
 
@@ -89,7 +171,9 @@ Create a source profile with:
 - source type and adapter
 - publication/update/capture date
 - language
-- domain placement candidate
+- domain placement candidate and alternative candidates
+- existing pages found during memory search
+- proposed fusion disposition: merge, extend, split, create, or source-package-only
 - sensitivity check
 - time-sensitivity/current-doc check requirement
 - expected formal artifacts

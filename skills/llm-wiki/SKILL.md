@@ -84,6 +84,36 @@ wiki/
 cross-referenced by the agent.
 **Layer 3 — The Schema:** `SCHEMA.md` defines structure, conventions, and tag taxonomy.
 
+## Memory-First Principle
+
+Peter's LLM Wiki is a personal memory system, not a source archive and not a
+course catalog. New knowledge should be classified by what it is about and how it
+will be reused, not by how it was acquired.
+
+When adding or reorganizing knowledge:
+
+- Prefer content-domain placement over acquisition-path placement. A course,
+  book, meeting, transcript, or clipping is a source package; it is not normally
+  the final home for the formal knowledge.
+- Before creating new formal pages, search existing pages and decide whether the
+  new material should merge into, extend, challenge, or split an existing page.
+- Treat related sources as human memory would: use later material to confirm,
+  refine, enrich, or revise earlier theory instead of piling up parallel notes.
+- Preserve old knowledge structures when they still have value. Use associative
+  links, "related memory" sections, and source/package indexes before doing a
+  destructive merge.
+- Ask Peter for confirmation when classification or merge choices are ambiguous,
+  especially for broad domains such as ecommerce operations, tax/finance,
+  brand, visual production, AI application development, and personal interests.
+- Use Chinese human-facing titles and index labels by default. English slugs may
+  remain as metadata, aliases, or transitional paths, but user navigation should
+  be Chinese-readable.
+- Use numeric prefixes on human-facing domain folders and formal knowledge
+  pages when reading order matters, e.g. `01-电商财税合规/` and
+  `03-增值税进销项与发票管理.md`. The prefix should express the intended
+  learning/navigation order; the title after the prefix should remain
+  Chinese-readable.
+
 ### Optional architecture: One Vault, Multiple Domains
 
 For users with several related but mostly distinct knowledge areas, prefer a
@@ -118,6 +148,9 @@ Placement rule:
 - `projects/` = concrete project/client/product context.
 - `inbox/` = entry point for clips and rough notes; later ingest into formal pages.
 - `raw/` = source-of-truth copies; never edit.
+- `source-packages/`, `course-packages/`, or a Chinese equivalent such as
+  `课程包/` may hold source-oriented maps and audit trails, but the durable
+  knowledge should still live in content-domain pages.
 
 Do not split into multiple vaults early unless one domain is large enough to
 need independent permissions, tooling, or maintainers. A single vault keeps
