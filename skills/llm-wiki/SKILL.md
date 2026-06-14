@@ -108,6 +108,10 @@ When adding or reorganizing knowledge:
 - Use Chinese human-facing titles and index labels by default. English slugs may
   remain as metadata, aliases, or transitional paths, but user navigation should
   be Chinese-readable.
+- Top-level human-facing domain directories under `domains/` should also be
+  Chinese-readable by default, e.g. `domains/AI Agent工程/` or
+  `domains/财税与经营财务/`. Keep English slugs only as aliases, tags, or
+  metadata when they are useful for search or compatibility.
 - Use numeric prefixes on human-facing domain folders and formal knowledge
   pages when reading order matters, e.g. `01-电商财税合规/` and
   `03-增值税进销项与发票管理.md`. The prefix should express the intended

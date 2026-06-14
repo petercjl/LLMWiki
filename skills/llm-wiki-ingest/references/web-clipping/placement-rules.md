@@ -10,7 +10,7 @@ Examples:
 
 - A Taobao help page is raw webpage evidence, but the formal knowledge usually belongs in `domains/ecommerce-ops/`.
 - A brand case article is raw webpage evidence, but the formal knowledge may belong in `domains/brand-strategy/samples/`.
-- A page about Obsidian Web Clipper is raw webpage evidence, but the formal knowledge belongs in `domains/ai-agent-engineering/knowledge-systems/`.
+- A page about Obsidian Web Clipper is raw webpage evidence, but the formal knowledge belongs in `domains/AI Agent工程/01-知识系统/`.
 
 ## Recommended Formal Destinations
 
@@ -65,7 +65,7 @@ Use `domains/visual-production/` for:
 
 ### AI Agent Engineering
 
-Use `domains/ai-agent-engineering/` for:
+Use `domains/AI Agent工程/` for:
 
 - LLM Wiki operations
 - Obsidian and knowledge systems
@@ -78,13 +78,13 @@ Use `domains/ai-agent-engineering/` for:
 Existing subfolders:
 
 ```text
-domains/ai-agent-engineering/knowledge-systems/
-domains/ai-agent-engineering/agent-architecture/
-domains/ai-agent-engineering/skill-design/
-domains/ai-agent-engineering/toolchain/
-domains/ai-agent-engineering/prompt-and-context/
-domains/ai-agent-engineering/automation-workflows/
-domains/ai-agent-engineering/evaluation-and-debugging/
+domains/AI Agent工程/01-知识系统/
+domains/AI Agent工程/02-Agent架构/
+domains/AI Agent工程/03-Skill设计/
+domains/AI Agent工程/05-工具链/
+domains/AI Agent工程/04-提示词与上下文/
+domains/AI Agent工程/06-自动化工作流/
+domains/AI Agent工程/07-评测与调试/
 ```
 
 ### Shared

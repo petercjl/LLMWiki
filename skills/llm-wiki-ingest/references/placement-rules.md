@@ -10,7 +10,7 @@ Read `/Users/pechen/wiki/SCHEMA.md` first. These are practical defaults.
 | ecommerce API docs | `domains/ecommerce-ops/api/<provider>/` |
 | brand strategy, category positioning, brand cases | `domains/brand-strategy/` |
 | visual production, AI image/video generation, creative workflows | `domains/visual-production/` |
-| AI agents, skills, tools, model APIs, automation workflows | `domains/ai-agent-engineering/` |
+| AI agents, skills, tools, model APIs, automation workflows | `domains/AI Agent工程/` |
 | cross-domain methods | `shared/` |
 | project-specific context | `projects/` |
 | people, companies, tools, models, platforms | `entities/` |
@@ -37,8 +37,8 @@ _meta/extraction-notes/<source-slug>/
 
 ## Naming
 
-- Use lowercase English slugs for paths.
-- Keep Chinese titles in frontmatter and headings.
+- Use Chinese-readable human-facing domain and page paths by default.
+- Keep English slugs in aliases, tags, or metadata when useful for search or compatibility.
 - Use ordered prefixes for learning paths: `01-...md`.
 - Avoid raw source titles as formal page names unless the page is a source summary.
 

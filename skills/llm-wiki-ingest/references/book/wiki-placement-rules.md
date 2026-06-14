@@ -20,7 +20,7 @@ Use Peter's one-vault, multi-domain structure:
 - `domains/ecommerce-ops/`: ecommerce operations, Taobao/Tmall, store operations, traffic, service, supply chain, finance, team management.
 - `domains/visual-production/`: images, detail pages, visual production, AI image/video workflows.
 - `domains/brand-strategy/`: positioning, mindshare, brand expression, hero-product strategy.
-- `domains/ai-agent-engineering/`: AI agents, LLM Wiki, skills, tools, automation.
+- `domains/AI Agent工程/`: AI agents, LLM Wiki, skills, tools, automation.
 - `shared/`: cross-domain frameworks such as consumer psychology, business frameworks, knowledge management.
 - `projects/`: project-specific context.
 - `entities/`: people, companies, brands, products, tools.

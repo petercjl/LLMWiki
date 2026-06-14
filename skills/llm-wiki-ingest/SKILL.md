@@ -91,6 +91,11 @@ can remain in frontmatter (`slug`, `aliases`) or transitional filenames, but
 new or renamed human-facing knowledge should be Chinese-readable. Avoid
 creating a large English-only directory tree for Chinese knowledge.
 
+Top-level human-facing domain directories under `domains/` should also be
+Chinese-readable by default, not only their child folders. Use English slugs as
+aliases, tags, or metadata when useful, but do not leave the navigable domain
+directory English-only.
+
 When a folder or page belongs to an ordered learning/navigation sequence, add a
 numeric prefix to the filename, such as `01-基础概念/`,
 `02-业务模型/`, or `03-风险与例外.md`. The number is part of the

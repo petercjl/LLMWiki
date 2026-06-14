@@ -11,11 +11,11 @@ Keep the LLM Wiki's cross-agent skill registry in sync with skill files on disk,
 
 The canonical daily-use wiki entry is:
 
-`/Users/pechen/wiki/domains/ai-agent-engineering/90-Skill注册表/01-个人与项目Skill注册库.md`
+`/Users/pechen/wiki/domains/AI Agent工程/90-Skill注册表/01-个人与项目Skill注册库.md`
 
 The full registry is:
 
-`/Users/pechen/wiki/domains/ai-agent-engineering/90-Skill注册表/02-跨Agent Skill注册库.md`
+`/Users/pechen/wiki/domains/AI Agent工程/90-Skill注册表/02-跨Agent Skill注册库.md`
 
 ## When To Use
 
@@ -86,7 +86,7 @@ Those capabilities are represented by `llm-wiki-ingest` adapters and should not 
 ## Output Pages
 
 The script regenerates numeric Chinese registry pages under
-`domains/ai-agent-engineering/90-Skill注册表/`:
+`domains/AI Agent工程/90-Skill注册表/`:
 
 - `01-个人与项目Skill注册库.md`
 - `02-跨Agent Skill注册库.md`
@@ -100,7 +100,7 @@ The script regenerates numeric Chinese registry pages under
 It also updates:
 
 - `/Users/pechen/wiki/index.md`
-- `/Users/pechen/wiki/domains/ai-agent-engineering/index.md`
+- `/Users/pechen/wiki/domains/AI Agent工程/index.md`
 - `/Users/pechen/wiki/log.md`
 
 ## Registry Content Rules

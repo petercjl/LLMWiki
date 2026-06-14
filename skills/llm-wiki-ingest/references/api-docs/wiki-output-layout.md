@@ -10,7 +10,7 @@ Default location for business API docs:
 
 For non-ecommerce APIs, choose the domain by purpose:
 
-- AI/tooling APIs: `domains/ai-agent-engineering/api/<provider-slug>/`
+- AI/tooling APIs: `domains/AI Agent工程/05-工具链/api/<provider-slug>/`
 - Visual production APIs: `domains/visual-production/api/<provider-slug>/`
 - Brand/research APIs: `domains/brand-strategy/api/<provider-slug>/`
 - Cross-domain APIs: `shared/api/<provider-slug>/`

@@ -165,7 +165,8 @@ When reorganizing an existing source-shaped knowledge path, follow this pattern:
 5. Fuse associatively: link old pages as related memory when they have their own
    context; merge only true duplicates after Peter confirms.
 6. Rename for human retrieval: use Chinese names and numeric prefixes for
-   ordered folders/pages.
+   ordered folders/pages, including top-level human-facing domain directories
+   under `domains/`.
 7. Update all routes: patch domain indexes, root index, query pages, schema or
    agent notes, and legacy indexes.
 8. Verify mechanically: check missing links, old path residues, placeholder
