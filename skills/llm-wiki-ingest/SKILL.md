@@ -65,6 +65,15 @@ broad and may include, among others:
 If the source crosses domains, split or cross-link by concept. Do not force all
 formal output under the source's original course/book directory.
 
+For brand and visual-production overlap, do not merge the two domains merely
+because both mention brand visuals. Brand strategy owns the "why": positioning,
+mindshare, differentiation, memory assets, visual symbols, and visual-world
+logic as brand assets. Visual production owns the "how": ecommerce images,
+detail pages, shooting, layout, AI image/video workflows, style libraries,
+prompt control, and repeatable production. When a source contains both, choose
+one primary home by the question it answers and add a related-memory bridge to
+the other domain.
+
 For ecommerce knowledge, classify platform ownership before choosing the final
 path. Platform-specific rules, tools, entry requirements, backend workflows, and
 operations belong under the relevant platform area, such as Taobao/Tmall, JD,

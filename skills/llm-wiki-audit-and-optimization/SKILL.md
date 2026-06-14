@@ -30,7 +30,7 @@ The goal is not only to report problems. When appropriate, propose or directly a
 Use this skill when the user asks things like:
 
 - “检查这个 LLM Wiki 的编译质量。”
-- “审阅一下 brand-strategy 这个知识库是否好用。”
+- “审阅一下 品牌策略 这个知识库是否好用。”
 - “这个知识库已经建好了，帮我看编译/路由有没有问题。”
 - “这是我的问题和 AI 答案，帮我判断是知识库问题、路由问题还是推理问题。”
 - “这个回答不太对，帮我反查 LLM Wiki 链路。”
@@ -66,7 +66,7 @@ Before auditing a wiki, orient yourself:
 2. Read `~/wiki/SCHEMA.md`.
 3. Read `~/wiki/index.md`.
 4. Read recent `~/wiki/log.md`.
-5. For a domain audit, read the domain index, e.g. `domains/brand-strategy/index.md`.
+5. For a domain audit, read the domain index, e.g. `domains/品牌策略/index.md`.
 6. For a learning-path audit, read the path `index.md` and 2-4 representative chapter pages, including the final Agent/template page if present.
 7. Search for key terms if the target is large.
 
@@ -80,7 +80,7 @@ Use when the user asks to audit a whole wiki, domain, or learning-path after it 
 
 Examples:
 
-- Audit `/Users/pechen/wiki/domains/brand-strategy`.
+- Audit `/Users/pechen/wiki/domains/品牌策略`.
 - Audit one learning path such as `brand-differentiation-perception-system`.
 - Review a newly ingested transcript set after formal pages were created.
 
@@ -404,7 +404,7 @@ Always include:
 
 Avoid vague statements like “结构还可以加强.” Instead say:
 
-> `domains/brand-strategy/index.md` lists learning paths but does not yet classify them by user problem type. Add a “按品牌策划问题调用” section mapping 感知问题 / 大单品问题 / 拓品问题 to the relevant pages.
+> `domains/品牌策略/index.md` lists learning paths but does not yet classify them by user problem type. Add a “按品牌策划问题调用” section mapping 感知问题 / 大单品问题 / 拓品问题 to the relevant pages.
 
 ## Direct Optimization Rules
 
@@ -446,7 +446,7 @@ Before final reply:
 
 Whole-domain audit:
 
-> 请用 llm-wiki-audit-and-optimization 审查 `/Users/pechen/wiki/domains/brand-strategy` 的编译和路由质量。
+> 请用 llm-wiki-audit-and-optimization 审查 `/Users/pechen/wiki/domains/品牌策略` 的编译和路由质量。
 
 Question-answer audit:
 

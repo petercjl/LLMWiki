@@ -8,8 +8,8 @@ Read `/Users/pechen/wiki/SCHEMA.md` first. These are practical defaults.
 | --- | --- |
 | ecommerce operations, merchant rules, platform operations | `domains/电商运营/` |
 | ecommerce API docs / ERP integrations | `domains/电商运营/30-ERP与系统工具/<provider>/` |
-| brand strategy, category positioning, brand cases | `domains/brand-strategy/` |
-| visual production, AI image/video generation, creative workflows | `domains/visual-production/` |
+| brand strategy, category positioning, brand cases | `domains/品牌策略/` |
+| visual production, AI image/video generation, creative workflows | `domains/视觉制作/` |
 | AI agents, skills, tools, model APIs, automation workflows | `domains/AI Agent工程/` |
 | cross-domain methods | `shared/` |
 | project-specific context | `projects/` |
@@ -52,6 +52,13 @@ _meta/extraction-notes/<source-slug>/
 - Platform-independent merchant methods, consulting delivery, channel strategy, settlement interfaces, and reusable playbooks belong under `domains/电商运营/01-通用电商方法/`.
 - ERP/API/system-tool knowledge belongs under `domains/电商运营/30-ERP与系统工具/`.
 - Do not keep durable ecommerce knowledge under `learning-paths/` merely because it came from a course or book.
+
+## Brand Strategy vs Visual Production
+
+- Use `domains/品牌策略/` when the durable question is about brand positioning, category mind, consumer perception, differentiation, hero-product strategy, product-line strategy, brand memory assets, or why a visual system should exist.
+- Use `domains/视觉制作/` when the durable question is about image/video production, ecommerce image conversion, detail pages, layouts, shooting, AI image/video workflows, style libraries, prompt control, or how a visual system is produced repeatedly.
+- For brand visual materials, keep strategic asset logic in `domains/品牌策略/04-品牌视觉资产/` and production/execution logic in `domains/视觉制作/02-品牌视觉标准化/` or the relevant AI visual workflow directory.
+- Cross-link overlapping pages through a "相关记忆" section instead of merging the two domains.
 
 ## Index Rules
 

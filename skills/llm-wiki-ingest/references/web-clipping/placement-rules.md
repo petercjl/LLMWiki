@@ -9,7 +9,7 @@ Source format decides where raw evidence goes. Knowledge role decides where form
 Examples:
 
 - A Taobao help page is raw webpage evidence, but the formal knowledge usually belongs in `domains/电商运营/02-淘宝天猫/`.
-- A brand case article is raw webpage evidence, but the formal knowledge may belong in `domains/brand-strategy/samples/`.
+- A brand case article is raw webpage evidence, but the formal knowledge may belong in `domains/品牌策略/90-样本/`.
 - A page about Obsidian Web Clipper is raw webpage evidence, but the formal knowledge belongs in `domains/AI Agent工程/01-知识系统/`.
 
 ## Recommended Formal Destinations
@@ -40,7 +40,7 @@ For Taobao/Tmall marketing tool rules, prefer `domains/电商运营/02-淘宝天
 
 ### Brand Strategy
 
-Use `domains/brand-strategy/` for:
+Use `domains/品牌策略/` for:
 
 - Brand positioning
 - Category strategy
@@ -51,13 +51,16 @@ Use `domains/brand-strategy/` for:
 Existing useful paths include:
 
 ```text
-domains/brand-strategy/samples/
-domains/brand-strategy/learning-paths/
+domains/品牌策略/01-品牌基础与增长方法/
+domains/品牌策略/02-品类心智与差异化/
+domains/品牌策略/03-产品战略与大单品/
+domains/品牌策略/04-品牌视觉资产/
+domains/品牌策略/90-样本/
 ```
 
 ### Visual Production
 
-Use `domains/visual-production/` for:
+Use `domains/视觉制作/` for:
 
 - Ecommerce main images
 - Detail pages
@@ -65,6 +68,11 @@ Use `domains/visual-production/` for:
 - Visual diagnosis
 - Product image workflows
 - Content and asset production rules
+
+Brand visuals are split by question. If the page explains why a visual asset
+builds brand memory or differentiation, place it in `domains/品牌策略/04-品牌视觉资产/`.
+If the page explains how to make images, videos, style systems, prompts, or
+production workflows, place it in `domains/视觉制作/`.
 
 ### AI Agent Engineering
 

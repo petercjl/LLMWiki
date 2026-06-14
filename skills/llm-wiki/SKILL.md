@@ -135,8 +135,8 @@ wiki/
 ├── raw/                # Immutable sources
 ├── domains/            # Long-lived professional knowledge domains
 │   ├── 电商运营/
-│   ├── visual-production/
-│   └── brand-strategy/
+│   ├── 视觉制作/
+│   └── 品牌策略/
 ├── shared/             # Cross-domain concepts, frameworks, rules, workflows
 ├── projects/           # Project-specific context and decisions
 ├── entities/
@@ -173,8 +173,8 @@ wiki/
 ├── raw/                # Immutable source material
 ├── domains/            # Long-lived professional domains
 │   ├── 电商运营/
-│   ├── visual-production/
-│   └── brand-strategy/
+│   ├── 视觉制作/
+│   └── 品牌策略/
 ├── shared/             # Cross-domain concepts and workflows
 │   ├── consumer-psychology/
 │   ├── platform-rules/

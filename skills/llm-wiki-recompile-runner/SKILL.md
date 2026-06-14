@@ -36,7 +36,7 @@ Do not use this for brand/report generation. This skill stops at knowledge-base 
 
 At least one of:
 
-- Target domain path, e.g. `/Users/pechen/wiki/domains/brand-strategy`
+- Target domain path, e.g. `/Users/pechen/wiki/domains/品牌策略`
 - Target learning path, course package, or source package
 - A shell inventory from `placeholder_scan.py`
 
@@ -241,7 +241,7 @@ Return:
 
 ## Brand Strategy Current Known Case
 
-As of 2026-06-06, `/Users/pechen/wiki/domains/brand-strategy` has been repaired from the
+As of 2026-06-14, `/Users/pechen/wiki/domains/品牌策略` has been repaired from the
 previous 31-page shell baseline.
 
 The latest mechanical audit result is:
