@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 DEFAULT_WIKI_ROOT = Path("/Users/pechen/wiki")
-REGISTRY_REL = Path("domains/ai-agent-engineering/skill-design")
+REGISTRY_REL = Path("domains/ai-agent-engineering/90-Skill注册表")
 
 
 @dataclass(frozen=True)
@@ -30,28 +30,28 @@ AGENT_SOURCES = (
         "codex",
         "Codex",
         (Path("/Users/pechen/.codex/skills"),),
-        "codex-skill-inventory.md",
+        "03-Codex Skill注册页.md",
         "Codex local business skills and system skills.",
     ),
     AgentSource(
         "hermes",
         "Hermes",
         (Path("/Users/pechen/.hermes/skills"),),
-        "hermes-skill-registry.md",
+        "04-Hermes Skill注册页.md",
         "Hermes main skills directory, excluding duplicated hermes-agent optional skill trees.",
     ),
     AgentSource(
         "lark-agent",
         "Lark Agent",
         (Path("/Users/pechen/.agents/skills"),),
-        "lark-agent-skill-registry.md",
+        "05-Lark Agent Skill注册页.md",
         "Feishu/Lark agent skills.",
     ),
     AgentSource(
         "openclaw",
         "OpenClaw",
         (Path("/Users/pechen/.openclaw/workspace/skills"),),
-        "openclaw-skill-registry.md",
+        "06-OpenClaw Skill注册页.md",
         "OpenClaw workspace skills.",
     ),
     AgentSource(
@@ -67,14 +67,14 @@ AGENT_SOURCES = (
             Path("/Users/pechen/sealseek"),
             Path("/Users/pechen/hermes/xc-sealseek-aicoding-skill"),
         ),
-        "sealseek-skill-registry.md",
+        "07-SealSeek Skill注册页.md",
         "SealSeek multi-source skills: global skill_pool, workspace skills, default workspace, active/customized skills, local standalone skills, backups, and migration bundles.",
     ),
     AgentSource(
         "claude-code",
         "Claude Code",
         (Path("/Users/pechen/.claude/plugins/marketplaces/claude-plugins-official.bak"),),
-        "claude-code-skill-registry.md",
+        "08-Claude Code Skill注册页.md",
         "Claude Code plugin marketplace backup skills.",
     ),
 )
@@ -100,7 +100,8 @@ OWNERSHIP_LABELS = {
     "generic-installed": "通用安装/不确定",
 }
 
-PERSONAL_REGISTRY_OUTPUT = "personal-ai-agent-skill-registry.md"
+PERSONAL_REGISTRY_OUTPUT = "01-个人与项目Skill注册库.md"
+CENTRAL_REGISTRY_OUTPUT = "02-跨Agent Skill注册库.md"
 
 HERMES_PERSONAL_PATTERNS = re.compile(
     r"peter|sealseek|seal|openclaw|xicheng|xc-|玺承|taobao|tmall|淘宝|天猫|"
@@ -424,7 +425,7 @@ def render_agent_page(source: AgentSource, entries: list[SkillEntry], today: str
     parts.append(
         "## 使用规则\n\n"
         "- 先用本页的名称、功能检索描述、输入方式和关键词判断是否存在类似 skill。\n"
-        "- 日常优先检索 [[domains/ai-agent-engineering/skill-design/personal-ai-agent-skill-registry|个人/项目 Skill 注册库]]；只有找不到时再回到全量库。\n"
+        "- 日常优先检索 [[domains/ai-agent-engineering/90-Skill注册表/01-个人与项目Skill注册库|个人/项目 Skill 注册库]]；只有找不到时再回到全量库。\n"
         "- 找到候选后，必须打开 `Skill 文件位置` 中的 `SKILL.md` 阅读完整流程、依赖和约束。\n"
         "- skill 多数可以跨 Agent 迁移，但执行前要检查工具、路径、权限、环境变量和脚本依赖。\n\n"
     )
@@ -468,7 +469,7 @@ def render_central_page(collected: dict[str, tuple[AgentSource, list[SkillEntry]
     parts.append(
         "## 检索协议\n\n"
         "当用户问“有没有类似 skill”“以前是不是写过”“能不能复用某个能力”时，Agent 应按以下顺序处理：\n\n"
-        "1. 日常先搜索 [[domains/ai-agent-engineering/skill-design/personal-ai-agent-skill-registry|个人/项目 Skill 注册库]]。\n"
+        "1. 日常先搜索 [[domains/ai-agent-engineering/90-Skill注册表/01-个人与项目Skill注册库|个人/项目 Skill 注册库]]。\n"
         "2. 如果个人库没有候选，再搜索本全量页和下方各 agent 注册页的 skill 名称、功能检索描述、输入方式、检索关键词。\n"
         "3. 找到候选 skill 后，打开对应 `SKILL.md` 文件位置，阅读完整设计内容。\n"
         "4. 判断可复用方式：直接使用、跨 Agent 迁移、抽取脚本/参考文件、合并重复 skill、或新建 skill。\n"
@@ -484,13 +485,13 @@ def render_central_page(collected: dict[str, tuple[AgentSource, list[SkillEntry]
     parts.append("\n")
     parts.append("## Agent 分类入口\n\n")
     parts.append(
-        f"- [[domains/ai-agent-engineering/skill-design/{PERSONAL_REGISTRY_OUTPUT.removesuffix('.md')}|个人/项目 Skill 注册库]]："
+        f"- [[domains/ai-agent-engineering/90-Skill注册表/{PERSONAL_REGISTRY_OUTPUT.removesuffix('.md')}|个人/项目 Skill 注册库]]："
         f"{len(personal_entries)} 个个人或项目定制 skill，日常优先检索。\n"
     )
     for source, entries in collected.values():
         roots = "、".join(f"`{root}`" for root in source.roots)
         target = source.output.removesuffix(".md")
-        parts.append(f"- [[domains/ai-agent-engineering/skill-design/{target}|{source.label} Skill 注册页]]：{len(entries)} 个 skill。来源：{roots}\n")
+        parts.append(f"- [[domains/ai-agent-engineering/90-Skill注册表/{target}|{source.label} Skill 注册页]]：{len(entries)} 个 skill。来源：{roots}\n")
     parts.append("\n## 全局能力索引\n\n")
     by_category: dict[str, list[SkillEntry]] = {}
     for entry in all_entries:
@@ -537,7 +538,7 @@ def render_personal_page(collected: dict[str, tuple[AgentSource, list[SkillEntry
     )
     parts.append(
         "不收录 Codex/Claude/Lark/SealSeek 等 Agent 的系统内置 skill、底层工具 skill、运行时副本和备份条目；"
-        "这些仍保留在 [[domains/ai-agent-engineering/skill-design/ai-agent-skill-registry|跨 Agent Skill 注册库]]。\n\n"
+        "这些仍保留在 [[domains/ai-agent-engineering/90-Skill注册表/02-跨Agent Skill注册库|跨 Agent Skill 注册库]]。\n\n"
     )
     parts.append(f"当前个人/项目 skill 数量：{len(personal_entries)}。\n\n")
     parts.append("## 分类规则\n\n")
@@ -590,26 +591,36 @@ def update_index_pages(wiki_root: Path, today: str) -> list[Path]:
     touched: list[Path] = []
     main_index = wiki_root / "index.md"
     domain_index = wiki_root / "domains/ai-agent-engineering/index.md"
-    ai_body = (
-        "- [[domains/ai-agent-engineering/skill-design/personal-ai-agent-skill-registry|个人/项目 Skill 注册库]]：只收录 Peter 自己创建、让 Agent 为项目定制、或明显服务于 Peter 项目/业务流程的 skill，是日常检索“有没有类似 skill”的优先入口。\n"
-        "- [[domains/ai-agent-engineering/skill-design/ai-agent-skill-registry|跨 Agent Skill 注册库]]：统一检索 Codex、Hermes、Lark Agent、OpenClaw、SealSeek、Claude Code 的 skill，定位原始 `SKILL.md` 并判断复用或迁移可能。\n"
-        "- [[domains/ai-agent-engineering/skill-design/codex-skill-inventory|Codex Skill 注册页]]：Codex 本地业务 skill 与系统 skill 的检索描述、输入方式、关键词和文件位置。\n"
-        "- [[domains/ai-agent-engineering/skill-design/hermes-skill-registry|Hermes Skill 注册页]]：Hermes 主 skill 目录的检索描述、输入方式、关键词和文件位置。\n"
-        "- [[domains/ai-agent-engineering/skill-design/lark-agent-skill-registry|Lark Agent Skill 注册页]]：飞书/Lark 相关 skill 的检索描述、输入方式、关键词和文件位置。\n"
-        "- [[domains/ai-agent-engineering/skill-design/openclaw-skill-registry|OpenClaw Skill 注册页]]：OpenClaw workspace skill 的检索描述、输入方式、关键词和文件位置。\n"
-        "- [[domains/ai-agent-engineering/skill-design/sealseek-skill-registry|SealSeek Skill 注册页]]：SealSeek 多来源 skill 的检索描述、输入方式、关键词和文件位置，覆盖 skill_pool、workspace、active/customized、standalone 和迁移包。\n"
-        "- [[domains/ai-agent-engineering/skill-design/claude-code-skill-registry|Claude Code Skill 注册页]]：Claude Code plugin marketplace skill 的检索描述、输入方式、关键词和文件位置。"
+    registry_body = (
+        "- [[domains/ai-agent-engineering/90-Skill注册表/01-个人与项目Skill注册库|个人/项目 Skill 注册库]]：只收录 Peter 自己创建、让 Agent 为项目定制、或明显服务于 Peter 项目/业务流程的 skill，是日常检索“有没有类似 skill”的优先入口。\n"
+        "- [[domains/ai-agent-engineering/90-Skill注册表/02-跨Agent Skill注册库|跨 Agent Skill 注册库]]：统一检索 Codex、Hermes、Lark Agent、OpenClaw、SealSeek、Claude Code 的 skill，定位原始 `SKILL.md` 并判断复用或迁移可能。\n"
+        "- [[domains/ai-agent-engineering/90-Skill注册表/03-Codex Skill注册页|Codex Skill 注册页]]：Codex 本地业务 skill 与系统 skill 的检索描述、输入方式、关键词和文件位置。\n"
+        "- [[domains/ai-agent-engineering/90-Skill注册表/04-Hermes Skill注册页|Hermes Skill 注册页]]：Hermes 主 skill 目录的检索描述、输入方式、关键词和文件位置。\n"
+        "- [[domains/ai-agent-engineering/90-Skill注册表/05-Lark Agent Skill注册页|Lark Agent Skill 注册页]]：飞书/Lark 相关 skill 的检索描述、输入方式、关键词和文件位置。\n"
+        "- [[domains/ai-agent-engineering/90-Skill注册表/06-OpenClaw Skill注册页|OpenClaw Skill 注册页]]：OpenClaw workspace skill 的检索描述、输入方式、关键词和文件位置。\n"
+        "- [[domains/ai-agent-engineering/90-Skill注册表/07-SealSeek Skill注册页|SealSeek Skill 注册页]]：SealSeek 多来源 skill 的检索描述、输入方式、关键词和文件位置，覆盖 skill_pool、workspace、active/customized、standalone 和迁移包。\n"
+        "- [[domains/ai-agent-engineering/90-Skill注册表/08-Claude Code Skill注册页|Claude Code Skill 注册页]]：Claude Code plugin marketplace skill 的检索描述、输入方式、关键词和文件位置。"
+    )
+    main_body = (
+        "- [[domains/ai-agent-engineering/index|AI Agent 工程知识域]]：LLM Wiki、Skill、工具链、自动化工作流与多 Agent 工程方法。\n"
+        "- [[domains/ai-agent-engineering/01-知识系统/01-LLM Wiki个人知识库运行闭环|LLM Wiki 个人知识库运行闭环]]：用 Ingest / Query / Lint 三个动作，把知识库从“资料堆”变成持续复利的个人知识系统。\n"
+        "- [[domains/ai-agent-engineering/03-Skill设计/01-LLM Wiki Skill同源包|LLM Wiki Skill 同源包]]：Codex 维护、GitHub 分发、SealSeek/Hermes 安装使用的 LLM Wiki skill 收敛规则与发布入口。\n"
+        "- [[domains/ai-agent-engineering/03-Skill设计/02-无限画板Skill写作知识库/index|无限画板 Skill 写作知识库]]：从历史无限画板 skill 中沉淀出的写作规则、工具规范、任务范式、prompt 模板、反坑清单和质量检查。\n"
+        "- [[domains/ai-agent-engineering/05-工具链/01-OpenAI图像生成API集成指南|OpenAI 图像生成 API 集成指南]]：Image API 与 Responses API 的选择、参数、编辑、流式、错误处理和成本判断。\n"
+        f"{registry_body}"
     )
     if main_index.exists():
         text = main_index.read_text(encoding="utf-8")
         text = re.sub(r"> Last updated: \d{4}-\d{2}-\d{2}", f"> Last updated: {today}", text)
-        new_text = replace_section(text, "AI Agent Engineering", ai_body)
+        new_text = replace_section(text, "AI Agent Engineering", main_body)
         if new_text != text:
             main_index.write_text(new_text, encoding="utf-8")
             touched.append(main_index)
     if domain_index.exists():
         text = domain_index.read_text(encoding="utf-8")
-        new_text = replace_section(text, "Skill 设计", ai_body)
+        new_text = replace_section(text, "Skill 注册表", registry_body)
+        if new_text == text:
+            new_text = replace_section(text, "Skill 设计", registry_body)
         if new_text != text:
             domain_index.write_text(new_text, encoding="utf-8")
             touched.append(domain_index)
@@ -631,9 +642,9 @@ def prepend_log(wiki_root: Path, today: str, collected: dict[str, tuple[AgentSou
     touched_rel = [str(p.relative_to(wiki_root)) for p in touched if p.is_relative_to(wiki_root)]
     entry = (
         f"## [{today}] compile | 同步跨 Agent Skill 注册库\n"
-        f"- Updated: `domains/ai-agent-engineering/skill-design/ai-agent-skill-registry.md`\n"
-        f"- Updated: `domains/ai-agent-engineering/skill-design/personal-ai-agent-skill-registry.md`\n"
-        f"- Updated: agent-specific skill registry pages under `domains/ai-agent-engineering/skill-design/`\n"
+        f"- Updated: `domains/ai-agent-engineering/90-Skill注册表/02-跨Agent Skill注册库.md`\n"
+        f"- Updated: `domains/ai-agent-engineering/90-Skill注册表/01-个人与项目Skill注册库.md`\n"
+        f"- Updated: agent-specific skill registry pages under `domains/ai-agent-engineering/90-Skill注册表/`\n"
         f"- Updated: `index.md`\n"
         f"- Updated: `domains/ai-agent-engineering/index.md`\n"
         f"- Notes: 扫描系统中 Codex、Hermes、Lark Agent、OpenClaw、SealSeek、Claude Code 的 `SKILL.md`，当前总计 {total} 个 skill，其中个人/项目自定义 {personal_total} 个；{counts}。Touched: {', '.join(touched_rel)}。\n\n"
@@ -664,7 +675,7 @@ def sync(wiki_root: Path, dry_run: bool, no_log: bool) -> tuple[dict[str, tuple[
     collected = collect_entries()
     touched: list[Path] = []
     central = render_central_page(collected, today)
-    central_path = registry_dir / "ai-agent-skill-registry.md"
+    central_path = registry_dir / CENTRAL_REGISTRY_OUTPUT
     if write_if_changed(central_path, central, dry_run):
         touched.append(central_path)
     personal = render_personal_page(collected, today)

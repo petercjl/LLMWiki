@@ -11,11 +11,11 @@ Keep the LLM Wiki's cross-agent skill registry in sync with skill files on disk,
 
 The canonical daily-use wiki entry is:
 
-`/Users/pechen/wiki/domains/ai-agent-engineering/skill-design/personal-ai-agent-skill-registry.md`
+`/Users/pechen/wiki/domains/ai-agent-engineering/90-Skill注册表/01-个人与项目Skill注册库.md`
 
 The full registry is:
 
-`/Users/pechen/wiki/domains/ai-agent-engineering/skill-design/ai-agent-skill-registry.md`
+`/Users/pechen/wiki/domains/ai-agent-engineering/90-Skill注册表/02-跨Agent Skill注册库.md`
 
 ## When To Use
 
@@ -85,16 +85,17 @@ Those capabilities are represented by `llm-wiki-ingest` adapters and should not 
 
 ## Output Pages
 
-The script regenerates:
+The script regenerates numeric Chinese registry pages under
+`domains/ai-agent-engineering/90-Skill注册表/`:
 
-- `personal-ai-agent-skill-registry.md`
-- `ai-agent-skill-registry.md`
-- `codex-skill-inventory.md`
-- `hermes-skill-registry.md`
-- `lark-agent-skill-registry.md`
-- `openclaw-skill-registry.md`
-- `sealseek-skill-registry.md`
-- `claude-code-skill-registry.md`
+- `01-个人与项目Skill注册库.md`
+- `02-跨Agent Skill注册库.md`
+- `03-Codex Skill注册页.md`
+- `04-Hermes Skill注册页.md`
+- `05-Lark Agent Skill注册页.md`
+- `06-OpenClaw Skill注册页.md`
+- `07-SealSeek Skill注册页.md`
+- `08-Claude Code Skill注册页.md`
 
 It also updates:
 
@@ -119,7 +120,7 @@ Do not write real API keys, cookies, tokens, customer secrets, or private creden
 
 ## Ownership Rules
 
-- Personal/project skills go into `personal-ai-agent-skill-registry.md`.
+- Personal/project skills go into `01-个人与项目Skill注册库.md`.
 - System/builtin skills remain only in the full registry.
 - Runtime copies and backups remain only in the full registry.
 - Hermes skills are classified as personal/project only when they match Peter-specific project, ecommerce, visual, courseware, LLM Wiki, SealSeek/OpenClaw, Xicheng, Feishu, or similar customization signals.
