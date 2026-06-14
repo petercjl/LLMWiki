@@ -6,8 +6,8 @@ Read `/Users/pechen/wiki/SCHEMA.md` first. These are practical defaults.
 
 | Knowledge role | Path |
 | --- | --- |
-| ecommerce operations, merchant rules, platform operations | `domains/ecommerce-ops/` |
-| ecommerce API docs | `domains/ecommerce-ops/api/<provider>/` |
+| ecommerce operations, merchant rules, platform operations | `domains/电商运营/` |
+| ecommerce API docs / ERP integrations | `domains/电商运营/30-ERP与系统工具/<provider>/` |
 | brand strategy, category positioning, brand cases | `domains/brand-strategy/` |
 | visual production, AI image/video generation, creative workflows | `domains/visual-production/` |
 | AI agents, skills, tools, model APIs, automation workflows | `domains/AI Agent工程/` |
@@ -41,6 +41,17 @@ _meta/extraction-notes/<source-slug>/
 - Keep English slugs in aliases, tags, or metadata when useful for search or compatibility.
 - Use ordered prefixes for learning paths: `01-...md`.
 - Avoid raw source titles as formal page names unless the page is a source summary.
+
+## Ecommerce Placement
+
+- First decide whether the knowledge is platform-specific or platform-independent.
+- Taobao/Tmall knowledge belongs under `domains/电商运营/02-淘宝天猫/`.
+- JD knowledge belongs under `domains/电商运营/03-京东/`.
+- Pinduoduo, Douyin, and Xiaohongshu knowledge should use their platform areas when those areas exist.
+- Cross-border ecommerce belongs under `domains/电商运营/20-跨境电商/` unless the page is really about a single domestic platform.
+- Platform-independent merchant methods, consulting delivery, channel strategy, settlement interfaces, and reusable playbooks belong under `domains/电商运营/01-通用电商方法/`.
+- ERP/API/system-tool knowledge belongs under `domains/电商运营/30-ERP与系统工具/`.
+- Do not keep durable ecommerce knowledge under `learning-paths/` merely because it came from a course or book.
 
 ## Index Rules
 

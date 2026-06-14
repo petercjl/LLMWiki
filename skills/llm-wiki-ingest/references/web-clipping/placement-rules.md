@@ -8,7 +8,7 @@ Source format decides where raw evidence goes. Knowledge role decides where form
 
 Examples:
 
-- A Taobao help page is raw webpage evidence, but the formal knowledge usually belongs in `domains/ecommerce-ops/`.
+- A Taobao help page is raw webpage evidence, but the formal knowledge usually belongs in `domains/电商运营/02-淘宝天猫/`.
 - A brand case article is raw webpage evidence, but the formal knowledge may belong in `domains/brand-strategy/samples/`.
 - A page about Obsidian Web Clipper is raw webpage evidence, but the formal knowledge belongs in `domains/AI Agent工程/01-知识系统/`.
 
@@ -16,24 +16,27 @@ Examples:
 
 ### Ecommerce Operations
 
-Use `domains/ecommerce-ops/` for:
+Use `domains/电商运营/` for:
 
 - Taobao, Tmall, JD, Douyin ecommerce platform rules
 - Merchant backend workflows
 - Product listing, traffic, conversion, pricing, promotion operations
 - Customer service, refund, review, compliance, store health rules
 
-Suggested subfolders when needed:
+Classify ecommerce clippings platform-first:
 
 ```text
-domains/ecommerce-ops/platform-rules/
-domains/ecommerce-ops/merchant-operations/
-domains/ecommerce-ops/growth-playbooks/
-domains/ecommerce-ops/marketing-tools/
-domains/ecommerce-ops/playbooks/
+domains/电商运营/01-通用电商方法/
+domains/电商运营/02-淘宝天猫/
+domains/电商运营/03-京东/
+domains/电商运营/04-拼多多/
+domains/电商运营/05-抖音/
+domains/电商运营/06-小红书/
+domains/电商运营/20-跨境电商/
+domains/电商运营/30-ERP与系统工具/
 ```
 
-For Taobao/Tmall marketing tool rules, prefer `domains/ecommerce-ops/marketing-tools/` for tool cards and rule matrices, and `domains/ecommerce-ops/playbooks/` for scenario decision workflows.
+For Taobao/Tmall marketing tool rules, prefer `domains/电商运营/02-淘宝天猫/02-淘宝营销工具/` for tool cards, rule matrices, and scenario decision workflows. Platform-independent methods should go to `domains/电商运营/01-通用电商方法/`, not to a source-shaped course folder.
 
 ### Brand Strategy
 

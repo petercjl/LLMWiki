@@ -24,7 +24,7 @@ Use one page per major tool when the tool is likely to recur.
 Suggested path:
 
 ```text
-domains/ecommerce-ops/marketing-tools/<tool-slug>.md
+domains/电商运营/02-淘宝天猫/02-淘宝营销工具/<number>-<tool-name>.md
 ```
 
 Suggested structure:
@@ -35,7 +35,7 @@ title: 淘宝营销工具：工具名
 type: concept
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-domain: ecommerce-ops
+domain: 电商运营
 tags: [ecommerce, taobao, marketing-tool]
 sources:
   - raw/webpages/taobao/...
@@ -93,7 +93,7 @@ status: active
 
 ## 相关页面
 
-- [[domains/ecommerce-ops/marketing-tools/...]]
+- [[domains/电商运营/02-淘宝天猫/02-淘宝营销工具/...]]
 ```
 
 ## Relationship Matrix Pages
@@ -103,9 +103,8 @@ Create or update a matrix when multiple tools interact.
 Suggested paths:
 
 ```text
-domains/ecommerce-ops/marketing-tools/taobao-marketing-tool-relationship-map.md
-domains/ecommerce-ops/marketing-tools/taobao-promotion-stacking-rules.md
-domains/ecommerce-ops/marketing-tools/taobao-lowest-price-rules.md
+domains/电商运营/02-淘宝天猫/02-淘宝营销工具/03-淘宝营销工具叠加与互斥规则.md
+domains/电商运营/02-淘宝天猫/02-淘宝营销工具/<number>-淘宝最低价与价保规则.md
 ```
 
 Useful matrices:
@@ -149,7 +148,7 @@ Create a playbook when the rules imply merchant decisions.
 Suggested path:
 
 ```text
-domains/ecommerce-ops/playbooks/taobao-marketing-tool-selection.md
+domains/电商运营/02-淘宝天猫/02-淘宝营销工具/04-淘宝营销工具选择Playbook.md
 ```
 
 Recommended sections:
@@ -186,9 +185,8 @@ Recommended content:
 
 ## 回答前必须读取
 
-- [[domains/ecommerce-ops/marketing-tools/taobao-marketing-tool-relationship-map]]
-- [[domains/ecommerce-ops/marketing-tools/taobao-promotion-stacking-rules]]
-- [[domains/ecommerce-ops/playbooks/taobao-marketing-tool-selection]]
+- [[domains/电商运营/02-淘宝天猫/02-淘宝营销工具/03-淘宝营销工具叠加与互斥规则]]
+- [[domains/电商运营/02-淘宝天猫/02-淘宝营销工具/04-淘宝营销工具选择Playbook]]
 
 ## 需要向商家确认的信息
 

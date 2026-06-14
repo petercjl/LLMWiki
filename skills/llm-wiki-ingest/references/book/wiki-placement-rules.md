@@ -17,7 +17,7 @@ Search existing pages before creating new ones.
 
 Use Peter's one-vault, multi-domain structure:
 
-- `domains/ecommerce-ops/`: ecommerce operations, Taobao/Tmall, store operations, traffic, service, supply chain, finance, team management.
+- `domains/电商运营/`: ecommerce operations. Classify platform-first: general methods under `01-通用电商方法/`, Taobao/Tmall under `02-淘宝天猫/`, JD under `03-京东/`, Pinduoduo/Douyin/Xiaohongshu under their platform areas, cross-border under `20-跨境电商/`, and ERP/API/tooling under `30-ERP与系统工具/`.
 - `domains/visual-production/`: images, detail pages, visual production, AI image/video workflows.
 - `domains/brand-strategy/`: positioning, mindshare, brand expression, hero-product strategy.
 - `domains/AI Agent工程/`: AI agents, LLM Wiki, skills, tools, automation.
@@ -27,7 +27,11 @@ Use Peter's one-vault, multi-domain structure:
 - `raw/`: immutable source material.
 - `inbox/`: temporary inputs.
 
-If a book spans several domains, create one primary learning path in the dominant domain and cross-link to shared pages. Do not split a book into multiple domains unless the formal knowledge would otherwise become confusing.
+If a book spans several domains, create one primary source/course package only
+when it is useful for provenance, then place formal knowledge in the durable
+content domain. For ecommerce books, do not leave everything under
+`learning-paths/`; split platform-specific chapters and platform-independent
+methods into the relevant ecommerce areas when that improves retrieval.
 
 ## Frontmatter
 
@@ -39,7 +43,7 @@ title: 页面标题
 type: concept | entity | project | playbook | comparison | query | decision | source-summary
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-domain: ecommerce-ops | visual-production | brand-strategy | ai-agent-engineering | shared | project | entity | meta
+domain: 电商运营 | visual-production | brand-strategy | AI Agent工程 | shared | project | entity | meta
 tags: [tag1, tag2]
 sources:
   - raw/books/example/source.epub
@@ -55,7 +59,7 @@ For chapter synthesis pages, usually use `type: concept` or `type: playbook`.
 
 After creating formal pages, update:
 
-- the domain index, e.g. `domains/ecommerce-ops/index.md`
+- the domain index, e.g. `domains/电商运营/index.md`
 - the root `index.md`
 - `log.md`
 

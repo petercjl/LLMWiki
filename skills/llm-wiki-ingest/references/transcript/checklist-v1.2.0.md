@@ -22,7 +22,7 @@
 - 日期
 - 字数 / 行数 / 时长
 - 主要主题
-- 是否适合 `brand-strategy` / `ecommerce-ops` / `visual-production` / `shared`
+- 是否适合 `brand-strategy` / `电商运营` / `visual-production` / `shared`
 - 是单文件处理还是 batch 中的一员
 
 ## 2. raw 保留

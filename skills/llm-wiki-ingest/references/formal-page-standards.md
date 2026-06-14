@@ -12,7 +12,7 @@ title: 页面标题
 type: concept | entity | project | playbook | comparison | query | decision | source-summary
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-domain: ecommerce-ops | visual-production | brand-strategy | ai-agent-engineering | shared | project | entity | meta
+domain: 电商运营 | visual-production | brand-strategy | AI Agent工程 | shared | project | entity | meta
 tags: [tag]
 sources:
   - raw/...

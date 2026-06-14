@@ -65,6 +65,17 @@ broad and may include, among others:
 If the source crosses domains, split or cross-link by concept. Do not force all
 formal output under the source's original course/book directory.
 
+For ecommerce knowledge, classify platform ownership before choosing the final
+path. Platform-specific rules, tools, entry requirements, backend workflows, and
+operations belong under the relevant platform area, such as Taobao/Tmall, JD,
+Pinduoduo, Douyin, Xiaohongshu, or cross-border ecommerce. Platform-independent
+merchant methods, consulting logic, channel strategy, settlement/accounting
+interfaces, supply chain methods, and reusable ecommerce playbooks belong under
+general ecommerce methods. ERP/API/tool knowledge belongs under the ecommerce
+systems/tooling area unless the tool is clearly a platform-native feature.
+The source type, such as course, book, webpage, or transcript, must not become
+the final classification.
+
 ### 0.2 Search Existing Memory Before Creating Pages
 
 Search existing pages for the source title, core concepts, synonyms, Chinese

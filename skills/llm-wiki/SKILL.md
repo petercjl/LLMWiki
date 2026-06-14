@@ -134,7 +134,7 @@ wiki/
 ├── inbox/              # Web Clipper and temporary inputs; not a final home
 ├── raw/                # Immutable sources
 ├── domains/            # Long-lived professional knowledge domains
-│   ├── ecommerce-ops/
+│   ├── 电商运营/
 │   ├── visual-production/
 │   └── brand-strategy/
 ├── shared/             # Cross-domain concepts, frameworks, rules, workflows
@@ -172,7 +172,7 @@ wiki/
 ├── inbox/              # Web Clipper and temporary notes before ingest
 ├── raw/                # Immutable source material
 ├── domains/            # Long-lived professional domains
-│   ├── ecommerce-ops/
+│   ├── 电商运营/
 │   ├── visual-production/
 │   └── brand-strategy/
 ├── shared/             # Cross-domain concepts and workflows

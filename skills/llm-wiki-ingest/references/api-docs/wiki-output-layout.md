@@ -5,7 +5,7 @@
 Default location for business API docs:
 
 ```text
-/Users/pechen/wiki/domains/ecommerce-ops/api/<provider-slug>/
+/Users/pechen/wiki/domains/电商运营/30-ERP与系统工具/<provider-slug>/
 ```
 
 For non-ecommerce APIs, choose the domain by purpose:
@@ -25,7 +25,7 @@ Raw sources:
 ## Recommended Formal Tree
 
 ```text
-domains/<domain>/api/<provider-slug>/
+domains/<domain>/30-ERP与系统工具/<provider-slug>/
 ├── index.md
 ├── auth-call-contract.md
 ├── capability-map.md
@@ -46,8 +46,8 @@ queries/<provider-slug>-<business-task>.md
 
 ## Naming
 
-- Use stable lowercase English slugs for files and folders.
-- Use Chinese titles inside Markdown when useful for Peter.
+- Use Chinese-readable page and folder names by default for human-facing wiki paths.
+- Keep stable provider slugs in aliases or metadata when useful for API search.
 - Keep provider slug stable across raw and formal folders.
 - Category page filenames can be English business slugs such as `stock-apis.md`, `order-apis.md`, `goods-apis.md`.
 
@@ -63,7 +63,7 @@ title: Provider API 首页
 type: concept
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-domain: ecommerce-ops
+domain: 电商运营
 tags: [api, provider]
 sources:
   - raw/api/provider/provider-full-scrape-YYYY-MM-DD.json
