@@ -40,6 +40,8 @@ Do not treat a command as a valid Obsidian CLI merely because `obsidian` exists 
 
 The bootstrap script should register real setup vaults in Obsidian automatically. It writes the platform Obsidian registry config and may open `obsidian://open?vault=<vault-id>` when `--open-obsidian` is requested. For smoke tests and demos, pass `--skip-obsidian-register` or set `OBSIDIAN_CONFIG_PATH` to an isolated temporary file.
 
+On macOS, registry writes are only reliable when Obsidian is not running. A running Obsidian process can save its in-memory vault list over the updated `obsidian.json`. Real setup should close Obsidian, update the registry, mark the new vault as open, and restart Obsidian. Isolated tests using `OBSIDIAN_CONFIG_PATH` must not close the user's real Obsidian.
+
 ## Installation Branches
 
 macOS:

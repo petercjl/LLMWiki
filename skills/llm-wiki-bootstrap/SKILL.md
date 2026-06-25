@@ -20,7 +20,7 @@ This skill must support macOS, Windows, and Linux. Never assume Homebrew, zsh, U
 5. Ask the user to confirm or adjust the wiki path and initial knowledge domains.
 6. Before writing, ensure the target wiki root is absent or empty and is not nested inside an existing Obsidian vault. If it is non-empty or nested, stop and ask for a different path or explicit override confirmation.
 7. Run `scripts/bootstrap_llm_wiki.py` with the confirmed values.
-8. Register the new vault in Obsidian automatically when Obsidian App is available. Open the vault with `--open-obsidian` when the user expects to see it immediately.
+8. Register the new vault in Obsidian automatically when Obsidian App is available. On macOS real runs, the script must quit Obsidian before editing the Obsidian registry, write the new vault as the active/open vault, then restart Obsidian when `--open-obsidian` is requested. This prevents a running Obsidian process from overwriting the registry with stale in-memory state.
 9. Review the generated summary, degraded capabilities, and next actions.
 10. Verify with filesystem checks, Git status, Obsidian registration, and Obsidian CLI checks when available.
 
@@ -62,6 +62,8 @@ py -3 <skill-dir>\scripts\bootstrap_llm_wiki.py --wiki-root "$env:USERPROFILE\wi
 The script creates files but does not edit shell profiles automatically. If the user wants persistent environment loading, show the platform-specific snippet from the script output and ask before changing profile files.
 
 The script registers the initialized vault in Obsidian by default by updating the platform Obsidian registry file. Use `--skip-obsidian-register` only for smoke tests, demos, or other runs that must not modify the user's Obsidian vault list. Use `--open-obsidian` for real setup when the user expects the new vault to appear/open immediately.
+
+For macOS real setup, do not rely on editing `obsidian.json` while Obsidian is running. Obsidian can overwrite the file on shutdown from its in-memory state. The script must close Obsidian, update the registry, set the new vault as the active/open vault, and then reopen Obsidian. For isolated tests with `OBSIDIAN_CONFIG_PATH`, do not quit the user's real Obsidian.
 
 If a vault was already created but is missing from Obsidian, use register-only mode instead of reinitializing files:
 
@@ -136,6 +138,7 @@ After bootstrap, verify:
 - every requested domain has `domains/<domain>/index.md`.
 - Git status is understandable.
 - `obsidian_register.registered` is true for real setup, unless the run explicitly used `--skip-obsidian-register`.
+- On macOS real setup, `obsidian_register.obsidian_quit.quit` is true before registry write, and the Obsidian UI opens to the new vault when `--open-obsidian` is used.
 - Obsidian CLI is a verified CLI command, not merely an executable named `obsidian`.
 - `tools.obsidian_route.trusted` is true, or the setup summary clearly marks route audit as degraded because the active/registered Obsidian vault does not match `WIKI_ROOT`.
 - The final response lists exact paths, installed/missing tools, and next commands for the user's OS.

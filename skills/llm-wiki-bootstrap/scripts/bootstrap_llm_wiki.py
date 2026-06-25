@@ -146,6 +146,40 @@ def vault_id_for_path(wiki: Path) -> str:
     return hashlib.sha256(str(wiki).encode("utf-8")).hexdigest()[:16]
 
 
+def quit_obsidian_for_registry(os_name: str) -> dict[str, object]:
+    if os_name != "macos" or os.environ.get("OBSIDIAN_CONFIG_PATH"):
+        return {"attempted": False}
+    result: dict[str, object] = {"attempted": True, "quit": False}
+    subprocess.run(
+        ["osascript", "-e", 'tell application "Obsidian" to quit'],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    for _ in range(30):
+        code, _, _ = run(["pgrep", "-x", "Obsidian"])
+        if code != 0:
+            result["quit"] = True
+            return result
+        time.sleep(0.5)
+    result["error"] = "Obsidian did not quit before registry update."
+    return result
+
+
+def open_obsidian_app(os_name: str, vault_id: str) -> bool:
+    if os_name == "macos":
+        proc = subprocess.run(
+            ["open", "-a", "Obsidian"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        return proc.returncode == 0
+    return bool(webbrowser.open(f"obsidian://open?vault={vault_id}"))
+
+
 def register_obsidian_vault(wiki: Path, os_name: str, open_obsidian: bool, dry_run: bool) -> dict[str, object]:
     config_path = obsidian_config_candidates(os_name)[0]
     vault_id = vault_id_for_path(wiki)
@@ -159,6 +193,11 @@ def register_obsidian_vault(wiki: Path, os_name: str, open_obsidian: bool, dry_r
     }
     if dry_run:
         result["dry_run"] = True
+        return result
+
+    result["obsidian_quit"] = quit_obsidian_for_registry(os_name)
+    if result["obsidian_quit"].get("error"):
+        result["error"] = str(result["obsidian_quit"]["error"])
         return result
 
     data: dict[str, object] = {}
@@ -178,6 +217,9 @@ def register_obsidian_vault(wiki: Path, os_name: str, open_obsidian: bool, dry_r
             existing_id = key
             break
     vault_id = existing_id or vault_id
+    for info in vaults.values():
+        if isinstance(info, dict):
+            info.pop("open", None)
     vaults[vault_id] = {
         "path": str(wiki),
         "ts": int(time.time() * 1000),
@@ -190,7 +232,7 @@ def register_obsidian_vault(wiki: Path, os_name: str, open_obsidian: bool, dry_r
     result["vault_id"] = vault_id
 
     if open_obsidian:
-        result["opened"] = bool(webbrowser.open(f"obsidian://open?vault={vault_id}"))
+        result["opened"] = open_obsidian_app(os_name, vault_id)
     return result
 
 
