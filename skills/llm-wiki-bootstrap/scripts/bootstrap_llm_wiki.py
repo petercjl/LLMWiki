@@ -42,6 +42,11 @@ def command_exists(command: str) -> bool:
     return shutil.which(command) is not None
 
 
+def run(cmd: list[str]) -> tuple[int, str, str]:
+    proc = subprocess.run(cmd, text=True, capture_output=True)
+    return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
+
+
 def detect_obsidian_app(os_name: str) -> dict[str, object]:
     home = user_home()
     candidates: list[Path] = []
@@ -71,8 +76,51 @@ def detect_obsidian_app(os_name: str) -> dict[str, object]:
 
 def detect_obsidian_cli() -> dict[str, object]:
     candidates = ["obsidian", "obsidian-cli"]
-    found = [cmd for cmd in candidates if command_exists(cmd)]
-    return {"installed": bool(found), "commands": found}
+    detected = [cmd for cmd in candidates if command_exists(cmd)]
+    verified = []
+    unverified = []
+    for cmd in detected:
+        code, out, err = run([cmd, "--help"])
+        help_text = f"{out}\n{err}"
+        if code == 0 and "Usage: obsidian" in help_text and "backlinks" in help_text:
+            verified.append(cmd)
+        else:
+            unverified.append(cmd)
+    return {
+        "installed": bool(verified),
+        "commands": verified,
+        "detected_commands": detected,
+        "unverified_commands": unverified,
+    }
+
+
+def obsidian_route_status(wiki: Path, cli: dict[str, object]) -> dict[str, object]:
+    commands = cli.get("commands") or []
+    if not commands:
+        return {
+            "available": False,
+            "trusted": False,
+            "active_vault_path": "",
+            "target_wiki_path": str(wiki),
+            "error": "No verified Obsidian CLI command was found.",
+        }
+    command = str(commands[0])
+    code, out, err = run([command, "vault", "info=path"])
+    active = out.splitlines()[-1] if out else ""
+    trusted = False
+    if code == 0 and active:
+        try:
+            trusted = Path(active).expanduser().resolve() == wiki
+        except OSError:
+            trusted = False
+    return {
+        "available": code == 0,
+        "trusted": trusted,
+        "command": command,
+        "active_vault_path": active,
+        "target_wiki_path": str(wiki),
+        "error": err if code else "",
+    }
 
 
 def detect_package_managers(os_name: str) -> list[str]:
@@ -101,9 +149,15 @@ def default_skill_source() -> str:
     if env:
         return str(Path(env).expanduser())
     script_path = Path(__file__).resolve()
-    source_root = script_path.parents[3]
-    if (source_root / "shared").exists() and (source_root / "skills").exists():
-        return str(source_root)
+    candidates = [
+        script_path.parents[3],
+        script_path.parents[2] / ".llmwiki-source",
+        Path(os.environ.get("CODEX_SKILLS_DIR", str(Path.home() / ".codex/skills"))) / ".llmwiki-source",
+        Path.cwd(),
+    ]
+    for source_root in candidates:
+        if (source_root / "shared").exists() and (source_root / "skills").exists():
+            return str(source_root)
     return ""
 
 
@@ -329,20 +383,25 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
     config = build_config(wiki_root, os_name)
     cfg_paths = [Path(args.config_path).expanduser().resolve()] if args.config_path else config_paths(os_name)
     package_managers = detect_package_managers(os_name)
+    obsidian_cli = detect_obsidian_cli()
+    obsidian_route = obsidian_route_status(wiki_root, obsidian_cli)
     tools = {
         "os": os_name,
         "shell": shell_family(os_name),
         "python": True,
         "git": command_exists("git"),
         "obsidian_app": detect_obsidian_app(os_name),
-        "obsidian_cli": detect_obsidian_cli(),
+        "obsidian_cli": obsidian_cli,
+        "obsidian_route": obsidian_route,
         "package_managers": package_managers,
     }
     degraded = []
     if not tools["obsidian_app"]["installed"]:
         degraded.append("Obsidian App not detected")
     if not tools["obsidian_cli"]["installed"]:
-        degraded.append("Obsidian CLI not detected")
+        degraded.append("Verified Obsidian CLI not detected")
+    elif not tools["obsidian_route"]["trusted"]:
+        degraded.append("Obsidian CLI target vault is unavailable or does not match WIKI_ROOT")
     return {
         "wiki_root": str(wiki_root),
         "domains": domains,
@@ -352,6 +411,7 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
         "degraded": degraded,
         "install_hints": install_hints(os_name, package_managers),
         "load_config_command": load_snippet(os_name, cfg_paths),
+        "route_audit_check_command": f"{obsidian_route.get('command', 'obsidian')} vault info=path",
     }
 
 

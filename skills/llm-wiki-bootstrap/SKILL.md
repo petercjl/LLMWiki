@@ -33,6 +33,22 @@ python3 <skill-dir>/scripts/bootstrap_llm_wiki.py --check-only
 python3 <skill-dir>/scripts/bootstrap_llm_wiki.py --wiki-root "$WIKI_ROOT" --domain "AI Agent工程" --domain "业务与运营"
 ```
 
+For smoke tests, demos, or any request that must not write to the user's home config, always pass both a temporary `--wiki-root` and a temporary `--config-path`:
+
+```bash
+python3 <skill-dir>/scripts/bootstrap_llm_wiki.py \
+  --check-only \
+  --wiki-root "/tmp/llm-wiki-test/wiki" \
+  --config-path "/tmp/llm-wiki-test/config.env"
+
+python3 <skill-dir>/scripts/bootstrap_llm_wiki.py \
+  --wiki-root "/tmp/llm-wiki-test/wiki" \
+  --config-path "/tmp/llm-wiki-test/config.env" \
+  --domain "测试领域" \
+  --no-git \
+  --json
+```
+
 On Windows, use `py -3` or `python` if `python3` is unavailable:
 
 ```powershell
@@ -107,11 +123,14 @@ After bootstrap, verify:
 - `AGENTS.md`, `SCHEMA.md`, `index.md`, and `log.md` exist.
 - every requested domain has `domains/<domain>/index.md`.
 - Git status is understandable.
-- Obsidian CLI can report the target vault or the setup summary clearly marks degraded mode.
+- Obsidian CLI is a verified CLI command, not merely an executable named `obsidian`.
+- `tools.obsidian_route.trusted` is true, or the setup summary clearly marks route audit as degraded because the active/registered Obsidian vault does not match `WIKI_ROOT`.
 - The final response lists exact paths, installed/missing tools, and next commands for the user's OS.
+- For smoke tests, demos, and dry runs, verify negatively that the real `~/.llmwiki/config.*` and real `~/wiki` were not created or modified.
 
 ## Patch Area
 
 - If Python is missing, do not attempt bootstrap with shell-only fragments. Tell the user Python 3 is required and provide platform-specific installation options.
 - If the user is on Windows and paths contain spaces, quote every path in examples and prefer PowerShell over cmd.
 - If Obsidian App is installed but CLI is missing, create the wiki and config anyway, then mark route audit unavailable until CLI is installed.
+- If the user asks for a temporary test, demo, or dry run, never allow the script to default to `~/.llmwiki/config.*`; provide `--config-path` inside the temporary directory.

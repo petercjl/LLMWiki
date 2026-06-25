@@ -36,6 +36,8 @@ obsidian backlinks path="domains/example/index.md" counts
 
 If the CLI is absent, the wiki can still be initialized and edited through the filesystem. Mark route audit and backlink checks as degraded until the CLI is installed.
 
+Do not treat a command as a valid Obsidian CLI merely because `obsidian` exists on PATH. Verify that `obsidian --help` or `obsidian-cli --help` prints the expected command surface, including route-audit commands such as `backlinks`, `links`, `outline`, and `vault info=path`.
+
 ## Installation Branches
 
 macOS:
