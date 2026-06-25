@@ -354,6 +354,12 @@ python3 <llm-wiki-audit-and-optimization-skill>/scripts/placeholder_scan.py <for
 python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_route_audit.py <new-entry-page.md>
 ```
 
+If `LLMWIKI_SKILL_SOURCE` is unset, look for the shared script in likely local
+source checkouts such as `~/.codex/skills/.llmwiki-source/shared/scripts/` before
+marking route audit unavailable. Do not look only inside `$WIKI_ROOT`; the wiki
+checkout usually does not contain the LLM Wiki skill source repo. If no script is
+available, record the exact paths checked in `audit-handoff.md`.
+
 If the active Obsidian vault is not `$WIKI_ROOT`, treat the script's degraded filesystem checks as partial route validation and say so.
 
 4. `rg` representative source terms across formal pages.

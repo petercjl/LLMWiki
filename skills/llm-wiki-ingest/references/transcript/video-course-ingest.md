@@ -138,6 +138,14 @@ _meta/extraction-notes/<source-slug>/
 └── audit-handoff.md
 ```
 
+When ingesting a later chapter into an existing course package, update these
+package-level files instead of creating a second package. Add chapter-level
+files under `chXX/` for segment and coverage detail, but keep
+`source-profile.md`, `source-inventory.md`, `knowledge-unit-inventory.md`,
+`coverage-matrix.md`, `omission-audit.md`, `formal-page-plan.md`, and
+`audit-handoff.md` at the package root so validators and future audits can find
+the whole course context.
+
 For each chapter, add chapter-level files when useful:
 
 ```text
@@ -166,6 +174,18 @@ Formal pages should be domain knowledge, not video notes. A video-course package
 - case library entry
 - Agent-use query page
 
+For an added chapter in an existing course package, decide whether to:
+
+- create a new formal page when the chapter introduces a new durable capability,
+  playbook, concept, or diagnostic template
+- merge into an existing formal page when the chapter only reinforces or
+  extends an existing theory
+- update only the package index and coverage records when the chapter is a
+  transition, intro, outro, or raw-only artifact
+
+Record that disposition in the package `formal-page-plan.md` and chapter
+coverage/omission files.
+
 Enrichment is encouraged after source coverage:
 
 - reconstruct causal chains
@@ -184,7 +204,13 @@ Before finishing:
 2. Confirm raw ASR exists for every processed media file.
 3. Confirm keyframes/OCR exist when screen content may carry knowledge.
 4. Confirm every meaningful ASR/OCR unit has a coverage row or omission reason.
-5. Run `validate_ingest_contract.py` where possible.
+5. Run `validate_ingest_contract.py` where possible. For existing course
+   packages with added chapters, pass the package-level notes directory, not
+   only `_meta/extraction-notes/<source-slug>/chXX/`, because the required
+   profile, inventory, formal plan, and audit handoff live at package root.
+   Treat verbatim-match warnings as review prompts, not automatic failure, when
+   formal pages intentionally reconstruct source units instead of copying
+   transcript wording; record the rationale in `audit-handoff.md`.
 6. Run placeholder scan on formal outputs.
 7. Remove `_meta/working/<source-slug>/` unless there is a deliberate reason to keep it.
 8. Update relevant domain index, root `index.md`, and `log.md`.
