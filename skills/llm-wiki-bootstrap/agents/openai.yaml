@@ -1,0 +1,4 @@
+interface:
+  display_name: "LLM Wiki Bootstrap"
+  short_description: "Initialize a cross-platform LLM Wiki"
+  default_prompt: "Use $llm-wiki-bootstrap to initialize a new LLM Wiki vault and configure the local environment."

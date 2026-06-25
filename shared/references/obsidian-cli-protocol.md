@@ -1,10 +1,10 @@
 # Obsidian CLI Protocol for LLM Wiki
 
-Use Obsidian CLI as a route and health layer for `/Users/pechen/wiki`. It complements direct filesystem edits; it does not replace deterministic scripts or source coverage records.
+Use Obsidian CLI as a route and health layer for `$WIKI_ROOT`. It complements direct filesystem edits; it does not replace deterministic scripts or source coverage records.
 
 ## Safety
 
-- Default wiki path: `/Users/pechen/wiki`.
+- Default wiki path: `$WIKI_ROOT` or `~/wiki` when unset.
 - Before trusting CLI results, compare `obsidian vault info=path` with the target wiki path.
 - If the active vault is not the target wiki, report degraded mode and fall back to filesystem search or parsing.
 - Do not use CLI write operations for batch ingestion unless the user explicitly asks for Obsidian-driven edits.

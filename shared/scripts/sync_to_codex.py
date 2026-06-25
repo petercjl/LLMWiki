@@ -4,13 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 from pathlib import Path
 
 
-DEFAULT_CODEX_SKILLS = Path("/Users/pechen/.codex/skills")
+DEFAULT_CODEX_SKILLS = Path(os.environ.get("CODEX_SKILLS_DIR", str(Path.home() / ".codex/skills")))
 PUBLISHED = {
     "llm-wiki",
+    "llm-wiki-bootstrap",
     "llm-wiki-ingest",
     "llm-wiki-audit-and-optimization",
     "llm-wiki-recompile-runner",

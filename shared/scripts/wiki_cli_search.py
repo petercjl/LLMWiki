@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 
 
-DEFAULT_WIKI = Path("/Users/pechen/wiki")
+DEFAULT_WIKI = Path(os.environ.get("WIKI_ROOT", str(Path.home() / "wiki")))
 
 
 def run(cmd: list[str]) -> tuple[int, str, str]:

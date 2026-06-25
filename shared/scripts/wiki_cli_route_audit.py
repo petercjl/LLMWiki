@@ -5,13 +5,32 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import re
 import subprocess
+from os import environ
 from pathlib import Path
 
 
-DEFAULT_WIKI = Path("/Users/pechen/wiki")
+DEFAULT_WIKI = Path(environ.get("WIKI_ROOT", str(Path.home() / "wiki")))
 WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)")
+
+
+def obsidian_config_candidates() -> list[Path]:
+    override = environ.get("OBSIDIAN_CONFIG_PATH")
+    if override:
+        return [Path(override).expanduser()]
+    home = Path.home()
+    system = platform.system().lower()
+    if system.startswith("darwin"):
+        return [home / "Library/Application Support/obsidian/obsidian.json"]
+    if system.startswith("windows"):
+        bases = [environ.get("APPDATA"), environ.get("LOCALAPPDATA")]
+        return [Path(base) / "Obsidian/obsidian.json" for base in bases if base]
+    return [
+        home / ".config/obsidian/obsidian.json",
+        home / ".var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json",
+    ]
 
 
 def run(cmd: list[str]) -> tuple[int, str, str]:
@@ -19,12 +38,43 @@ def run(cmd: list[str]) -> tuple[int, str, str]:
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
+def find_vault_selector(wiki: Path) -> str | None:
+    """Return the Obsidian vault id for the target path when available.
+
+    Obsidian CLI accepts the vault selector only as a global argument before the
+    command, for example: `obsidian vault=<id> files total`.
+    """
+    if environ.get("OBSIDIAN_VAULT"):
+        return environ["OBSIDIAN_VAULT"]
+    for config_path in obsidian_config_candidates():
+        if not config_path.exists():
+            continue
+        try:
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        for vault_id, info in data.get("vaults", {}).items():
+            path = info.get("path")
+            if path and Path(path).expanduser().resolve() == wiki:
+                return vault_id
+    return None
+
+
+def obsidian_cmd(wiki: Path, *args: str) -> list[str]:
+    selector = find_vault_selector(wiki)
+    if selector:
+        return ["obsidian", f"vault={selector}", *args]
+    return ["obsidian", *args]
+
+
 def cli_status(wiki: Path) -> dict:
-    code, out, err = run(["obsidian", "vault", "info=path"])
+    selector = find_vault_selector(wiki)
+    code, out, err = run(obsidian_cmd(wiki, "vault", "info=path"))
     active = out.splitlines()[-1] if out else ""
     return {
         "available": code == 0,
         "active_vault_path": active,
+        "vault_selector": selector or "",
         "target_wiki_path": str(wiki),
         "trusted": code == 0 and Path(active).expanduser() == wiki,
         "error": err if code else "",
@@ -89,9 +139,9 @@ def main() -> int:
     unresolved = {}
     global_signals = {}
     if status["trusted"]:
-        unresolved["counts"] = cli_lines(["obsidian", "unresolved", "counts"])[:100]
-        global_signals["orphans_total"] = cli_lines(["obsidian", "orphans", "total"])
-        global_signals["deadends_total"] = cli_lines(["obsidian", "deadends", "total"])
+        unresolved["counts"] = cli_lines(obsidian_cmd(wiki, "unresolved", "counts"))[:100]
+        global_signals["orphans_total"] = cli_lines(obsidian_cmd(wiki, "orphans", "total"))
+        global_signals["deadends_total"] = cli_lines(obsidian_cmd(wiki, "deadends", "total"))
     else:
         unresolved["counts"] = []
         global_signals["degraded_mode"] = "Obsidian CLI active vault does not match target wiki; used filesystem checks for target pages."
@@ -103,9 +153,9 @@ def main() -> int:
         p = wiki / rel
         exists = p.exists()
         if status["trusted"]:
-            backlinks = cli_lines(["obsidian", "backlinks", f"path={rel}", "counts"])
-            links = cli_lines(["obsidian", "links", f"path={rel}"])
-            outline = cli_lines(["obsidian", "outline", f"path={rel}", "format=json"])
+            backlinks = cli_lines(obsidian_cmd(wiki, "backlinks", f"path={rel}", "counts"))
+            links = cli_lines(obsidian_cmd(wiki, "links", f"path={rel}"))
+            outline = cli_lines(obsidian_cmd(wiki, "outline", f"path={rel}", "format=json"))
         else:
             backlinks = filesystem_backlinks(wiki, rel) if exists else []
             links = filesystem_links(wiki, rel) if exists else []

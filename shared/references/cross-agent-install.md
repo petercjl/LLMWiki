@@ -11,7 +11,7 @@ git@github.com:petercjl/LLMWiki.git
 Codex source path:
 
 ```text
-/Users/pechen/.codex/skills/.llmwiki-source
+$LLMWIKI_SKILL_SOURCE
 ```
 
 Published skill directories live under `skills/`. Other agents should install from GitHub and copy the desired skill directories into their own skill locations.
@@ -21,6 +21,7 @@ Do not maintain divergent SealSeek or Hermes source copies. If a skill needs cha
 Active published skills:
 
 - `llm-wiki`
+- `llm-wiki-bootstrap`
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
 - `llm-wiki-recompile-runner`

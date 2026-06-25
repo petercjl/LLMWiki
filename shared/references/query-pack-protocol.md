@@ -6,7 +6,7 @@ A query pack is the routing bundle an agent builds before answering from the LLM
 
 - User question.
 - Optional target domain or project.
-- Wiki path, default `/Users/pechen/wiki`.
+- Wiki path, default `$WIKI_ROOT` or `~/wiki` when unset.
 
 ## Required Output
 

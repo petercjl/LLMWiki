@@ -1,17 +1,18 @@
 # LLM Wiki Skills
 
-Codex-maintained source package for Peter's LLM Wiki skills.
+Codex-maintained source package for LLM Wiki skills.
 
 Source of truth:
 
 ```text
-/Users/pechen/.codex/skills/.llmwiki-source
+$LLMWIKI_SKILL_SOURCE
 git@github.com:petercjl/LLMWiki.git
 ```
 
 Published skills are under `skills/`:
 
 - `llm-wiki`
+- `llm-wiki-bootstrap`
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
 - `llm-wiki-recompile-runner`
