@@ -564,6 +564,8 @@ def main() -> int:
             summary["error"] = f"Cannot register missing wiki root {wiki_root}."
             print(json.dumps(summary, ensure_ascii=False, indent=2))
             return 2
+        summary["config_write_mode"] = "not-written-in-register-only"
+        summary["config_written"] = []
         if args.skip_obsidian_register:
             summary["obsidian_register"] = {"requested": False, "reason": "Skipped by --skip-obsidian-register"}
         else:
