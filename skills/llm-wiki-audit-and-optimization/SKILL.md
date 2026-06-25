@@ -60,13 +60,14 @@ Answer quality = Compile quality × Route quality × Reason quality
 
 Before auditing a wiki, orient yourself:
 
-1. Read `~/wiki/AGENTS.md` if present.
-2. Read `~/wiki/SCHEMA.md`.
-3. Read `~/wiki/index.md`.
-4. Read recent `~/wiki/log.md`.
-5. For a domain audit, read the domain index, e.g. `domains/品牌策略/index.md`.
-6. For a learning-path audit, read the path `index.md` and 2-4 representative chapter pages, including the final Agent/template page if present.
-7. Search for key terms if the target is large.
+1. Resolve the target wiki root from `WIKI_ROOT`, skill config, or the user's explicit path.
+2. Read `$WIKI_ROOT/AGENTS.md` if present.
+3. Read `$WIKI_ROOT/SCHEMA.md`.
+4. Read `$WIKI_ROOT/index.md`.
+5. Read recent `$WIKI_ROOT/log.md`.
+6. For a domain audit, read the domain index, e.g. `domains/品牌策略/index.md`.
+7. For a learning-path audit, read the path `index.md` and 2-4 representative chapter pages, including the final Agent/template page if present.
+8. Search for key terms if the target is large.
 
 Never judge a wiki only from a file listing. The audit must inspect structure, content, and routing artifacts.
 

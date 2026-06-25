@@ -5,7 +5,7 @@ Use this reference when creating extraction notes for a book.
 ## Directory
 
 ```text
-~/wiki/_meta/extraction-notes/<book-slug>-<year>/
+$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>/
 ├── source-profile.md
 ├── source-inventory.md
 ├── segment-plan.md

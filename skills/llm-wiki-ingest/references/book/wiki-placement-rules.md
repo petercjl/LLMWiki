@@ -6,16 +6,16 @@ Use this reference when deciding where a book's formal pages should live.
 
 Read these files before editing:
 
-- `~/wiki/AGENTS.md`
-- `~/wiki/SCHEMA.md`
-- `~/wiki/index.md`
-- recent `~/wiki/log.md`
+- `$WIKI_ROOT/AGENTS.md`
+- `$WIKI_ROOT/SCHEMA.md`
+- `$WIKI_ROOT/index.md`
+- recent `$WIKI_ROOT/log.md`
 
 Search existing pages before creating new ones.
 
 ## Placement
 
-Use the user's one-vault, multi-domain structure:
+Use the target wiki's own schema and domain index. If the wiki is newly initialized and still has the default one-vault, multi-domain structure, these are useful starting examples:
 
 - `domains/电商运营/`: ecommerce operations. Classify platform-first: general methods under `01-通用电商方法/`, Taobao/Tmall under `02-淘宝天猫/`, JD under `03-京东/`, Pinduoduo/Douyin/Xiaohongshu under their platform areas, cross-border under `20-跨境电商/`, and ERP/API/tooling under `30-ERP与系统工具/`.
 - `domains/视觉制作/`: images, detail pages, visual production, AI image/video workflows.

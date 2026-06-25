@@ -143,7 +143,7 @@ After bootstrap, verify:
 - Treat Obsidian registry/UI success separately from CLI route readiness. `obsidian_register.registered` proves the vault was added to Obsidian; it does not prove the CLI currently targets it.
 - After registration, inspect `post_register_route.obsidian_route.trusted`. It must be true for full route-audit readiness. If false, the setup is usable in Obsidian but route audit is degraded, and the summary must say the CLI route does not currently point to `WIKI_ROOT`.
 - The final response lists exact paths, installed/missing tools, and next commands for the user's OS.
-- For smoke tests, demos, and dry runs, verify negatively that the real `~/.llmwiki/config.*` and real `~/wiki` were not created or modified.
+- For smoke tests, demos, and dry runs, verify negatively that the real default config and default wiki root were not created or modified.
 
 ## Patch Area
 

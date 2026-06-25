@@ -1,6 +1,6 @@
 # course-transcript-to-knowledge v1.2.0 Checklist
 
-适用场景：Get 笔记、飞书妙记、课程录音转写、长时口播资料进入 `~/wiki`。
+适用场景：Get 笔记、飞书妙记、课程录音转写、长时口播资料进入目标 `$WIKI_ROOT`。
 
 ## 一句话目标
 
@@ -9,10 +9,10 @@
 ## 0. 启动前
 
 必须先读：
-1. `~/wiki/AGENTS.md`
-2. `~/wiki/SCHEMA.md`
-3. `~/wiki/index.md`
-4. 最近的 `~/wiki/log.md`
+1. `$WIKI_ROOT/AGENTS.md`
+2. `$WIKI_ROOT/SCHEMA.md`
+3. `$WIKI_ROOT/index.md`
+4. 最近的 `$WIKI_ROOT/log.md`
 5. 搜索已有相关页面，避免重复建页
 
 ## 1. 文件 inspection

@@ -257,7 +257,7 @@ The answer should be grounded in the selected query pack. If no query/template/i
 
 When the user asks to create or start a wiki:
 
-1. Determine the wiki path (from config, env var, or ask the user; default `~/wiki`)
+1. Determine the wiki path from config, `WIKI_ROOT`, or the user's explicit path; use `~/wiki` only as the generic home-directory default.
 2. Create the directory structure above
 3. Ask the user what domain the wiki covers — be specific
 4. Write `SCHEMA.md` customized to the domain (see template below)
@@ -594,7 +594,7 @@ ob login --email <email> --password '<password>'
 ob sync-create-remote --name "LLM Wiki"
 
 # Connect the wiki directory to the vault
-cd ~/wiki
+cd "$WIKI_ROOT"
 ob sync-setup --vault "<vault-id>"
 
 # Initial sync
@@ -614,7 +614,7 @@ Wants=network-online.target
 
 [Service]
 ExecStart=/path/to/ob sync --continuous
-WorkingDirectory=/home/user/wiki
+WorkingDirectory=<absolute path to WIKI_ROOT>
 Restart=on-failure
 RestartSec=10
 
@@ -629,7 +629,7 @@ systemctl --user enable --now obsidian-wiki-sync
 sudo loginctl enable-linger $USER
 ```
 
-This lets the agent write to `~/wiki` on a server while you browse the same
+This lets the agent write to `$WIKI_ROOT` on a server while you browse the same
 vault in Obsidian on your laptop/phone — changes appear within seconds.
 
 ## Pitfalls
