@@ -1,6 +1,6 @@
 # Transcript Adapter
 
-Use for course transcripts, meeting transcripts, Feishu Minutes, audio/video transcription output, interviews, and Q&A sessions.
+Use for course transcripts, meeting transcripts, Feishu Minutes, local audio/video course files, audio/video transcription output, interviews, and Q&A sessions.
 
 This adapter absorbs the previous `course-transcript-to-knowledge` workflow. Use it inside `llm-wiki-ingest`; do not maintain a separate transcript skill.
 
@@ -18,14 +18,22 @@ For dense course material, especially business, ecommerce, brand, visual-product
 
 Load `references/transcript/checklist-v1.2.0.md` before processing long or noisy transcripts.
 
+When the source is a local video or audio file and no high-quality transcript is
+already provided, also load `references/transcript/video-course-ingest.md`. That
+reference is the main branch for video-course ingestion: it covers tool
+installation, audio extraction, ASR, keyframe/OCR capture, ASR correction notes,
+raw preservation, and return-to-main-line rules.
+
 ## Intake
 
 Record:
 
 - source path, title, speaker(s), date, duration
 - transcript type: course, meeting, interview, workshop, Q&A
+- original media files when the transcript is generated from audio/video
 - timestamp availability
 - transcript quality issues
+- ASR/OCR tool and model used, when generated during ingest
 - repeated filler/noise pattern
 - source language and desired formal language
 
@@ -71,6 +79,8 @@ Formal pages must not expose internal processing headings such as `cleaned_text`
 Batch transcript ingestion discipline:
 
 - inspect all files first
+- for audio/video batches, first archive original media, then extract audio,
+  ASR transcripts, and keyframes/OCR before formal writing
 - preserve separate raw transcript for each file
 - create separate extraction notes and coverage records per file
 - write separate formal outputs unless the user explicitly asks for later synthesis

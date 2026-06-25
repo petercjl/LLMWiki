@@ -11,7 +11,7 @@ Choose by source knowledge shape, not only file format.
 | File is under `/Users/pechen/wiki/Clippings` or Obsidian Web Clipper metadata exists | `web-clipping.md` |
 | Endpoint docs, SDK docs, API reference, auth/signature docs, model API console page | `api-docs.md` |
 | EPUB, PDF book, manuscript, long published book-like source | `book.md` |
-| Course transcript, meeting transcript, lecture, Feishu Minutes, ASR text | `transcript.md` |
+| Course transcript, meeting transcript, lecture, Feishu Minutes, ASR text, local audio/video course files | `transcript.md` |
 | `.xmind`, mind map, topic tree, node hierarchy | `xmind.md` |
 | Spreadsheet, CSV, Excel, data report, table-heavy market report | `spreadsheet-report.md` |
 | Local Markdown documentation, manual, README, spec | `markdown-doc.md` |

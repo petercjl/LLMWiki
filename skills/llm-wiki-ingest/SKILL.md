@@ -16,7 +16,7 @@ Legacy standalone entries are intentionally removed. If the user names
 Use this skill instead of source-specific ingest skills when the user asks to:
 
 - process `/Users/pechen/wiki/Clippings`
-- ingest webpages, product docs, API docs, books, transcripts, XMind, spreadsheets, reports, Markdown files, PDFs, EPUBs, or mixed sources
+- ingest webpages, product docs, API docs, books, transcripts, local audio/video courses, XMind, spreadsheets, reports, Markdown files, PDFs, EPUBs, or mixed sources
 - ingest PPT/courseware content as a source for durable knowledge
 - make a source "入脑"
 - compile a source into reusable wiki knowledge
@@ -193,7 +193,7 @@ Read `references/source-adapter-map.md`, then load only the relevant adapter:
 | Obsidian Web Clipper / webpage / Clippings | `adapters/web-clipping.md` |
 | API docs / developer docs / endpoint docs | `adapters/api-docs.md` |
 | EPUB/PDF/book manuscript | `adapters/book.md` |
-| course/audio/meeting transcript | `adapters/transcript.md` |
+| course/audio/video/meeting transcript or local audio/video course | `adapters/transcript.md` |
 | XMind or mind map | `adapters/xmind.md` |
 | spreadsheet/CSV/report/table-heavy source | `adapters/spreadsheet-report.md` |
 | PPT/courseware/slide-derived source | `adapters/markdown-doc.md` plus transcript adapter when paired with spoken content |
