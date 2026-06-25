@@ -428,6 +428,41 @@ def existing_wiki_blocker(wiki_root: Path, force: bool) -> str:
     return ""
 
 
+def registered_obsidian_vault_paths(os_name: str) -> list[Path]:
+    paths: list[Path] = []
+    for config_path in obsidian_config_candidates(os_name):
+        if not config_path.exists():
+            continue
+        try:
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        for info in data.get("vaults", {}).values():
+            if isinstance(info, dict) and info.get("path"):
+                try:
+                    paths.append(Path(str(info["path"])).expanduser().resolve())
+                except OSError:
+                    continue
+    return paths
+
+
+def nested_vault_blocker(wiki_root: Path, os_name: str, force: bool) -> str:
+    if force:
+        return ""
+    for existing in registered_obsidian_vault_paths(os_name):
+        if existing == wiki_root:
+            continue
+        try:
+            wiki_root.relative_to(existing)
+        except ValueError:
+            continue
+        return (
+            f"Refusing to create a vault inside existing Obsidian vault {existing}. "
+            "Choose a path outside existing vault roots or rerun with --force after explicit confirmation."
+        )
+    return ""
+
+
 def install_hints(os_name: str, package_managers: list[str]) -> list[str]:
     hints: list[str] = []
     if os_name == "macos":
@@ -537,6 +572,8 @@ def main() -> int:
         return 0
 
     blocker = existing_wiki_blocker(wiki_root, args.force)
+    if not blocker:
+        blocker = nested_vault_blocker(wiki_root, str(summary["tools"]["os"]), args.force)
     if blocker:
         summary["error"] = blocker
         print(json.dumps(summary, ensure_ascii=False, indent=2))
