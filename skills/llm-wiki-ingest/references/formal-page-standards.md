@@ -4,7 +4,7 @@ Formal pages are compiled knowledge, not source summaries.
 
 ## Required Frontmatter
 
-Follow `/Users/pechen/wiki/SCHEMA.md`:
+Follow `$WIKI_ROOT/SCHEMA.md`:
 
 ```yaml
 ---

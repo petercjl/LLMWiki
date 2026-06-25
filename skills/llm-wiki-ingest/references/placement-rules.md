@@ -1,6 +1,6 @@
 # Placement Rules
 
-Read `/Users/pechen/wiki/SCHEMA.md` first. These are practical defaults.
+Read `$WIKI_ROOT/SCHEMA.md` first. These are practical defaults.
 
 ## Formal Knowledge
 
@@ -69,6 +69,6 @@ _meta/extraction-notes/<source-slug>/
 
 ## Index Rules
 
-- Every formal page appears in `/Users/pechen/wiki/index.md`.
+- Every formal page appears in `$WIKI_ROOT/index.md`.
 - Domain pages appear in the domain index.
 - Internal extraction notes do not need main index entries unless they are formal source-summary pages intended for retrieval.

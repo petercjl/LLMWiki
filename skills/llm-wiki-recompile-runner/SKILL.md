@@ -36,14 +36,14 @@ Do not use this for brand/report generation. This skill stops at knowledge-base 
 
 At least one of:
 
-- Target domain path, e.g. `/Users/pechen/wiki/domains/品牌策略`
+- Target domain path, e.g. `$WIKI_ROOT/domains/品牌策略`
 - Target learning path, course package, or source package
 - A shell inventory from `placeholder_scan.py`
 
 Useful optional inputs:
 
-- Raw transcript path under `/Users/pechen/wiki/raw/transcripts`
-- Extraction note path under `/Users/pechen/wiki/_meta/extraction-notes`
+- Raw transcript path under `$WIKI_ROOT/raw/transcripts`
+- Extraction note path under `$WIKI_ROOT/_meta/extraction-notes`
 - Downstream use case, e.g. “brand planning report skill”
 
 ## Workflow
@@ -52,10 +52,10 @@ Useful optional inputs:
 
 Before editing the wiki:
 
-1. Read `/Users/pechen/wiki/AGENTS.md` if present.
-2. Read `/Users/pechen/wiki/SCHEMA.md`.
-3. Read `/Users/pechen/wiki/index.md`.
-4. Read recent `/Users/pechen/wiki/log.md`.
+1. Read `$WIKI_ROOT/AGENTS.md` if present.
+2. Read `$WIKI_ROOT/SCHEMA.md`.
+3. Read `$WIKI_ROOT/index.md`.
+4. Read recent `$WIKI_ROOT/log.md`.
 5. Read the target domain `index.md`.
 
 ### 2. Mechanical Shell Audit
@@ -105,7 +105,7 @@ Use one of four modes:
 | Full recompile | Formal pages are shell and extraction notes are empty/incomplete | Re-run `llm-wiki-ingest` transcript adapter from raw transcript |
 | Formal synthesis repair | Extraction notes are complete but formal pages are shallow | Re-synthesize formal pages from extraction notes |
 | Routing/status repair | Pages are complete but index/status/routes are stale | Patch indexes, links, and agent-use templates |
-| Memory reorganization | Pages are source-shaped, learning-path-shaped, duplicated, or hard to find by content | Build a migration/fusion map, ask Peter to confirm ambiguous moves, then move/merge/split into content-domain pages and keep source package as provenance |
+| Memory reorganization | Pages are source-shaped, learning-path-shaped, duplicated, or hard to find by content | Build a migration/fusion map, ask the user to confirm ambiguous moves, then move/merge/split into content-domain pages and keep source package as provenance |
 
 Do not “patch around” shell pages by adding a few paragraphs. Shell pages usually indicate the raw-to-formal pipeline failed.
 
@@ -138,7 +138,7 @@ For each learning path or source package:
 
 Before moving or creating many pages, produce a migration/fusion table:
 
-| Old page | Current role | Proposed content domain | Existing page to merge/extend | Proposed new title/path | Need Peter confirmation |
+| Old page | Current role | Proposed content domain | Existing page to merge/extend | Proposed new title/path | Need the user confirmation |
 | --- | --- | --- | --- | --- | --- |
 
 Use this table to separate:
@@ -148,7 +148,7 @@ Use this table to separate:
 - duplicate or overlapping pages that should be merged
 - pages that should remain as agent templates, case libraries, or audit notes
 
-Ask Peter to confirm the table when the move touches major categories, changes
+Ask the user to confirm the table when the move touches major categories, changes
 more than 10 files, or may merge two previously separate theories.
 
 ### 5.0.1 Memory Reorganization Method
@@ -163,7 +163,7 @@ When reorganizing an existing source-shaped knowledge path, follow this pattern:
 4. Preserve provenance: keep raw files and extraction notes; reduce the old
    learning path to a legacy/source pointer when it is no longer the main home.
 5. Fuse associatively: link old pages as related memory when they have their own
-   context; merge only true duplicates after Peter confirms.
+   context; merge only true duplicates after the user confirms.
 6. Rename for human retrieval: use Chinese names and numeric prefixes for
    ordered folders/pages, including top-level human-facing domain directories
    under `domains/`.
@@ -221,7 +221,7 @@ Only after a path passes QA:
 
 - Update domain index status.
 - Update wiki index if relevant.
-- Append `/Users/pechen/wiki/log.md`.
+- Append `$WIKI_ROOT/log.md`.
 - Note what raw transcript and extraction notes were used.
 
 For partially repaired domains, mark each learning path separately. Do not mark the whole domain complete if any P0 shell path remains.
@@ -247,7 +247,7 @@ Return:
 
 ## Brand Strategy Current Known Case
 
-As of 2026-06-14, `/Users/pechen/wiki/domains/品牌策略` has been repaired from the
+As of 2026-06-14, `$WIKI_ROOT/domains/品牌策略` has been repaired from the
 previous 31-page shell baseline.
 
 The latest mechanical audit result is:

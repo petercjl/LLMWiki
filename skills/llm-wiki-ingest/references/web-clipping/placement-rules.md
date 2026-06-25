@@ -1,6 +1,6 @@
 # Placement Rules
 
-Use these rules when deciding where a clipping should become durable knowledge in `/Users/pechen/wiki`.
+Use these rules when deciding where a clipping should become durable knowledge in `$WIKI_ROOT`.
 
 ## Core Principle
 

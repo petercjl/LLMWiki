@@ -1,6 +1,6 @@
 ---
 name: ai-agent-skill-registry-sync
-description: Scan Peter's local AI agent skill directories across Codex, Hermes, Lark Agent, OpenClaw, SealSeek, and Claude Code, then update the LLM Wiki skill registry pages under /Users/pechen/wiki. Use when the user asks to find newly created skills, refresh the cross-agent skill registry, add agent skills to the wiki, check whether skill inventory is up to date, or make skills discoverable for future AI agents.
+description: Scan the user's local AI agent skill directories across Codex, Hermes, Lark Agent, OpenClaw, SealSeek, and Claude Code, then update the LLM Wiki skill registry pages under $WIKI_ROOT. Use when the user asks to find newly created skills, refresh the cross-agent skill registry, add agent skills to the wiki, check whether skill inventory is up to date, or make skills discoverable for future AI agents.
 ---
 
 # AI Agent Skill Registry Sync
@@ -11,11 +11,11 @@ Keep the LLM Wiki's cross-agent skill registry in sync with skill files on disk,
 
 The canonical daily-use wiki entry is:
 
-`/Users/pechen/wiki/domains/AI Agent工程/90-Skill注册表/01-个人与项目Skill注册库.md`
+`$WIKI_ROOT/domains/AI Agent工程/90-Skill注册表/01-个人与项目Skill注册库.md`
 
 The full registry is:
 
-`/Users/pechen/wiki/domains/AI Agent工程/90-Skill注册表/02-跨Agent Skill注册库.md`
+`$WIKI_ROOT/domains/AI Agent工程/90-Skill注册表/02-跨Agent Skill注册库.md`
 
 ## When To Use
 
@@ -57,20 +57,20 @@ python3 <skill-root>/scripts/sync_skill_registry.py --dry-run
 
 The script scans these roots:
 
-- Codex: `/Users/pechen/.codex/skills`
-- Hermes: `/Users/pechen/.hermes/skills`
-- Lark Agent: `/Users/pechen/.agents/skills`
-- OpenClaw: `/Users/pechen/.openclaw/workspace/skills`
+- Codex: `$HOME/.codex/skills`
+- Hermes: `$HOME/.hermes/skills`
+- Lark Agent: `$HOME/.agents/skills`
+- OpenClaw: `$HOME/.openclaw/workspace/skills`
 - SealSeek:
-  - `/Users/pechen/.sealseek/skill_pool`
-  - `/Users/pechen/.sealseek/workspace/skills`
-  - `/Users/pechen/.sealseek/workspaces/default/skills`
-  - `/Users/pechen/.sealseek/workspaces/default/active_skills`
-  - `/Users/pechen/.sealseek/workspaces/default/customized_skills`
-  - `/Users/pechen/.sealseek/backups`
-  - `/Users/pechen/sealseek`
-  - `/Users/pechen/hermes/xc-sealseek-aicoding-skill`
-- Claude Code: `/Users/pechen/.claude/plugins/marketplaces/claude-plugins-official.bak`
+  - `$HOME/.sealseek/skill_pool`
+  - `$HOME/.sealseek/workspace/skills`
+  - `$HOME/.sealseek/workspaces/default/skills`
+  - `$HOME/.sealseek/workspaces/default/active_skills`
+  - `$HOME/.sealseek/workspaces/default/customized_skills`
+  - `$HOME/.sealseek/backups`
+  - `$HOME/sealseek`
+  - `$HOME/hermes/xc-sealseek-aicoding-skill`
+- Claude Code: `$HOME/.claude/plugins/marketplaces/claude-plugins-official.bak`
 
 The script excludes `node_modules`, `.venv`, `runtime`, and `__pycache__`.
 
@@ -99,9 +99,9 @@ The script regenerates numeric Chinese registry pages under
 
 It also updates:
 
-- `/Users/pechen/wiki/index.md`
-- `/Users/pechen/wiki/domains/AI Agent工程/index.md`
-- `/Users/pechen/wiki/log.md`
+- `$WIKI_ROOT/index.md`
+- `$WIKI_ROOT/domains/AI Agent工程/index.md`
+- `$WIKI_ROOT/log.md`
 
 ## Registry Content Rules
 
@@ -123,4 +123,4 @@ Do not write real API keys, cookies, tokens, customer secrets, or private creden
 - Personal/project skills go into `01-个人与项目Skill注册库.md`.
 - System/builtin skills remain only in the full registry.
 - Runtime copies and backups remain only in the full registry.
-- Hermes skills are classified as personal/project only when they match Peter-specific project, ecommerce, visual, courseware, LLM Wiki, SealSeek/OpenClaw, Xicheng, Feishu, or similar customization signals.
+- Hermes skills are classified as personal/project only when they match the user-specific project, ecommerce, visual, courseware, LLM Wiki, SealSeek/OpenClaw, Xicheng, Feishu, or similar customization signals.

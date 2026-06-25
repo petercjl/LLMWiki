@@ -151,7 +151,7 @@ Extract:
 - Limits
 - Risks
 - Alternatives
-- How it connects to Peter's projects or domains
+- How it connects to the user's projects or domains
 - All code examples, API request/response shapes, CLI commands, SDK calls, parameters, model/version constraints, and troubleshooting patterns
 
 For product/tool documentation, create a capability map plus code/example section whenever the source contains examples. Do not reduce official docs to a decision summary; preserve reusable invocation templates and source cases.
@@ -174,7 +174,7 @@ Extract:
 - Evidence
 - Counterpoints
 - Assumptions
-- Implications for Peter's work
+- Implications for the user's work
 - Open questions
 
 ## Profile: Dataset / Table / Report

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync local AI agent SKILL.md files into Peter's LLM Wiki registry."""
+"""Sync local AI agent SKILL.md files into an LLM Wiki registry."""
 
 from __future__ import annotations
 
@@ -12,7 +12,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_WIKI_ROOT = Path("/Users/pechen/wiki")
+HOME = Path.home()
+
+
+def env_path(name: str, default: Path) -> Path:
+    return Path(os.environ.get(name, str(default))).expanduser()
+
+
+DEFAULT_WIKI_ROOT = env_path("WIKI_ROOT", HOME / "wiki")
 REGISTRY_REL = Path("domains/AI Agent工程/90-Skill注册表")
 
 
@@ -29,28 +36,28 @@ AGENT_SOURCES = (
     AgentSource(
         "codex",
         "Codex",
-        (Path("/Users/pechen/.codex/skills"),),
+        (env_path("CODEX_SKILLS_DIR", HOME / ".codex/skills"),),
         "03-Codex Skill注册页.md",
         "Codex local business skills and system skills.",
     ),
     AgentSource(
         "hermes",
         "Hermes",
-        (Path("/Users/pechen/.hermes/skills"),),
+        (env_path("HERMES_SKILLS_DIR", HOME / ".hermes/skills"),),
         "04-Hermes Skill注册页.md",
         "Hermes main skills directory, excluding duplicated hermes-agent optional skill trees.",
     ),
     AgentSource(
         "lark-agent",
         "Lark Agent",
-        (Path("/Users/pechen/.agents/skills"),),
+        (env_path("LARK_AGENT_SKILLS_DIR", HOME / ".agents/skills"),),
         "05-Lark Agent Skill注册页.md",
         "Feishu/Lark agent skills.",
     ),
     AgentSource(
         "openclaw",
         "OpenClaw",
-        (Path("/Users/pechen/.openclaw/workspace/skills"),),
+        (env_path("OPENCLAW_SKILLS_DIR", HOME / ".openclaw/workspace/skills"),),
         "06-OpenClaw Skill注册页.md",
         "OpenClaw workspace skills.",
     ),
@@ -58,14 +65,14 @@ AGENT_SOURCES = (
         "sealseek",
         "SealSeek",
         (
-            Path("/Users/pechen/.sealseek/skill_pool"),
-            Path("/Users/pechen/.sealseek/workspace/skills"),
-            Path("/Users/pechen/.sealseek/workspaces/default/skills"),
-            Path("/Users/pechen/.sealseek/workspaces/default/active_skills"),
-            Path("/Users/pechen/.sealseek/workspaces/default/customized_skills"),
-            Path("/Users/pechen/.sealseek/backups"),
-            Path("/Users/pechen/sealseek"),
-            Path("/Users/pechen/hermes/xc-sealseek-aicoding-skill"),
+            env_path("SEALSEEK_SKILL_POOL_DIR", HOME / ".sealseek/skill_pool"),
+            env_path("SEALSEEK_WORKSPACE_SKILLS_DIR", HOME / ".sealseek/workspace/skills"),
+            env_path("SEALSEEK_DEFAULT_SKILLS_DIR", HOME / ".sealseek/workspaces/default/skills"),
+            env_path("SEALSEEK_ACTIVE_SKILLS_DIR", HOME / ".sealseek/workspaces/default/active_skills"),
+            env_path("SEALSEEK_CUSTOMIZED_SKILLS_DIR", HOME / ".sealseek/workspaces/default/customized_skills"),
+            env_path("SEALSEEK_BACKUPS_DIR", HOME / ".sealseek/backups"),
+            env_path("SEALSEEK_PROJECT_DIR", HOME / "sealseek"),
+            env_path("SEALSEEK_MIGRATION_SKILL_DIR", HOME / "hermes/xc-sealseek-aicoding-skill"),
         ),
         "07-SealSeek Skill注册页.md",
         "SealSeek multi-source skills: global skill_pool, workspace skills, default workspace, active/customized skills, local standalone skills, backups, and migration bundles.",
@@ -73,7 +80,7 @@ AGENT_SOURCES = (
     AgentSource(
         "claude-code",
         "Claude Code",
-        (Path("/Users/pechen/.claude/plugins/marketplaces/claude-plugins-official.bak"),),
+        (env_path("CLAUDE_CODE_SKILLS_DIR", HOME / ".claude/plugins/marketplaces/claude-plugins-official.bak"),),
         "08-Claude Code Skill注册页.md",
         "Claude Code plugin marketplace backup skills.",
     ),
@@ -104,7 +111,7 @@ PERSONAL_REGISTRY_OUTPUT = "01-个人与项目Skill注册库.md"
 CENTRAL_REGISTRY_OUTPUT = "02-跨Agent Skill注册库.md"
 
 HERMES_PERSONAL_PATTERNS = re.compile(
-    r"peter|sealseek|seal|openclaw|xicheng|xc-|玺承|taobao|tmall|淘宝|天猫|"
+    r"sealseek|seal|openclaw|xicheng|xc-|玺承|taobao|tmall|淘宝|天猫|"
     r"ecommerce|电商|商品|店铺|主图|详情页|视觉|生图|gpt-image|gpt生图|"
     r"toapis|evolink|courseware|course-transcript|课程|html-ppt|static-html-courseware|"
     r"feishu|lark|飞书|"
@@ -255,7 +262,7 @@ def input_hint(desc: str, name: str) -> str:
 
 
 def source_type(file_path: Path, source: AgentSource, rel: str) -> str:
-    path_str = str(file_path)
+    path_str = str(file_path).replace(str(HOME), "~")
     if source.key == "sealseek":
         mapping = (
             ("/.sealseek/skill_pool/", "global-skill-pool"),
@@ -264,8 +271,8 @@ def source_type(file_path: Path, source: AgentSource, rel: str) -> str:
             ("/.sealseek/workspaces/default/active_skills/", "active-skills"),
             ("/.sealseek/workspaces/default/customized_skills/", "customized-skills"),
             ("/.sealseek/backups/", "backup"),
-            ("/Users/pechen/sealseek/", "standalone-local"),
-            ("/Users/pechen/hermes/xc-sealseek-aicoding-skill/", "migration-bundle"),
+            ("~/sealseek/", "standalone-local"),
+            ("~/hermes/xc-sealseek-aicoding-skill/", "migration-bundle"),
         )
         for needle, label in mapping:
             if needle in path_str:
@@ -287,7 +294,7 @@ def ownership_for(file_path: Path, source: AgentSource, kind: str, name: str, de
     if source.key == "hermes":
         probe = f"{file_path} {rel} {name} {desc}"
         if HERMES_PERSONAL_PATTERNS.search(probe):
-            return "personal-project", "Hermes skill 命中 Peter 项目/业务/知识库/电商/课程/视觉等定制关键词。"
+            return "personal-project", "Hermes skill 命中用户项目/业务/知识库/电商/课程/视觉等定制关键词。"
         return "generic-installed", "Hermes 通用能力库 skill，未命中个人项目关键词；保留在全量库，不进入个人库。"
     if source.key == "lark-agent":
         return "system-builtin", "Lark/Feishu 通用工具 skill，视为底层工具能力。"
@@ -533,7 +540,7 @@ def render_personal_page(collected: dict[str, tuple[AgentSource, list[SkillEntry
     ]
     parts.append("# 个人/项目 Skill 注册库\n\n")
     parts.append(
-        "本页只收录 Peter 自己创建、让 Agent 为项目定制、或明显服务于 Peter 项目/业务流程的 skill。"
+        "本页只收录 wiki owner 自己创建、让 Agent 为项目定制、或明显服务于 wiki owner 项目/业务流程的 skill。"
         "它是日常检索“以前有没有做过类似 skill”的优先入口。\n\n"
     )
     parts.append(
@@ -546,7 +553,7 @@ def render_personal_page(collected: dict[str, tuple[AgentSource, list[SkillEntry
         "- Codex 非 `.system` 本地 skill：视为个人/项目自定义。\n"
         "- OpenClaw workspace skill：视为项目自定义。\n"
         "- SealSeek workspace/default/customized/standalone/migration skill：视为个人/项目自定义；`skill_pool` 和 `active_skills` 不进入本页。\n"
-        "- Hermes skill：命中 Peter 项目、电商、视觉、课程、LLM Wiki、Sealseek/OpenClaw/玺承等关键词时进入本页；否则归入通用安装/不确定。\n"
+        "- Hermes skill：命中用户项目、电商、视觉、课程、LLM Wiki、Sealseek/OpenClaw/玺承等关键词时进入本页；否则归入通用安装/不确定。\n"
         "- Claude Code 官方 marketplace、Codex `.system`、Lark 通用工具 skill：作为系统/底层能力，只在全量库中保留。\n\n"
     )
     parts.append("## Agent 快速索引\n\n")
@@ -592,7 +599,7 @@ def update_index_pages(wiki_root: Path, today: str) -> list[Path]:
     main_index = wiki_root / "index.md"
     domain_index = wiki_root / "domains/AI Agent工程/index.md"
     registry_body = (
-        "- [[domains/AI Agent工程/90-Skill注册表/01-个人与项目Skill注册库|个人/项目 Skill 注册库]]：只收录 Peter 自己创建、让 Agent 为项目定制、或明显服务于 Peter 项目/业务流程的 skill，是日常检索“有没有类似 skill”的优先入口。\n"
+        "- [[domains/AI Agent工程/90-Skill注册表/01-个人与项目Skill注册库|个人/项目 Skill 注册库]]：只收录 wiki owner 自己创建、让 Agent 为项目定制、或明显服务于 wiki owner 项目/业务流程的 skill，是日常检索“有没有类似 skill”的优先入口。\n"
         "- [[domains/AI Agent工程/90-Skill注册表/02-跨Agent Skill注册库|跨 Agent Skill 注册库]]：统一检索 Codex、Hermes、Lark Agent、OpenClaw、SealSeek、Claude Code 的 skill，定位原始 `SKILL.md` 并判断复用或迁移可能。\n"
         "- [[domains/AI Agent工程/90-Skill注册表/03-Codex Skill注册页|Codex Skill 注册页]]：Codex 本地业务 skill 与系统 skill 的检索描述、输入方式、关键词和文件位置。\n"
         "- [[domains/AI Agent工程/90-Skill注册表/04-Hermes Skill注册页|Hermes Skill 注册页]]：Hermes 主 skill 目录的检索描述、输入方式、关键词和文件位置。\n"

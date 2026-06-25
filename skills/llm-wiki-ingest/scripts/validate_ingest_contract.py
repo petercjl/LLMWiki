@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 from pathlib import Path
 
@@ -98,7 +99,7 @@ def validate_coverage(notes_dir: Path, formal_pages: list[Path], errors: list[st
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--wiki-root", default="/Users/pechen/wiki")
+    parser.add_argument("--wiki-root", default=os.environ.get("WIKI_ROOT", str(Path.home() / "wiki")))
     parser.add_argument("--notes-dir", required=True)
     parser.add_argument("--raw", action="append", default=[])
     parser.add_argument("--formal", action="append", default=[])

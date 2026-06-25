@@ -8,7 +8,7 @@ Choose by source knowledge shape, not only file format.
 
 | Signal | Adapter |
 | --- | --- |
-| File is under `/Users/pechen/wiki/Clippings` or Obsidian Web Clipper metadata exists | `web-clipping.md` |
+| File is under `$WIKI_ROOT/Clippings` or Obsidian Web Clipper metadata exists | `web-clipping.md` |
 | Endpoint docs, SDK docs, API reference, auth/signature docs, model API console page | `api-docs.md` |
 | EPUB, PDF book, manuscript, long published book-like source | `book.md` |
 | Course transcript, meeting transcript, lecture, Feishu Minutes, ASR text, local audio/video course files | `transcript.md` |

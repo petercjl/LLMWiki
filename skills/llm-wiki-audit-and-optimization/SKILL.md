@@ -1,8 +1,6 @@
 ---
 name: llm-wiki-audit-and-optimization
 description: Audit and optimize an LLM Wiki's compile-routing-reasoning quality. Use after a wiki/domain/learning path is built, or when a question-answer result needs diagnosis against the wiki, to find whether issues come from compilation, routing, or reasoning and to patch the knowledge base.
-version: 1.1.1
-author: Hermes Agent
 license: MIT
 metadata:
   hermes:
@@ -80,7 +78,7 @@ Use when the user asks to audit a whole wiki, domain, or learning-path after it 
 
 Examples:
 
-- Audit `/Users/pechen/wiki/domains/品牌策略`.
+- Audit `$WIKI_ROOT/domains/品牌策略`.
 - Audit one learning path such as `brand-differentiation-perception-system`.
 - Review a newly ingested transcript set after formal pages were created.
 
@@ -270,10 +268,10 @@ This mode is mechanical and route-focused. It does not replace compile-quality r
 3. Run the shared route audit helper when available:
 
 ```bash
-python3 /Users/pechen/.codex/skills/.llmwiki-source/shared/scripts/wiki_cli_route_audit.py <target-page.md>
+python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_route_audit.py <target-page.md>
 ```
 
-4. If Obsidian CLI is unavailable or active vault does not match `/Users/pechen/wiki`, use the helper's degraded filesystem report and state that global Obsidian signals were not trusted.
+4. If Obsidian CLI is unavailable or active vault does not match `$WIKI_ROOT`, use the helper's degraded filesystem report and state that global Obsidian signals were not trusted.
 5. Inspect:
    - unresolved links
    - target backlinks
@@ -448,7 +446,7 @@ Before final reply:
 
 Whole-domain audit:
 
-> 请用 llm-wiki-audit-and-optimization 审查 `/Users/pechen/wiki/domains/品牌策略` 的编译和路由质量。
+> 请用 llm-wiki-audit-and-optimization 审查 `$WIKI_ROOT/domains/品牌策略` 的编译和路由质量。
 
 Question-answer audit:
 

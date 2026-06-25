@@ -16,8 +16,8 @@ When a normalized scrape JSON exists and category manuals are needed, use:
 
 ```bash
 python3 <skill>/scripts/api/compile_api_reference.py \
-  --input /Users/pechen/wiki/raw/api/<provider>/<full-scrape>.json \
-  --output-dir /Users/pechen/wiki/domains/<domain>/api/<provider>/reference \
+  --input $WIKI_ROOT/raw/api/<provider>/<full-scrape>.json \
+  --output-dir $WIKI_ROOT/domains/<domain>/api/<provider>/reference \
   --title-prefix "<Provider>" \
   --domain <domain> \
   --source "raw/api/<provider>/<full-scrape>.json"

@@ -1,6 +1,6 @@
 # Video Course Ingest Branch
 
-Use this reference when the source is a local video/audio course and Peter wants it in `/Users/pechen/wiki`.
+Use this reference when the source is a local video/audio course and the user wants it in `$WIKI_ROOT`.
 
 ## Main Line
 

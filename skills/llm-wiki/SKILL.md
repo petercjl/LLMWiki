@@ -1,8 +1,6 @@
 ---
 name: llm-wiki
 description: "Karpathy's LLM Wiki — build and maintain a persistent, interlinked markdown knowledge base. Ingest sources, query compiled knowledge, and lint for consistency."
-version: 2.0.0
-author: Hermes Agent
 license: MIT
 metadata:
   hermes:
@@ -86,7 +84,7 @@ cross-referenced by the agent.
 
 ## Memory-First Principle
 
-Peter's LLM Wiki is a personal memory system, not a source archive and not a
+The wiki owner's LLM Wiki is a personal memory system, not a source archive and not a
 course catalog. New knowledge should be classified by what it is about and how it
 will be reused, not by how it was acquired.
 
@@ -102,7 +100,7 @@ When adding or reorganizing knowledge:
 - Preserve old knowledge structures when they still have value. Use associative
   links, "related memory" sections, and source/package indexes before doing a
   destructive merge.
-- Ask Peter for confirmation when classification or merge choices are ambiguous,
+- Ask the user for confirmation when classification or merge choices are ambiguous,
   especially for broad domains such as ecommerce operations, tax/finance,
   brand, visual production, AI application development, and personal interests.
 - Use Chinese human-facing titles and index labels by default. English slugs may
@@ -236,7 +234,7 @@ When answering a user question from an existing wiki, do not simply read a user-
 Use the protocol in the source repo when available:
 
 ```bash
-python3 /Users/pechen/.codex/skills/.llmwiki-source/shared/scripts/wiki_cli_search.py "<user question>"
+python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_search.py "<user question>"
 ```
 
 If the script is unavailable, manually follow the same order:

@@ -15,7 +15,7 @@ Search existing pages before creating new ones.
 
 ## Placement
 
-Use Peter's one-vault, multi-domain structure:
+Use the user's one-vault, multi-domain structure:
 
 - `domains/电商运营/`: ecommerce operations. Classify platform-first: general methods under `01-通用电商方法/`, Taobao/Tmall under `02-淘宝天猫/`, JD under `03-京东/`, Pinduoduo/Douyin/Xiaohongshu under their platform areas, cross-border under `20-跨境电商/`, and ERP/API/tooling under `30-ERP与系统工具/`.
 - `domains/视觉制作/`: images, detail pages, visual production, AI image/video workflows.

@@ -1,13 +1,13 @@
 ---
 name: llm-wiki-ingest
-description: Unified and only LLM Wiki ingestion skill for Peter's /Users/pechen/wiki. Use for any source that should be compiled into the wiki, including Obsidian Clippings, webpages, books, EPUB/PDF, course transcripts, meeting transcripts, API docs, XMind files, spreadsheets, markdown docs, product/tool docs, PPT/courseware, and unknown source types. Enforces memory-first classification, fusion with existing knowledge, lossless knowledge-unit coverage, raw preservation, extraction notes, formal pages, index/log updates, Obsidian route audit, and audit handoff.
+description: Unified and only LLM Wiki ingestion skill for the user's $WIKI_ROOT. Use for any source that should be compiled into the wiki, including Obsidian Clippings, webpages, books, EPUB/PDF, course transcripts, meeting transcripts, API docs, XMind files, spreadsheets, markdown docs, product/tool docs, PPT/courseware, and unknown source types. Enforces memory-first classification, fusion with existing knowledge, lossless knowledge-unit coverage, raw preservation, extraction notes, formal pages, index/log updates, Obsidian route audit, and audit handoff.
 ---
 
 # LLM Wiki Ingest
 
 ## Purpose
 
-This is the single entry skill for compiling sources into Peter's LLM Wiki at `/Users/pechen/wiki`.
+This is the single entry skill for compiling sources into the wiki owner's LLM Wiki at `$WIKI_ROOT`.
 
 Legacy standalone entries are intentionally removed. If the user names
 `api-docs-wiki-ingest`, `wiki-clippings-ingest`, `book-to-llm-wiki`, or
@@ -15,7 +15,7 @@ Legacy standalone entries are intentionally removed. If the user names
 
 Use this skill instead of source-specific ingest skills when the user asks to:
 
-- process `/Users/pechen/wiki/Clippings`
+- process `$WIKI_ROOT/Clippings`
 - ingest webpages, product docs, API docs, books, transcripts, local audio/video courses, XMind, spreadsheets, reports, Markdown files, PDFs, EPUBs, or mixed sources
 - ingest PPT/courseware content as a source for durable knowledge
 - make a source "入脑"
@@ -26,11 +26,11 @@ Use this skill instead of source-specific ingest skills when the user asks to:
 
 Wiki ingestion is not summarization, abbreviation, or takeaway extraction.
 
-Wiki ingestion is also not source filing. Peter's wiki is a personal memory
+Wiki ingestion is also not source filing. The wiki owner's wiki is a personal memory
 system: new material must be absorbed into the existing knowledge structure
 whenever possible. A course, book, transcript, meeting, web clipping, or report
 is the acquisition path; the final formal knowledge belongs under the content
-domain where Peter will later look for it.
+domain where the user will later look for it.
 
 Every meaningful source unit must be preserved at the knowledge-unit level. A meaningful source unit can be a heading, paragraph claim, table row, code block, API field, example, case, formula, diagram meaning, image with information, XMind node, transcript micro-segment, Q&A point, limitation, caveat, decision rule, operational step, or pricing/parameter value.
 
@@ -50,7 +50,7 @@ Before planning formal pages, perform a classification and fusion gate.
 
 ### 0.1 Classify The Knowledge Domain
 
-Identify the durable content domain before deciding file paths. Peter's wiki is
+Identify the durable content domain before deciding file paths. The wiki owner's wiki is
 broad and may include, among others:
 
 - ecommerce operations, including platform-specific knowledge such as Taobao,
@@ -100,13 +100,13 @@ For every planned formal page, choose one disposition:
 - `source-package-only`: keep a source map, course map, or audit trail, but do
   not make it the main knowledge home.
 
-When the choice is ambiguous or would reorganize important knowledge, ask Peter
+When the choice is ambiguous or would reorganize important knowledge, ask the user
 to confirm the classification and merge plan before editing.
 
 ### 0.3 Human-Facing Chinese Names
 
 Use Chinese titles and Chinese index labels by default for formal knowledge
-pages, because Peter navigates and reviews the wiki in Chinese. English slugs
+pages, because the user navigates and reviews the wiki in Chinese. English slugs
 can remain in frontmatter (`slug`, `aliases`) or transitional filenames, but
 new or renamed human-facing knowledge should be Chinese-readable. Avoid
 creating a large English-only directory tree for Chinese knowledge.
@@ -119,7 +119,7 @@ directory English-only.
 When a folder or page belongs to an ordered learning/navigation sequence, add a
 numeric prefix to the filename, such as `01-基础概念/`,
 `02-业务模型/`, or `03-风险与例外.md`. The number is part of the
-navigation contract, not decoration: choose it so Peter can tell which file to
+navigation contract, not decoration: choose it so the user can tell which file to
 read first in Obsidian or any plain file browser.
 
 ### 0.4 Associative Fusion
@@ -135,7 +135,7 @@ it and connect the new durable page through:
   the new synthesis
 
 Use destructive merging only when two pages are genuinely duplicate theories and
-Peter has confirmed the merge.
+the user has confirmed the merge.
 
 ### 0.4.1 Case Library Layer
 
@@ -145,7 +145,7 @@ When a domain contains multiple reusable cases, create or update a domain case
 library/index layer, such as `domains/品牌策略/90-样本/`.
 
 A case library page should not replace the theory page. It should be a retrieval
-layer that helps Peter and agents answer "what case is this problem like?" Each
+layer that helps the user and agents answer "what case is this problem like?" Each
 case entry should point back to the relevant theory page and preserve source
 traceability.
 
@@ -174,13 +174,13 @@ pages; it should not become the only home of the knowledge.
 
 Before editing the wiki:
 
-1. Read `/Users/pechen/wiki/AGENTS.md`.
-2. Read `/Users/pechen/wiki/SCHEMA.md`.
-3. Read `/Users/pechen/wiki/index.md`.
-4. Read recent `/Users/pechen/wiki/log.md`.
+1. Read `$WIKI_ROOT/AGENTS.md`.
+2. Read `$WIKI_ROOT/SCHEMA.md`.
+3. Read `$WIKI_ROOT/index.md`.
+4. Read recent `$WIKI_ROOT/log.md`.
 5. Search existing wiki pages for source title, product names, concepts, APIs, brands, model IDs, and major keywords.
 6. When available, run Obsidian CLI search probes for source title and core concepts. Use `<LLMWiki repo>/shared/scripts/wiki_cli_search.py` or the commands in `<LLMWiki repo>/shared/references/obsidian-cli-protocol.md`.
-7. Run `git -C /Users/pechen/wiki status --short` and avoid reverting unrelated work.
+7. Run `git -C $WIKI_ROOT status --short` and avoid reverting unrelated work.
 
 If the task will create or modify more than 10 wiki files, present a short execution plan before editing unless the user already approved a batch run.
 
@@ -301,7 +301,7 @@ Do not create many thin pages. Do not create one giant page that prevents routin
 
 Formal pages must:
 
-- include YAML frontmatter matching `/Users/pechen/wiki/SCHEMA.md`
+- include YAML frontmatter matching `$WIKI_ROOT/SCHEMA.md`
 - cite raw source and extraction notes in `sources`
 - use `[[wikilinks]]`
 - preserve all meaningful source knowledge or link to coverage records
@@ -317,8 +317,8 @@ Read `references/formal-page-standards.md` before writing formal pages.
 Update:
 
 - domain/project/shared index where relevant
-- `/Users/pechen/wiki/index.md`
-- `/Users/pechen/wiki/log.md`
+- `$WIKI_ROOT/index.md`
+- `$WIKI_ROOT/log.md`
 
 Only delete a queue item such as a Clippings file after:
 
@@ -351,10 +351,10 @@ python3 <llm-wiki-audit-and-optimization-skill>/scripts/placeholder_scan.py <for
 3. Run Obsidian route audit when the shared LLMWiki repo is available:
 
 ```bash
-python3 /Users/pechen/.codex/skills/.llmwiki-source/shared/scripts/wiki_cli_route_audit.py <new-entry-page.md>
+python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_route_audit.py <new-entry-page.md>
 ```
 
-If the active Obsidian vault is not `/Users/pechen/wiki`, treat the script's degraded filesystem checks as partial route validation and say so.
+If the active Obsidian vault is not `$WIKI_ROOT`, treat the script's degraded filesystem checks as partial route validation and say so.
 
 4. `rg` representative source terms across formal pages.
 5. Verify every `formalized` source unit has a target page.

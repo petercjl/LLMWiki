@@ -5,7 +5,7 @@
 Default location for business API docs:
 
 ```text
-/Users/pechen/wiki/domains/电商运营/30-ERP与系统工具/<provider-slug>/
+$WIKI_ROOT/domains/电商运营/30-ERP与系统工具/<provider-slug>/
 ```
 
 For non-ecommerce APIs, choose the domain by purpose:
@@ -19,7 +19,7 @@ For non-ecommerce APIs, choose the domain by purpose:
 Raw sources:
 
 ```text
-/Users/pechen/wiki/raw/api/<provider-slug>/
+$WIKI_ROOT/raw/api/<provider-slug>/
 ```
 
 ## Recommended Formal Tree
@@ -53,7 +53,7 @@ queries/<provider-slug>-<business-task>.md
 
 ## Frontmatter
 
-Use `/Users/pechen/wiki/SCHEMA.md`.
+Use `$WIKI_ROOT/SCHEMA.md`.
 
 Typical API page:
 
@@ -75,6 +75,6 @@ Use `type: playbook` for task recipes and `type: query` for query pages.
 
 ## Index and Log
 
-Update `/Users/pechen/wiki/index.md` with all formal pages.
+Update `$WIKI_ROOT/index.md` with all formal pages.
 
-Append `/Users/pechen/wiki/log.md` with source, created/updated files, endpoint count, categories, auth status, and remaining gaps.
+Append `$WIKI_ROOT/log.md` with source, created/updated files, endpoint count, categories, auth status, and remaining gaps.
