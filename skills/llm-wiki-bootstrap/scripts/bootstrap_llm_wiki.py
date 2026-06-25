@@ -342,6 +342,21 @@ def init_git(wiki_root: Path, dry_run: bool) -> dict[str, object]:
     return {"status": "initialized" if (wiki_root / ".git").exists() else "failed"}
 
 
+def existing_wiki_blocker(wiki_root: Path, force: bool) -> str:
+    if force or not wiki_root.exists():
+        return ""
+    try:
+        has_content = any(wiki_root.iterdir())
+    except OSError as exc:
+        return f"Cannot inspect existing wiki root {wiki_root}: {exc}"
+    if has_content:
+        return (
+            f"Refusing to initialize into non-empty wiki root {wiki_root}. "
+            "Choose an empty directory or rerun with --force after explicit user confirmation."
+        )
+    return ""
+
+
 def install_hints(os_name: str, package_managers: list[str]) -> list[str]:
     hints: list[str] = []
     if os_name == "macos":
@@ -435,6 +450,11 @@ def main() -> int:
     wiki_root = Path(summary["wiki_root"])
     cfg_paths = [Path(p) for p in summary["config_paths"]]
     dry_run = bool(args.dry_run)
+    blocker = existing_wiki_blocker(wiki_root, args.force)
+    if blocker:
+        summary["error"] = blocker
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 2
     if not dry_run:
         wiki_root.mkdir(parents=True, exist_ok=True)
 

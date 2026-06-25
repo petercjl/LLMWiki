@@ -18,9 +18,10 @@ This skill must support macOS, Windows, and Linux. Never assume Homebrew, zsh, U
 3. Explain missing prerequisites and attempt safe installation only when the package manager is obvious and user consent is available.
 4. Propose configuration values, especially `WIKI_ROOT` and `LLMWIKI_SKILL_SOURCE`.
 5. Ask the user to confirm or adjust the wiki path and initial knowledge domains.
-6. Run `scripts/bootstrap_llm_wiki.py` with the confirmed values.
-7. Review the generated summary, degraded capabilities, and next actions.
-8. Verify with filesystem checks, Git status, and Obsidian CLI checks when available.
+6. Before writing, ensure the target wiki root is absent or empty. If it is non-empty, stop and ask for a different path or explicit overwrite confirmation.
+7. Run `scripts/bootstrap_llm_wiki.py` with the confirmed values.
+8. Review the generated summary, degraded capabilities, and next actions.
+9. Verify with filesystem checks, Git status, and Obsidian CLI checks when available.
 
 If a branch fails, fix the branch and return to the next main-flow step. Do not turn this skill into a general package manager or Obsidian support workflow.
 
@@ -108,7 +109,7 @@ Tell the user these are starting points. Future ingest runs may add, split, or m
 
 ## Safety
 
-- Never overwrite an existing non-empty wiki root without explicit confirmation.
+- Never overwrite an existing non-empty wiki root without explicit confirmation. The script should refuse non-empty targets unless `--force` is used after confirmation.
 - If `index.md`, `SCHEMA.md`, or `AGENTS.md` already exists, update only when the user confirms.
 - Initialize Git when absent. Do not commit unless the user asked for a committed bootstrap or the setup is clearly a new empty repo.
 - Do not install software silently. Package installs and shell profile edits need explicit user confirmation.
