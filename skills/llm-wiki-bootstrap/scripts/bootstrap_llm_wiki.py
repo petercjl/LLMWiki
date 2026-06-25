@@ -578,6 +578,23 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
     }
 
 
+def attach_post_register_route(summary: dict[str, object], wiki_root: Path, wait_for_open: bool) -> None:
+    if wait_for_open:
+        time.sleep(2)
+    cli = detect_obsidian_cli()
+    route = obsidian_route_status(wiki_root, cli)
+    summary["post_register_route"] = {
+        "obsidian_cli": cli,
+        "obsidian_route": route,
+    }
+    register = summary.get("obsidian_register", {})
+    if isinstance(register, dict) and register.get("registered") and not route.get("trusted"):
+        degraded = summary.setdefault("degraded", [])
+        message = "Obsidian vault registered/opened, but CLI route does not currently point to WIKI_ROOT"
+        if isinstance(degraded, list) and message not in degraded:
+            degraded.append(message)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Bootstrap an LLM Wiki vault.")
     parser.add_argument("--wiki-root", help="Target wiki root. Defaults to WIKI_ROOT or ~/wiki.")
@@ -612,6 +629,7 @@ def main() -> int:
             summary["obsidian_register"] = {"requested": False, "reason": "Skipped by --skip-obsidian-register"}
         else:
             summary["obsidian_register"] = register_obsidian_vault(wiki_root, str(summary["tools"]["os"]), args.open_obsidian, dry_run)
+            attach_post_register_route(summary, wiki_root, args.open_obsidian and not dry_run)
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
 
@@ -632,6 +650,7 @@ def main() -> int:
         summary["obsidian_register"] = {"requested": False, "reason": "Skipped by --skip-obsidian-register"}
     else:
         summary["obsidian_register"] = register_obsidian_vault(wiki_root, str(summary["tools"]["os"]), args.open_obsidian, dry_run)
+        attach_post_register_route(summary, wiki_root, args.open_obsidian and not dry_run)
 
     if args.json:
         print(json.dumps(summary, ensure_ascii=False, indent=2))

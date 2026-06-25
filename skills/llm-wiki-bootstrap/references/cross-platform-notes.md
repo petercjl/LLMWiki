@@ -42,6 +42,8 @@ The bootstrap script should register real setup vaults in Obsidian automatically
 
 On macOS, registry writes are only reliable when Obsidian is not running. A running Obsidian process can save its in-memory vault list over the updated `obsidian.json`. Real setup should close Obsidian, update the registry, mark the new vault as open, and restart Obsidian. Isolated tests using `OBSIDIAN_CONFIG_PATH` must not close the user's real Obsidian.
 
+Registration and CLI routing are separate checks. A vault can be present in the Obsidian UI and opened successfully while `obsidian vault info=path` still reports a previously active vault. After registration, check `post_register_route.obsidian_route.trusted`; if it is false, keep the setup status usable but mark route audit degraded until the CLI route points to `WIKI_ROOT`.
+
 ## Installation Branches
 
 macOS:

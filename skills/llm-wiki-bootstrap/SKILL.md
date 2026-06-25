@@ -140,7 +140,8 @@ After bootstrap, verify:
 - `obsidian_register.registered` is true for real setup, unless the run explicitly used `--skip-obsidian-register`.
 - On macOS real setup, `obsidian_register.obsidian_quit.quit` is true before registry write, and the Obsidian UI opens to the new vault when `--open-obsidian` is used.
 - Obsidian CLI is a verified CLI command, not merely an executable named `obsidian`.
-- `tools.obsidian_route.trusted` is true, or the setup summary clearly marks route audit as degraded because the active/registered Obsidian vault does not match `WIKI_ROOT`.
+- Treat Obsidian registry/UI success separately from CLI route readiness. `obsidian_register.registered` proves the vault was added to Obsidian; it does not prove the CLI currently targets it.
+- After registration, inspect `post_register_route.obsidian_route.trusted`. It must be true for full route-audit readiness. If false, the setup is usable in Obsidian but route audit is degraded, and the summary must say the CLI route does not currently point to `WIKI_ROOT`.
 - The final response lists exact paths, installed/missing tools, and next commands for the user's OS.
 - For smoke tests, demos, and dry runs, verify negatively that the real `~/.llmwiki/config.*` and real `~/wiki` were not created or modified.
 
