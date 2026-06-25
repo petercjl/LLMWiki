@@ -7,10 +7,12 @@ Date: 2026-06-12
 The active LLM Wiki package now publishes five skills:
 
 - `llm-wiki`
+- `llm-wiki-bootstrap`
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
 - `llm-wiki-recompile-runner`
-- `ai-agent-skill-registry-sync`
+
+`ai-agent-skill-registry-sync` is no longer published from this repository. It is a separate agent-operations utility, not part of the LLM Wiki runtime package.
 
 ## Merged Legacy Entries
 

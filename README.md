@@ -16,6 +16,9 @@ Published skills are under `skills/`:
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
 - `llm-wiki-recompile-runner`
+
+Non-published entries:
+
 - `ai-agent-skill-registry-sync`
 
 Standalone legacy entries have been merged into `llm-wiki-ingest` adapters and are not published:

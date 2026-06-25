@@ -9,12 +9,16 @@ git@github.com:petercjl/LLMWiki.git
 Do not copy legacy standalone entries. Install only the published directories under `skills/`:
 
 - `llm-wiki`
+- `llm-wiki-bootstrap`
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
 - `llm-wiki-recompile-runner`
-- `ai-agent-skill-registry-sync`
 
 Removed standalone entries:
+
+- `ai-agent-skill-registry-sync`
+
+Merged legacy entries:
 
 - `api-docs-wiki-ingest`
 - `wiki-clippings-ingest`

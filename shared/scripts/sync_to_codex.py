@@ -16,9 +16,9 @@ PUBLISHED = {
     "llm-wiki-ingest",
     "llm-wiki-audit-and-optimization",
     "llm-wiki-recompile-runner",
-    "ai-agent-skill-registry-sync",
 }
 OBSOLETE = {
+    "ai-agent-skill-registry-sync",
     "api-docs-wiki-ingest",
     "wiki-clippings-ingest",
     "book-to-llm-wiki",
