@@ -38,6 +38,8 @@ If the CLI is absent, the wiki can still be initialized and edited through the f
 
 Do not treat a command as a valid Obsidian CLI merely because `obsidian` exists on PATH. Verify that `obsidian --help` or `obsidian-cli --help` prints the expected command surface, including route-audit commands such as `backlinks`, `links`, `outline`, and `vault info=path`.
 
+The bootstrap script should register real setup vaults in Obsidian automatically. It writes the platform Obsidian registry config and may open `obsidian://open?vault=<vault-id>` when `--open-obsidian` is requested. For smoke tests and demos, pass `--skip-obsidian-register` or set `OBSIDIAN_CONFIG_PATH` to an isolated temporary file.
+
 ## Installation Branches
 
 macOS:

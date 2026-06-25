@@ -20,8 +20,9 @@ This skill must support macOS, Windows, and Linux. Never assume Homebrew, zsh, U
 5. Ask the user to confirm or adjust the wiki path and initial knowledge domains.
 6. Before writing, ensure the target wiki root is absent or empty. If it is non-empty, stop and ask for a different path or explicit overwrite confirmation.
 7. Run `scripts/bootstrap_llm_wiki.py` with the confirmed values.
-8. Review the generated summary, degraded capabilities, and next actions.
-9. Verify with filesystem checks, Git status, and Obsidian CLI checks when available.
+8. Register the new vault in Obsidian automatically when Obsidian App is available. Open the vault with `--open-obsidian` when the user expects to see it immediately.
+9. Review the generated summary, degraded capabilities, and next actions.
+10. Verify with filesystem checks, Git status, Obsidian registration, and Obsidian CLI checks when available.
 
 If a branch fails, fix the branch and return to the next main-flow step. Do not turn this skill into a general package manager or Obsidian support workflow.
 
@@ -31,7 +32,7 @@ Use the bootstrap script for deterministic work:
 
 ```bash
 python3 <skill-dir>/scripts/bootstrap_llm_wiki.py --check-only
-python3 <skill-dir>/scripts/bootstrap_llm_wiki.py --wiki-root "$WIKI_ROOT" --domain "AI Agent工程" --domain "业务与运营"
+python3 <skill-dir>/scripts/bootstrap_llm_wiki.py --wiki-root "$WIKI_ROOT" --domain "AI Agent工程" --domain "业务与运营" --open-obsidian
 ```
 
 For smoke tests, demos, or any request that must not write to the user's home config, always pass both a temporary `--wiki-root` and a temporary `--config-path`:
@@ -47,6 +48,7 @@ python3 <skill-dir>/scripts/bootstrap_llm_wiki.py \
   --config-path "/tmp/llm-wiki-test/config.env" \
   --domain "测试领域" \
   --no-git \
+  --skip-obsidian-register \
   --json
 ```
 
@@ -58,6 +60,14 @@ py -3 <skill-dir>\scripts\bootstrap_llm_wiki.py --wiki-root "$env:USERPROFILE\wi
 ```
 
 The script creates files but does not edit shell profiles automatically. If the user wants persistent environment loading, show the platform-specific snippet from the script output and ask before changing profile files.
+
+The script registers the initialized vault in Obsidian by default by updating the platform Obsidian registry file. Use `--skip-obsidian-register` only for smoke tests, demos, or other runs that must not modify the user's Obsidian vault list. Use `--open-obsidian` for real setup when the user expects the new vault to appear/open immediately.
+
+If a vault was already created but is missing from Obsidian, use register-only mode instead of reinitializing files:
+
+```bash
+python3 <skill-dir>/scripts/bootstrap_llm_wiki.py --wiki-root "<existing-vault-path>" --register-only --open-obsidian
+```
 
 ## Configuration Contract
 
@@ -124,6 +134,7 @@ After bootstrap, verify:
 - `AGENTS.md`, `SCHEMA.md`, `index.md`, and `log.md` exist.
 - every requested domain has `domains/<domain>/index.md`.
 - Git status is understandable.
+- `obsidian_register.registered` is true for real setup, unless the run explicitly used `--skip-obsidian-register`.
 - Obsidian CLI is a verified CLI command, not merely an executable named `obsidian`.
 - `tools.obsidian_route.trusted` is true, or the setup summary clearly marks route audit as degraded because the active/registered Obsidian vault does not match `WIKI_ROOT`.
 - The final response lists exact paths, installed/missing tools, and next commands for the user's OS.
@@ -134,4 +145,4 @@ After bootstrap, verify:
 - If Python is missing, do not attempt bootstrap with shell-only fragments. Tell the user Python 3 is required and provide platform-specific installation options.
 - If the user is on Windows and paths contain spaces, quote every path in examples and prefer PowerShell over cmd.
 - If Obsidian App is installed but CLI is missing, create the wiki and config anyway, then mark route audit unavailable until CLI is installed.
-- If the user asks for a temporary test, demo, or dry run, never allow the script to default to `~/.llmwiki/config.*`; provide `--config-path` inside the temporary directory.
+- If the user asks for a temporary test, demo, or dry run, never allow the script to default to `~/.llmwiki/config.*`; provide `--config-path` inside the temporary directory and pass `--skip-obsidian-register`.

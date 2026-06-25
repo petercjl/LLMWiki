@@ -5,11 +5,14 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import platform
 import shutil
 import subprocess
+import time
+import webbrowser
 from pathlib import Path
 
 
@@ -121,6 +124,74 @@ def obsidian_route_status(wiki: Path, cli: dict[str, object]) -> dict[str, objec
         "target_wiki_path": str(wiki),
         "error": err if code else "",
     }
+
+
+def obsidian_config_candidates(os_name: str) -> list[Path]:
+    override = os.environ.get("OBSIDIAN_CONFIG_PATH")
+    if override:
+        return [Path(override).expanduser()]
+    home = Path.home()
+    if os_name == "macos":
+        return [home / "Library/Application Support/obsidian/obsidian.json"]
+    if os_name == "windows":
+        bases = [os.environ.get("APPDATA"), os.environ.get("LOCALAPPDATA")]
+        return [Path(base) / "Obsidian/obsidian.json" for base in bases if base]
+    return [
+        home / ".config/obsidian/obsidian.json",
+        home / ".var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json",
+    ]
+
+
+def vault_id_for_path(wiki: Path) -> str:
+    return hashlib.sha256(str(wiki).encode("utf-8")).hexdigest()[:16]
+
+
+def register_obsidian_vault(wiki: Path, os_name: str, open_obsidian: bool, dry_run: bool) -> dict[str, object]:
+    config_path = obsidian_config_candidates(os_name)[0]
+    vault_id = vault_id_for_path(wiki)
+    result: dict[str, object] = {
+        "requested": True,
+        "config_path": str(config_path),
+        "vault_id": vault_id,
+        "vault_path": str(wiki),
+        "registered": False,
+        "opened": False,
+    }
+    if dry_run:
+        result["dry_run"] = True
+        return result
+
+    data: dict[str, object] = {}
+    if config_path.exists():
+        try:
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            result["error"] = f"Cannot parse Obsidian config: {exc}"
+            return result
+    vaults = data.setdefault("vaults", {})
+    if not isinstance(vaults, dict):
+        result["error"] = "Obsidian config field `vaults` is not an object."
+        return result
+    existing_id = ""
+    for key, info in vaults.items():
+        if isinstance(info, dict) and Path(str(info.get("path", ""))).expanduser().resolve() == wiki:
+            existing_id = key
+            break
+    vault_id = existing_id or vault_id
+    vaults[vault_id] = {
+        "path": str(wiki),
+        "ts": int(time.time() * 1000),
+        "open": True,
+    }
+    data["cli"] = True
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    result["registered"] = True
+    result["vault_id"] = vault_id
+
+    if open_obsidian:
+        result["opened"] = bool(webbrowser.open(f"obsidian://open?vault={vault_id}"))
+    return result
 
 
 def detect_package_managers(os_name: str) -> list[str]:
@@ -439,6 +510,9 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Show planned writes without writing files.")
     parser.add_argument("--force", action="store_true", help="Overwrite existing bootstrap files.")
     parser.add_argument("--no-git", action="store_true", help="Do not initialize Git.")
+    parser.add_argument("--skip-obsidian-register", action="store_true", help="Do not register the new vault in Obsidian.")
+    parser.add_argument("--open-obsidian", action="store_true", help="Open the registered vault in Obsidian after bootstrap.")
+    parser.add_argument("--register-only", action="store_true", help="Only register an existing wiki root in Obsidian.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON summary.")
     args = parser.parse_args()
 
@@ -450,6 +524,18 @@ def main() -> int:
     wiki_root = Path(summary["wiki_root"])
     cfg_paths = [Path(p) for p in summary["config_paths"]]
     dry_run = bool(args.dry_run)
+    if args.register_only:
+        if not wiki_root.is_dir():
+            summary["error"] = f"Cannot register missing wiki root {wiki_root}."
+            print(json.dumps(summary, ensure_ascii=False, indent=2))
+            return 2
+        if args.skip_obsidian_register:
+            summary["obsidian_register"] = {"requested": False, "reason": "Skipped by --skip-obsidian-register"}
+        else:
+            summary["obsidian_register"] = register_obsidian_vault(wiki_root, str(summary["tools"]["os"]), args.open_obsidian, dry_run)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
+
     blocker = existing_wiki_blocker(wiki_root, args.force)
     if blocker:
         summary["error"] = blocker
@@ -461,6 +547,10 @@ def main() -> int:
     summary["config_written"] = write_config_files(cfg_paths, summary["config"], args.force, dry_run)
     summary["wiki_writes"] = create_wiki(wiki_root, summary["domains"], args.force, dry_run)
     summary["git"] = {"status": "skipped"} if args.no_git else init_git(wiki_root, dry_run)
+    if args.skip_obsidian_register:
+        summary["obsidian_register"] = {"requested": False, "reason": "Skipped by --skip-obsidian-register"}
+    else:
+        summary["obsidian_register"] = register_obsidian_vault(wiki_root, str(summary["tools"]["os"]), args.open_obsidian, dry_run)
 
     if args.json:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
