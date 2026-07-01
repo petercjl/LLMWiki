@@ -166,6 +166,8 @@ Examples:
 4. **Route audit**
    Check whether an Agent can find the right knowledge:
    - Does the main/domain index show a clear map?
+   - Does a `queries/` entry page exist for recurring tasks, multi-page topics,
+     diagnostics, planning workflows, generation workflows, or skill-creation use cases?
    - Are learning paths ordered and readable?
    - Are module boundaries clear?
    - Are chapter titles human-readable and problem-oriented?
@@ -279,9 +281,11 @@ python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_route_audit.py <target-pag
    - outgoing wikilinks
    - outline availability
    - whether target appears in relevant `index.md`, `queries/`, or Agent usage template pages
+   - whether recurring task topics have a query entry page with trigger phrases,
+     an ordered reading list, boundaries, and standard output steps
 6. Classify route issues:
    - P0: target has no route from index/query/template or is a shell/thin page
-   - P1: target is reachable but lacks outgoing links, usage template, or clear outline
+   - P1: target is reachable but lacks outgoing links, query entry, usage template, or clear outline
    - P2: tag/property/index wording could improve discovery
 7. Recommend or patch route fixes when requested.
 
@@ -295,6 +299,7 @@ Check:
 - Extraction notes exist.
 - Formal pages exist.
 - Index/log updated.
+- Query entry created/updated when the knowledge supports recurring Agent use, or a no-query reason is recorded.
 - Coverage/omission audit exists.
 - Human-facing titles are readable.
 - Important evidence anchors are integrated into reasoning, not appended as fact lists.
@@ -315,6 +320,7 @@ Check:
 - Domain boundary drift.
 - Outdated pages.
 - Stale Agent-use templates.
+- Missing query entry pages for high-value recurring task topics.
 - Raw sources that never made it into formal pages.
 
 This mode overlaps with general `llm-wiki` linting but is more focused on usefulness for AI answer generation, not just structural hygiene.

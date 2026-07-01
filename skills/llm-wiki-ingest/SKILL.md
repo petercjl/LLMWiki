@@ -297,6 +297,33 @@ Choose artifact types:
 
 Do not create many thin pages. Do not create one giant page that prevents routing. Use as many pages as needed for complete, coherent, Agent-usable knowledge.
 
+### 5.1 Query Entry Gate
+
+Every ingest must decide whether the new or updated knowledge needs a `queries/`
+entry page. This is the Agent routing layer: future users should not need to
+remember how many formal markdown files were created for a topic.
+
+Create or update a query entry page when any of these are true:
+
+- The knowledge supports a recurring task, diagnosis, planning workflow,
+  generation workflow, comparison, troubleshooting flow, or skill creation.
+- The formal knowledge spans more than one page or directory.
+- A future Agent would need a specific reading order, boundary conditions, or
+  output structure to use the knowledge correctly.
+- The topic is likely to be invoked by natural language rather than by an exact
+  page title.
+
+The query entry page should be small and operational. It should contain:
+
+- trigger phrases / when to use it
+- ordered reading list of core pages
+- optional pages to read only in specific branches
+- answer or execution boundaries
+- standard diagnostic / planning / output steps
+
+If no query page is needed, record `query-entry: not-needed` plus the reason in
+the formal page plan or audit handoff. Do not silently omit the decision.
+
 ### 6. Formal Compilation
 
 Formal pages must:
@@ -317,6 +344,7 @@ Read `references/formal-page-standards.md` before writing formal pages.
 Update:
 
 - domain/project/shared index where relevant
+- `queries/` entry page when the Query Entry Gate says one is needed
 - `$WIKI_ROOT/index.md`
 - `$WIKI_ROOT/log.md`
 
@@ -326,6 +354,7 @@ Only delete a queue item such as a Clippings file after:
 - formal knowledge exists or source is explicitly raw-only
 - coverage/omission record exists
 - index/log are updated
+- query entry is created/updated, or the no-query reason is recorded
 
 ### 8. Audit Handoff
 
@@ -396,6 +425,7 @@ End with:
 - raw files created/moved
 - extraction notes created
 - formal pages created/updated
+- query entries created/updated, or no-query reason
 - index/log updates
 - coverage result
 - validation result

@@ -172,7 +172,10 @@ When reorganizing an existing source-shaped knowledge path, follow this pattern:
    case library or template index such as `90-样本/`, grouped by problem type
    and linked back to theory pages.
 8. Update all routes: patch domain indexes, root index, query pages, schema or
-   agent notes, and legacy indexes.
+   agent notes, and legacy indexes. For any recurring task, diagnostic workflow,
+   planning workflow, generation workflow, or multi-page topic, create or update
+   a `queries/` entry page so future Agents can start from one route card instead
+   of guessing every related file.
 9. Verify mechanically: check missing links, old path residues, placeholder
    status, and representative page quality.
 10. Feed the lesson back into skills before publishing the skill repo.
@@ -211,6 +214,7 @@ After each learning path repair:
      exists when the source contains many cases
    - duplicate source-shaped pages have been merged or clearly marked as provenance
    - old path residues and stale links are removed from indexes and query pages
+   - recurring task topics have a query entry page, or the no-query reason is recorded
    - downstream agents can route to the path
 
 If the path still has shell pages, do not proceed to downstream business skill work.
