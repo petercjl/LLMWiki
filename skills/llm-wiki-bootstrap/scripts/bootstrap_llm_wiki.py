@@ -8,9 +8,12 @@ import datetime as dt
 import json
 import os
 import platform
+import struct
 import shutil
 import subprocess
 import sys
+import tempfile
+import wave
 from pathlib import Path
 
 
@@ -41,9 +44,9 @@ def command_exists(command: str) -> bool:
     return shutil.which(command) is not None
 
 
-def run(cmd: list[str]) -> tuple[int, str, str]:
+def run(cmd: list[str], timeout: int = 20) -> tuple[int, str, str]:
     try:
-        proc = subprocess.run(cmd, text=True, capture_output=True, timeout=20)
+        proc = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout)
     except (OSError, subprocess.TimeoutExpired) as exc:
         return 127, "", str(exc)
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
@@ -96,8 +99,25 @@ def detect_obsidian_app(os_name: str) -> dict[str, object]:
             home / ".local/bin/obsidian",
             home / "Applications/Obsidian.AppImage",
         ])
-    found = [str(path) for path in candidates if path.exists()]
-    return {"installed": bool(found) or command_exists("obsidian"), "paths": found}
+    found: list[str] = []
+    for path in candidates:
+        value = str(path)
+        if path.exists() and value not in found:
+            found.append(value)
+    versions: list[dict[str, str]] = []
+    if os_name == "windows":
+        for path in found:
+            command = (
+                f"(Get-Item -LiteralPath '{path.replace("'", "''")}')."
+                "VersionInfo.ProductVersion"
+            )
+            code, out, _ = run(["powershell.exe", "-NoProfile", "-Command", command])
+            versions.append({"path": path, "version": out if code == 0 else ""})
+    return {
+        "installed": bool(found) or command_exists("obsidian"),
+        "paths": found,
+        "versions": versions,
+    }
 
 
 def detect_obsidian_cli(os_name: str, app: dict[str, object] | None = None) -> dict[str, object]:
@@ -227,11 +247,23 @@ def default_skill_source() -> str:
     return ""
 
 
-def build_config(wiki_root: Path, os_name: str) -> dict[str, str]:
+def build_config(
+    wiki_root: Path,
+    os_name: str,
+    media: dict[str, object] | None = None,
+) -> dict[str, str]:
     config = {
         "WIKI_ROOT": str(wiki_root),
         "LLMWIKI_SKILL_SOURCE": default_skill_source(),
     }
+    media = media or {}
+    primary_bin = str(media.get("primary_bin") or "")
+    model = media.get("asr_model") or {}
+    model_path = str(model.get("path") or "") if isinstance(model, dict) else ""
+    if primary_bin:
+        config["LLMWIKI_MEDIA_BIN"] = primary_bin
+    if model_path:
+        config["WHISPER_MODEL"] = model_path
     if os_name == "windows":
         config.update({
             key: value.replace("/", "\\") if value else value
@@ -418,6 +450,21 @@ def existing_wiki_blocker(wiki_root: Path, force: bool) -> str:
     return ""
 
 
+def target_status(wiki_root: Path) -> dict[str, object]:
+    if not wiki_root.exists():
+        return {"exists": False, "empty": True, "entries": [], "error": ""}
+    try:
+        entries = sorted(path.name for path in wiki_root.iterdir())
+    except OSError as exc:
+        return {"exists": True, "empty": False, "entries": [], "error": str(exc)}
+    return {
+        "exists": True,
+        "empty": not entries,
+        "entries": entries,
+        "error": "",
+    }
+
+
 def registered_obsidian_vault_paths(os_name: str) -> list[Path]:
     paths: list[Path] = []
     for config_path in obsidian_config_candidates(os_name):
@@ -453,11 +500,81 @@ def nested_vault_blocker(wiki_root: Path, os_name: str, force: bool) -> str:
     return ""
 
 
-def probe_tool(command_names: list[str], version_args: list[str]) -> dict[str, object]:
+def media_search_dirs(os_name: str, explicit: str = "") -> list[Path]:
+    candidates: list[Path] = []
+    for raw in [explicit, os.environ.get("LLMWIKI_MEDIA_BIN", "")]:
+        if raw:
+            candidates.append(Path(raw).expanduser())
+    if os_name == "windows":
+        drive = os.environ.get("SystemDrive", "C:")
+        candidates.extend([
+            Path(f"{drive}\\msys64\\clangarm64\\bin"),
+            Path(f"{drive}\\msys64\\mingw64\\bin"),
+            user_home() / "msys64/clangarm64/bin",
+            user_home() / "msys64/mingw64/bin",
+        ])
+    result: list[Path] = []
+    for path in candidates:
+        try:
+            resolved = path.resolve()
+        except OSError:
+            resolved = path
+        if resolved.is_dir() and resolved not in result:
+            result.append(resolved)
+    return result
+
+
+def find_executable(command_names: list[str], search_dirs: list[Path]) -> str:
     for command in command_names:
         path = shutil.which(command)
-        if not path:
-            continue
+        if path:
+            return path
+    suffixes = [""] if detect_os() != "windows" else [".exe", ".com", ".cmd", ""]
+    for directory in search_dirs:
+        for command in command_names:
+            for suffix in suffixes:
+                candidate = directory / (command if Path(command).suffix else f"{command}{suffix}")
+                if candidate.is_file():
+                    return str(candidate)
+    return ""
+
+
+def binary_architecture(path: str) -> str:
+    try:
+        with Path(path).open("rb") as handle:
+            if handle.read(2) != b"MZ":
+                return ""
+            handle.seek(0x3C)
+            pe_offset = struct.unpack("<I", handle.read(4))[0]
+            handle.seek(pe_offset)
+            if handle.read(4) != b"PE\x00\x00":
+                return ""
+            machine = struct.unpack("<H", handle.read(2))[0]
+    except (OSError, struct.error):
+        return ""
+    return {
+        0x014C: "x86",
+        0x8664: "x64",
+        0xAA64: "ARM64",
+    }.get(machine, f"unknown-0x{machine:04x}")
+
+
+def normalize_architecture(value: str) -> str:
+    normalized = value.strip().lower().replace("_", "").replace("-", "")
+    return {
+        "amd64": "x64",
+        "x8664": "x64",
+        "aarch64": "arm64",
+    }.get(normalized, normalized)
+
+
+def probe_tool(
+    command_names: list[str],
+    version_args: list[str],
+    search_dirs: list[Path] | None = None,
+) -> dict[str, object]:
+    path = find_executable(command_names, search_dirs or [])
+    if path:
         code, out, err = run([path, *version_args])
         text = out or err
         return {
@@ -465,15 +582,86 @@ def probe_tool(command_names: list[str], version_args: list[str]) -> dict[str, o
             "command": path,
             "version": text.splitlines()[0] if text else "",
             "exit_code": code,
+            "stderr": err[-500:] if err else "",
+            "binary_architecture": binary_architecture(path),
         }
     return {"installed": False, "command": "", "version": ""}
 
 
-def detect_media_toolchain() -> dict[str, object]:
-    ffmpeg = probe_tool(["ffmpeg"], ["-version"])
-    ffprobe = probe_tool(["ffprobe"], ["-version"])
-    whisper = probe_tool(["whisper-cli", "whisper.cpp", "whisper-cpp"], ["--help"])
-    tesseract = probe_tool(["tesseract"], ["--version"])
+def resolve_whisper_model(explicit: str = "") -> dict[str, object]:
+    candidates: list[Path] = []
+    for raw in [explicit, os.environ.get("WHISPER_MODEL", "")]:
+        if raw:
+            candidates.append(Path(raw).expanduser())
+    candidates.extend([
+        user_home() / "whisper-models/ggml-small.bin",
+        user_home() / ".cache/whisper/ggml-small.bin",
+    ])
+    seen: list[str] = []
+    for candidate in candidates:
+        path = candidate.resolve()
+        if str(path) in seen:
+            continue
+        seen.append(str(path))
+        if path.is_file() and path.stat().st_size > 0:
+            return {
+                "configured": True,
+                "path": str(path),
+                "size": path.stat().st_size,
+                "source": "argument/environment/common-location",
+            }
+    return {
+        "configured": False,
+        "path": str(candidates[0].resolve()) if candidates else "",
+        "size": 0,
+        "searched": seen,
+    }
+
+
+def whisper_canary(command: str, model_path: str) -> dict[str, object]:
+    if not command or not model_path:
+        return {"requested": True, "passed": False, "error": "Whisper executable or model is missing."}
+    with tempfile.TemporaryDirectory(prefix="llmwiki-whisper-canary-") as td:
+        root = Path(td)
+        audio = root / "silence.wav"
+        output_base = root / "result"
+        with wave.open(str(audio), "wb") as wav:
+            wav.setnchannels(1)
+            wav.setsampwidth(2)
+            wav.setframerate(16000)
+            wav.writeframes(b"\x00\x00" * 16000)
+        code, out, err = run([
+            command,
+            "-m", model_path,
+            "-f", str(audio),
+            "-l", "zh",
+            "-otxt",
+            "-of", str(output_base),
+            "-nt",
+        ], timeout=180)
+        output_file = output_base.with_suffix(".txt")
+        return {
+            "requested": True,
+            "passed": code == 0 and output_file.exists(),
+            "exit_code": code,
+            "output_created": output_file.exists(),
+            "stdout_tail": out[-500:],
+            "stderr_tail": err[-500:],
+        }
+
+
+def detect_media_toolchain(
+    os_name: str | None = None,
+    explicit_media_bin: str = "",
+    explicit_model: str = "",
+    verify_media: bool = False,
+) -> dict[str, object]:
+    os_name = os_name or detect_os()
+    search_dirs = media_search_dirs(os_name, explicit_media_bin)
+    ffmpeg = probe_tool(["ffmpeg"], ["-version"], search_dirs)
+    ffprobe = probe_tool(["ffprobe"], ["-version"], search_dirs)
+    whisper = probe_tool(["whisper-cli", "whisper.cpp", "whisper-cpp"], ["--version"], search_dirs)
+    tesseract = probe_tool(["tesseract"], ["--version"], search_dirs)
     languages: list[str] = []
     if tesseract.get("installed") and tesseract.get("command"):
         code, out, _ = run([str(tesseract["command"]), "--list-langs"])
@@ -481,21 +669,61 @@ def detect_media_toolchain() -> dict[str, object]:
             languages = [line.strip() for line in out.splitlines()[1:] if line.strip()]
     tesseract["languages"] = languages
     tesseract["required_languages_ready"] = all(lang in languages for lang in ["chi_sim", "eng"])
-    imagemagick = probe_tool(["magick"], ["-version"])
+    imagemagick = probe_tool(["magick"], ["-version"], search_dirs)
+    model = resolve_whisper_model(explicit_model)
+    canary = (
+        whisper_canary(str(whisper.get("command") or ""), str(model.get("path") or ""))
+        if verify_media
+        else {"requested": False, "passed": None}
+    )
+    required_detected = bool(
+        ffmpeg.get("installed")
+        and ffprobe.get("installed")
+        and whisper.get("installed")
+        and model.get("configured")
+        and tesseract.get("installed")
+        and tesseract.get("required_languages_ready")
+    )
+    native_arch = architecture_status(os_name)["native"]
+    required_tools = [ffmpeg, ffprobe, whisper, tesseract]
+    reported_arches = [
+        str(item.get("binary_architecture") or "")
+        for item in required_tools
+        if item.get("command")
+    ]
+    native_architecture_ready = bool(
+        os_name != "windows"
+        or (
+            len(reported_arches) == len(required_tools)
+            and all(
+                normalize_architecture(value) == normalize_architecture(native_arch)
+                for value in reported_arches
+            )
+        )
+    )
+    command_dirs = [
+        str(Path(str(item.get("command"))).parent)
+        for item in [ffmpeg, ffprobe, whisper, tesseract]
+        if item.get("command")
+    ]
+    primary_bin = command_dirs[0] if command_dirs and len(set(command_dirs)) == 1 else ""
     return {
+        "search_dirs": [str(path) for path in search_dirs],
+        "primary_bin": primary_bin,
         "ffmpeg": ffmpeg,
         "ffprobe": ffprobe,
         "local_asr": whisper,
-        "asr_model": {"configured": bool(os.environ.get("WHISPER_MODEL")), "path": os.environ.get("WHISPER_MODEL", "")},
+        "asr_model": model,
+        "asr_canary": canary,
+        "native_architecture": native_arch,
+        "native_architecture_ready": native_architecture_ready,
         "tesseract": tesseract,
         "imagemagick_optional": imagemagick,
+        "required_detected": required_detected,
         "ready": bool(
-            ffmpeg.get("installed")
-            and ffprobe.get("installed")
-            and whisper.get("installed")
-            and os.environ.get("WHISPER_MODEL")
-            and tesseract.get("installed")
-            and tesseract.get("required_languages_ready")
+            required_detected
+            and native_architecture_ready
+            and (not verify_media or bool(canary.get("passed")))
         ),
     }
 
@@ -535,12 +763,20 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
     wiki_root_source = "argument" if args.wiki_root else ("environment" if os.environ.get("WIKI_ROOT") else "default proposal")
     wiki_root = Path(wiki_root_value).expanduser().resolve()
     domains = args.domain or DEFAULT_DOMAINS
-    config = build_config(wiki_root, os_name)
-    cfg_paths = [Path(args.config_path).expanduser().resolve()] if args.config_path else config_paths(os_name)
     package_managers = detect_package_managers(os_name)
     obsidian_app = detect_obsidian_app(os_name)
     obsidian_cli = detect_obsidian_cli(os_name, obsidian_app)
     obsidian_route = obsidian_route_status(wiki_root, obsidian_cli)
+    media = detect_media_toolchain(
+        os_name,
+        explicit_media_bin=args.media_bin or "",
+        explicit_model=args.whisper_model or "",
+        verify_media=bool(args.verify_media or not args.check_only),
+    )
+    config = build_config(wiki_root, os_name, media)
+    cfg_paths = [Path(args.config_path).expanduser().resolve()] if args.config_path else config_paths(os_name)
+    target = target_status(wiki_root)
+    nested_blocker = nested_vault_blocker(wiki_root, os_name, False)
     tools = {
         "os": os_name,
         "architecture": architecture_status(os_name),
@@ -550,7 +786,7 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
         "obsidian_app": obsidian_app,
         "obsidian_cli": obsidian_cli,
         "obsidian_route": obsidian_route,
-        "media": detect_media_toolchain(),
+        "media": media,
         "package_managers": package_managers,
     }
     degraded = []
@@ -562,12 +798,19 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
         degraded.append("Obsidian CLI target vault is unavailable or does not match WIKI_ROOT")
     if not tools["media"]["ready"]:
         degraded.append("Media-ingestion toolchain is incomplete")
+    core_ready = bool(tools["obsidian_app"]["installed"] and tools["obsidian_cli"]["installed"])
+    media_ready = bool(tools["media"]["ready"])
+    target_ready = bool(target["empty"] and not target["error"] and not nested_blocker)
     return {
         "inspection_mode": "read-only" if args.check_only else "bootstrap",
         "wiki_root": str(wiki_root),
         "current_state": {
             "wiki_root_source": wiki_root_source,
             "wiki_root_exists": wiki_root.exists(),
+            "wiki_root_empty": target["empty"],
+            "wiki_root_entries": target["entries"],
+            "wiki_root_inspection_error": target["error"],
+            "nested_vault_conflict": nested_blocker,
             "existing_config_paths": [str(p) for p in cfg_paths if p.exists()],
             "note": "config_paths and config below are planned bootstrap values; they do not prove that files already exist.",
         },
@@ -575,6 +818,13 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
         "config_paths": [str(p) for p in cfg_paths],
         "config": config,
         "tools": tools,
+        "readiness": {
+            "target_ready": target_ready,
+            "core_ready": core_ready,
+            "media_ready": media_ready,
+            "bootstrap_ready": bool(target_ready and core_ready and media_ready),
+            "media_canary_required": bool(args.verify_media or not args.check_only),
+        },
         "degraded": degraded,
         "install_hints": install_hints(os_name, package_managers),
         "load_config_command": load_snippet(os_name, cfg_paths),
@@ -587,6 +837,11 @@ def main() -> int:
     parser.add_argument("--wiki-root", help="Target wiki root. Defaults to WIKI_ROOT or ~/wiki.")
     parser.add_argument("--config-path", help="Override config file path.")
     parser.add_argument("--domain", action="append", help="Initial Chinese domain name. Repeatable.")
+    parser.add_argument("--media-bin", help="Directory containing the verified media/OCR executables.")
+    parser.add_argument("--whisper-model", help="Path to the verified local Whisper model.")
+    parser.add_argument("--verify-media", action="store_true", help="Run a local one-second Whisper canary in addition to version checks.")
+    parser.add_argument("--require-toolchain-ready", action="store_true", help="Deprecated compatibility flag; full readiness is required by default.")
+    parser.add_argument("--allow-degraded-bootstrap", action="store_true", help="Allow an incomplete toolchain only after the user explicitly accepts degraded initialization.")
     parser.add_argument("--check-only", action="store_true", help="Only inspect environment and print a summary.")
     parser.add_argument("--dry-run", action="store_true", help="Show planned writes without writing files.")
     parser.add_argument("--force", action="store_true", help="Overwrite existing bootstrap files.")
@@ -620,6 +875,15 @@ def main() -> int:
         }
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
+
+    if not args.allow_degraded_bootstrap and not summary["readiness"]["bootstrap_ready"]:
+        summary["error"] = (
+            "Refusing to initialize because the target, Obsidian CLI, or media-ingestion "
+            "toolchain is not fully ready. Resolve the reported readiness fields and rerun."
+        )
+        summary["readiness_gate"] = "blocked-before-write"
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 3
 
     blocker = existing_wiki_blocker(wiki_root, args.force)
     if not blocker:

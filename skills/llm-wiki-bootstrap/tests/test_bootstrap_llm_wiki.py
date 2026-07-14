@@ -3,7 +3,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import struct
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -25,7 +27,7 @@ def load_module():
 class BootstrapTests(unittest.TestCase):
     def run_script(self, *args: str, env: dict[str, str] | None = None) -> tuple[int, dict]:
         proc = subprocess.run(
-            ["python3", str(SCRIPT), *args],
+            [sys.executable, str(SCRIPT), *args],
             text=True,
             capture_output=True,
             env=env,
@@ -48,7 +50,7 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(result["inspection_mode"], "read-only")
             self.assertFalse(result["current_state"]["wiki_root_exists"])
             self.assertEqual(result["current_state"]["existing_config_paths"], [])
-            self.assertEqual(set(result["config"]), {"WIKI_ROOT", "LLMWIKI_SKILL_SOURCE"})
+            self.assertTrue({"WIKI_ROOT", "LLMWIKI_SKILL_SOURCE"}.issubset(result["config"]))
             self.assertIn("architecture", result["tools"])
             self.assertIn("media", result["tools"])
 
@@ -69,6 +71,7 @@ class BootstrapTests(unittest.TestCase):
                 str(config),
                 "--domain",
                 "电商运营",
+                "--allow-degraded-bootstrap",
                 "--json",
                 env=env,
             )
@@ -82,6 +85,66 @@ class BootstrapTests(unittest.TestCase):
             self.assertIn("only official LLM Wiki", agents)
             self.assertIn("做成知识库", agents)
 
+    def test_check_only_lists_even_empty_target_subdirectories(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            wiki = root / "wiki"
+            (wiki / "_meta").mkdir(parents=True)
+            code, result = self.run_script(
+                "--check-only",
+                "--wiki-root",
+                str(wiki),
+                "--config-path",
+                str(root / "config.env"),
+            )
+            self.assertEqual(code, 0)
+            self.assertFalse(result["current_state"]["wiki_root_empty"])
+            self.assertEqual(result["current_state"]["wiki_root_entries"], ["_meta"])
+            self.assertFalse(result["readiness"]["target_ready"])
+
+    def test_required_toolchain_gate_blocks_before_any_write(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            wiki = root / "wiki"
+            config = root / "config.env"
+            env = os.environ.copy()
+            env["PATH"] = ""
+            env["HOME"] = str(root / "home")
+            env.pop("WHISPER_MODEL", None)
+            env.pop("LLMWIKI_MEDIA_BIN", None)
+            code, result = self.run_script(
+                "--wiki-root",
+                str(wiki),
+                "--config-path",
+                str(config),
+                env=env,
+            )
+            self.assertEqual(code, 3)
+            self.assertEqual(result["readiness_gate"], "blocked-before-write")
+            self.assertFalse(wiki.exists())
+            self.assertFalse(config.exists())
+
+    def test_whisper_canary_requires_real_output_file(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            fake = root / "whisper-cli"
+            fake.write_text(
+                "#!/bin/sh\n"
+                "out=''\n"
+                "while [ $# -gt 0 ]; do\n"
+                "  if [ \"$1\" = '-of' ]; then shift; out=\"$1\"; fi\n"
+                "  shift\n"
+                "done\n"
+                "[ -n \"$out\" ] && : > \"${out}.txt\"\n",
+                encoding="utf-8",
+            )
+            fake.chmod(0o755)
+            model = root / "model.bin"
+            model.write_bytes(b"model")
+            result = module.whisper_canary(str(fake), str(model))
+            self.assertTrue(result["passed"])
+
     def test_git_is_opt_in(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
@@ -91,6 +154,7 @@ class BootstrapTests(unittest.TestCase):
                 "--config-path",
                 str(root / "config.env"),
                 "--git",
+                "--allow-degraded-bootstrap",
                 "--json",
             )
             self.assertEqual(code, 0)
@@ -132,6 +196,29 @@ class BootstrapTests(unittest.TestCase):
                 result = module.detect_obsidian_cli("windows", {"installed": True, "paths": [str(app)]})
         self.assertTrue(result["installed"])
         self.assertEqual(result["commands"][0], str(cli))
+
+    def test_windows_obsidian_helper_enforces_single_verified_download(self):
+        helper = SKILL_DIR / "scripts" / "install_obsidian_windows.ps1"
+        text = helper.read_text(encoding="utf-8")
+        self.assertIn("Get-AuthenticodeSignature", text)
+        self.assertIn("Get-FileHash -Algorithm SHA256", text)
+        self.assertIn("FileShare]::None", text)
+        self.assertIn("curl.exe", text)
+        self.assertNotIn("Start-BitsTransfer", text)
+
+    def test_pe_architecture_detection_distinguishes_arm64_and_x64(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            for machine, expected in [(0xAA64, "ARM64"), (0x8664, "x64")]:
+                binary = root / f"{expected}.exe"
+                data = bytearray(0x90)
+                data[0:2] = b"MZ"
+                data[0x3C:0x40] = struct.pack("<I", 0x80)
+                data[0x80:0x84] = b"PE\x00\x00"
+                data[0x84:0x86] = struct.pack("<H", machine)
+                binary.write_bytes(data)
+                self.assertEqual(module.binary_architecture(str(binary)), expected)
 
 
 if __name__ == "__main__":

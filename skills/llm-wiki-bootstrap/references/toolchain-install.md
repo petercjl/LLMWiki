@@ -29,6 +29,7 @@ Git is optional and is not part of either required profile. Office/PDF extractor
 7. If a mirror index cannot be opened by an Agent browser, test the known mirror URL with the native client. A page-access failure is not a file-download failure.
 8. Never silently fall back from a domestic or course-controlled mirror to GitHub. Stop and explain the missing artifact.
 9. Use absolute executable paths for verification. Ask before making a persistent PATH or profile change.
+10. Keep one active download per artifact. A slow foreground transfer is still active. Do not start BITS, `Invoke-WebRequest`, a browser download, or another `curl.exe` transfer in parallel. Before changing methods, terminate the old process, confirm it stopped, and account for the partial file.
 
 ## Obsidian
 
@@ -37,7 +38,15 @@ Preferred domestic download route:
 - Mirror index: `https://obsidian.bijitongbu.site/`
 - Signed download resolver: `https://obsidian-dl.notebooksyncer.com/sign?os=win` or `?os=mac`
 
-Use the native client with the resolver's required request headers when needed. Confirm the returned platform artifact before downloading. If this route cannot provide a verified compatible file, stop and give the user the prepared manual course download link rather than switching sources silently.
+On Windows, after the user confirms installation, run the bundled deterministic helper:
+
+```powershell
+& "<skill-dir>\scripts\install_obsidian_windows.ps1" -Install
+```
+
+The helper uses `curl.exe` directly with the resolver's required headers, performs exactly one synchronous transfer, validates the HTTPS host and Windows artifact, requires a valid Authenticode signature, records SHA-256 and signer information, installs only after verification, and removes its installer after successful installation. Do not replace it with browser automation, `web_fetch`, page scraping, bare `curl` in PowerShell, BITS, or a second downloader. If the helper fails, report its JSON error and stop this branch. Do not improvise another source.
+
+For a download-and-verification check without installation, omit `-Install`. Confirm the returned platform artifact before downloading. If this route cannot provide a verified compatible file, stop and give the user the prepared manual course download link rather than switching sources silently.
 
 After installation, start Obsidian and let the user open the new Wiki directory with **Open folder as vault**. Then test the bundled CLI:
 
@@ -111,7 +120,21 @@ Run and record:
 - Obsidian app version and `<obsidian-cli> help` while Obsidian is running.
 - `ffmpeg -version` and `ffprobe -version`.
 - the selected ASR executable's help/version plus the model path and checksum.
+- each required Windows media executable's PE architecture; require it to match the native system architecture unless the user explicitly approves a tested emulation branch.
 - `tesseract --version` and `tesseract --list-langs`; require `chi_sim` and `eng`.
 - `magick -version` only when ImageMagick was installed.
+
+After finding the real media executable directory and model, pass them back to the bootstrap checker instead of relying on the parent process's stale PATH:
+
+```powershell
+py -3 "<skill-dir>\scripts\bootstrap_llm_wiki.py" `
+  --check-only `
+  --wiki-root "<confirmed-wiki-root>" `
+  --media-bin "<verified-media-bin>" `
+  --whisper-model "<verified-model-path>" `
+  --verify-media
+```
+
+Require `readiness.media_ready: true` and a passed `tools.media.asr_canary` before the real bootstrap. Use the same paths with `--require-toolchain-ready` during the write step. Do not treat executables merely found outside PATH as ready until this check passes.
 
 Write a short `TOOLS.md` in the Wiki root after a real installation, listing tool, version, architecture, executable path, source, and verification result. Do not include secrets or temporary signed URLs.
