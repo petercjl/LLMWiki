@@ -268,13 +268,18 @@ This mode is mechanical and route-focused. It does not replace compile-quality r
 
 1. Orient with `AGENTS.md`, `SCHEMA.md`, `index.md`, and recent `log.md`.
 2. Identify target entry pages: query page, domain index, learning-path index, Agent-use template, or new formal pages.
-3. Run the shared route audit helper when available:
+3. Run the route audit helper bundled with this Skill. Resolve the current
+   system's Python launcher, then run:
 
 ```bash
-python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_route_audit.py <target-page.md>
+<python> <skill-dir>/scripts/wiki_cli_route_audit.py <target-page.md> --wiki "<wiki-root>"
 ```
 
-4. If Obsidian CLI is unavailable or active vault does not match `$WIKI_ROOT`, use the helper's degraded filesystem report and state that global Obsidian signals were not trusted.
+4. Do not search for or depend on a separate LLMWiki source checkout. If the
+   bundled helper cannot run, record the exact error and perform the equivalent
+   filesystem checks manually. If Obsidian CLI is unavailable or the active
+   vault does not match `$WIKI_ROOT`, use the helper's degraded filesystem report
+   and state that global Obsidian signals were not trusted.
 5. Inspect:
    - unresolved links
    - target backlinks

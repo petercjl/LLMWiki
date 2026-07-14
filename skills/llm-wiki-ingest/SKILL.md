@@ -179,7 +179,7 @@ Before editing the wiki:
 3. Read `$WIKI_ROOT/index.md`.
 4. Read recent `$WIKI_ROOT/log.md`.
 5. Search existing wiki pages for source title, product names, concepts, APIs, brands, model IDs, and major keywords.
-6. When available, run Obsidian CLI search probes for source title and core concepts. Use `<LLMWiki repo>/shared/scripts/wiki_cli_search.py` or the commands in `<LLMWiki repo>/shared/references/obsidian-cli-protocol.md`.
+6. Run the bundled `scripts/wiki_cli_search.py` with the current system's Python launcher to probe the source title and core concepts. Pass the resolved Wiki root with `--wiki`. If it cannot run, record the exact error and perform the equivalent filesystem search before returning to the main flow.
 7. Run `git -C $WIKI_ROOT status --short` and avoid reverting unrelated work.
 
 If the task will create or modify more than 10 wiki files, present a short execution plan before editing unless the user already approved a batch run.
@@ -377,17 +377,17 @@ Before final response:
 python3 <llm-wiki-audit-and-optimization-skill>/scripts/placeholder_scan.py <formal_path>
 ```
 
-3. Run Obsidian route audit when the shared LLMWiki repo is available:
+3. Run the route audit helper bundled with this Skill. Resolve the current
+   system's Python launcher, then run:
 
 ```bash
-python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_route_audit.py <new-entry-page.md>
+<python> <skill-dir>/scripts/wiki_cli_route_audit.py <new-entry-page.md> --wiki "<wiki-root>"
 ```
 
-If `LLMWIKI_SKILL_SOURCE` is unset, look for the shared script in likely local
-source checkouts such as `~/.codex/skills/.llmwiki-source/shared/scripts/` before
-marking route audit unavailable. Do not look only inside `$WIKI_ROOT`; the wiki
-checkout usually does not contain the LLM Wiki skill source repo. If no script is
-available, record the exact paths checked in `audit-handoff.md`.
+Do not search for a development checkout or depend on `LLMWIKI_SKILL_SOURCE`.
+If the bundled script cannot run, record the exact error in `audit-handoff.md`,
+perform its filesystem checks manually, and clearly mark Obsidian global signals
+as unavailable.
 
 If the active Obsidian vault is not `$WIKI_ROOT`, treat the script's degraded filesystem checks as partial route validation and say so.
 

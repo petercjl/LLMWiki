@@ -231,13 +231,15 @@ at hand before creating anything new.
 
 When answering a user question from an existing wiki, do not simply read a user-provided directory and answer from the first matching files. Build a query pack first.
 
-Use the protocol in the source repo when available:
+Use the query helper bundled with this Skill. Resolve the current Python
+launcher for the operating system, then run:
 
 ```bash
-python3 $LLMWIKI_SKILL_SOURCE/shared/scripts/wiki_cli_search.py "<user question>"
+<python> <skill-dir>/scripts/wiki_cli_search.py "<user question>" --wiki "<wiki-root>"
 ```
 
-If the script is unavailable, manually follow the same order:
+If the bundled script cannot run, report the exact error and manually follow
+the same order:
 
 1. Search `queries/` for a task-specific entry page.
 2. Search for `Agent 使用模板` or `agent-usage-template`.
