@@ -228,18 +228,9 @@ def default_skill_source() -> str:
 
 
 def build_config(wiki_root: Path, os_name: str) -> dict[str, str]:
-    home = user_home()
     config = {
         "WIKI_ROOT": str(wiki_root),
         "LLMWIKI_SKILL_SOURCE": default_skill_source(),
-        "CODEX_SKILLS_DIR": os.environ.get("CODEX_SKILLS_DIR", str(home / ".codex/skills")),
-        "HERMES_SKILLS_DIR": os.environ.get("HERMES_SKILLS_DIR", str(home / ".hermes/skills")),
-        "LARK_AGENT_SKILLS_DIR": os.environ.get("LARK_AGENT_SKILLS_DIR", str(home / ".agents/skills")),
-        "OPENCLAW_SKILLS_DIR": os.environ.get("OPENCLAW_SKILLS_DIR", str(home / ".openclaw/workspace/skills")),
-        "CLAUDE_CODE_SKILLS_DIR": os.environ.get(
-            "CLAUDE_CODE_SKILLS_DIR",
-            str(home / ".claude/plugins/marketplaces/claude-plugins-official.bak"),
-        ),
     }
     if os_name == "windows":
         config.update({

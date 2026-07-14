@@ -48,6 +48,7 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(result["inspection_mode"], "read-only")
             self.assertFalse(result["current_state"]["wiki_root_exists"])
             self.assertEqual(result["current_state"]["existing_config_paths"], [])
+            self.assertEqual(set(result["config"]), {"WIKI_ROOT", "LLMWIKI_SKILL_SOURCE"})
             self.assertIn("architecture", result["tools"])
             self.assertIn("media", result["tools"])
 
