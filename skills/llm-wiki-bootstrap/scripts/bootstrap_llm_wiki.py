@@ -50,19 +50,22 @@ def run(cmd: list[str]) -> tuple[int, str, str]:
 
 
 def architecture_status(os_name: str) -> dict[str, str]:
-    process_arch = platform.machine() or "unknown"
-    native_arch = process_arch
+    checker_arch = platform.machine() or "unknown"
+    launcher_arch = checker_arch
+    native_arch = checker_arch
     source = "platform.machine"
     if os_name == "windows":
+        launcher_arch = os.environ.get("PROCESSOR_ARCHITECTURE") or checker_arch
         native_arch = (
             os.environ.get("PROCESSOR_ARCHITEW6432")
-            or os.environ.get("PROCESSOR_ARCHITECTURE")
-            or process_arch
+            or launcher_arch
+            or checker_arch
         )
         source = "Windows architecture environment"
     return {
         "native": native_arch,
-        "process": process_arch,
+        "launcher_environment": launcher_arch,
+        "python_checker": checker_arch,
         "python_bits": str(64 if sys.maxsize > 2**32 else 32),
         "source": source,
     }
@@ -478,7 +481,7 @@ def probe_tool(command_names: list[str], version_args: list[str]) -> dict[str, o
 def detect_media_toolchain() -> dict[str, object]:
     ffmpeg = probe_tool(["ffmpeg"], ["-version"])
     ffprobe = probe_tool(["ffprobe"], ["-version"])
-    whisper = probe_tool(["whisper-cli", "whisper", "main"], ["--help"])
+    whisper = probe_tool(["whisper-cli", "whisper.cpp", "whisper-cpp"], ["--help"])
     tesseract = probe_tool(["tesseract"], ["--version"])
     languages: list[str] = []
     if tesseract.get("installed") and tesseract.get("command"):
@@ -487,7 +490,7 @@ def detect_media_toolchain() -> dict[str, object]:
             languages = [line.strip() for line in out.splitlines()[1:] if line.strip()]
     tesseract["languages"] = languages
     tesseract["required_languages_ready"] = all(lang in languages for lang in ["chi_sim", "eng"])
-    imagemagick = probe_tool(["magick", "convert"], ["-version"])
+    imagemagick = probe_tool(["magick"], ["-version"])
     return {
         "ffmpeg": ffmpeg,
         "ffprobe": ffprobe,

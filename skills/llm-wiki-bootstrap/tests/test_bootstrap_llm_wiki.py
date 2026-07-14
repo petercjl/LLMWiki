@@ -101,7 +101,21 @@ class BootstrapTests(unittest.TestCase):
         ), mock.patch.object(module.platform, "machine", return_value="AMD64"):
             status = module.architecture_status("windows")
         self.assertEqual(status["native"], "ARM64")
-        self.assertEqual(status["process"], "AMD64")
+        self.assertEqual(status["launcher_environment"], "AMD64")
+        self.assertEqual(status["python_checker"], "AMD64")
+
+    def test_windows_system_commands_are_not_media_tools(self):
+        module = load_module()
+        with mock.patch.object(module.shutil, "which") as which:
+            which.side_effect = lambda name: {
+                "main": r"C:\\Windows\\System32\\main.cpl",
+                "convert": r"C:\\Windows\\System32\\convert.exe",
+            }.get(name)
+            result = module.detect_media_toolchain()
+        self.assertFalse(result["local_asr"]["installed"])
+        self.assertEqual(result["local_asr"]["command"], "")
+        self.assertFalse(result["imagemagick_optional"]["installed"])
+        self.assertEqual(result["imagemagick_optional"]["command"], "")
 
     def test_windows_obsidian_cli_prefers_com_redirector(self):
         module = load_module()

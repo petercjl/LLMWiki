@@ -13,8 +13,9 @@ Support macOS, Windows, and Linux. Never assume a shell, package manager, CPU ar
 
 ## Main Flow
 
-1. Identify the operating system, native system architecture, current process architecture, shell, PATH, and independent tool installations.
+1. Identify the operating system, native system architecture, SealSeek/Node process architecture, checker/Python architecture, shell, PATH, and independent tool installations. On Windows, `node -p "process.arch"` is a safe single-purpose check for SealSeek's Node process; do not mix CMD `if` syntax into PowerShell.
 2. Run `scripts/bootstrap_llm_wiki.py --check-only` and read its complete JSON result.
+   Use this script as the primary inventory. Do not repeat its checks with long improvised shell chains unless one specific result needs confirmation.
 3. Read `references/toolchain-install.md` whenever a required tool is missing or installation is requested. Distinguish the core profile from the media-ingestion profile.
 4. Explain what is already usable, what is missing, where each missing item will come from, and whether it changes PATH or a profile. Ask for confirmation before installing anything.
 5. Install only the confirmed items. Prefer a verified domestic mirror or a course-controlled mirror. Never silently fall back to GitHub or another upstream source after a mirror failure.
