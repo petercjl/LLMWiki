@@ -70,6 +70,7 @@ Prefer the Tsinghua MSYS2 mirror when it has packages for the native architectur
 For Windows ARM64, the current native package names are:
 
 - `mingw-w64-clang-aarch64-ffmpeg`
+- `mingw-w64-clang-aarch64-whisper.cpp`
 - `mingw-w64-clang-aarch64-tesseract-ocr`
 - `mingw-w64-clang-aarch64-tesseract-data-chi_sim`
 - `mingw-w64-clang-aarch64-tesseract-data-eng`
@@ -77,13 +78,22 @@ For Windows ARM64, the current native package names are:
 
 For x64, resolve the corresponding `mingw-w64-x86_64-*` names from the mirror's current package database instead of assuming versions. Configure the selected MSYS2 environment to use the Tsinghua mirror before package installation.
 
-The upstream whisper.cpp project currently publishes Windows x64 binaries but no Windows ARM64 binary. Do not label an x64 package as native ARM64. On Windows ARM64, use only one of these explicit branches:
+The upstream whisper.cpp project currently publishes Windows x64 binaries but no Windows ARM64 release asset. Do not label an upstream x64 package as native ARM64. The Tsinghua MSYS2 `clangarm64` repository currently supplies a native `mingw-w64-clang-aarch64-whisper.cpp` package; prefer that package on Windows ARM64 and verify the resulting `whisper-cli` architecture and help output.
+
+For the multilingual model, a domestic ModelScope mirror is available:
+
+- Repository: `https://modelscope.cn/models/cjc1887415157/whisper.cpp`
+- Small multilingual direct file: `https://modelscope.cn/models/cjc1887415157/whisper.cpp/resolve/master/ggml-small.bin`
+
+The Small model is roughly 466 MB and is the default course balance for Chinese teaching videos. Before the real download, make a native HEAD request, record the current 64-character `X-Linked-Etag` supplied by ModelScope, then calculate SHA-256 after download and compare it with that recorded value. Also preserve the model repository's published model hash as secondary provenance. Do not permanently hard-code either value in the Skill because the repository can update.
+
+If the native MSYS2 package later disappears or fails verification, use only one of these explicit fallback branches:
 
 1. a course-controlled native ARM64 build with a published manifest and checksum;
 2. a locally compiled native ARM64 build after the user approves the compiler toolchain;
 3. a verified x64 build under Windows emulation, clearly reported as emulated, after a clean-machine test proves it works.
 
-The ASR model must also come from a course-controlled or otherwise verified mirror manifest. If neither executable nor model has a trusted compatible mirror, leave ASR missing and report that video/audio ingestion is not ready.
+If neither executable nor model has a trusted compatible mirror, leave ASR missing and report that video/audio ingestion is not ready.
 
 ## macOS Media Toolchain
 
