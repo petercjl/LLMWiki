@@ -5,24 +5,20 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
 import shutil
 import subprocess
-import time
-import webbrowser
+import sys
 from pathlib import Path
 
 
 DEFAULT_DOMAINS = [
-    "AI Agent工程",
-    "业务与运营",
-    "产品与工具",
-    "研究与阅读",
-    "项目复盘",
-    "个人方法论",
+    "财税与经营财务",
+    "电商运营",
+    "品牌策略",
+    "视觉制作",
 ]
 
 
@@ -46,8 +42,30 @@ def command_exists(command: str) -> bool:
 
 
 def run(cmd: list[str]) -> tuple[int, str, str]:
-    proc = subprocess.run(cmd, text=True, capture_output=True)
+    try:
+        proc = subprocess.run(cmd, text=True, capture_output=True, timeout=20)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return 127, "", str(exc)
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
+
+
+def architecture_status(os_name: str) -> dict[str, str]:
+    process_arch = platform.machine() or "unknown"
+    native_arch = process_arch
+    source = "platform.machine"
+    if os_name == "windows":
+        native_arch = (
+            os.environ.get("PROCESSOR_ARCHITEW6432")
+            or os.environ.get("PROCESSOR_ARCHITECTURE")
+            or process_arch
+        )
+        source = "Windows architecture environment"
+    return {
+        "native": native_arch,
+        "process": process_arch,
+        "python_bits": str(64 if sys.maxsize > 2**32 else 32),
+        "source": source,
+    }
 
 
 def detect_obsidian_app(os_name: str) -> dict[str, object]:
@@ -65,7 +83,9 @@ def detect_obsidian_app(os_name: str) -> dict[str, object]:
         for base in [local_appdata, program_files, program_files_x86]:
             if base:
                 candidates.append(Path(base) / "Obsidian" / "Obsidian.exe")
+                candidates.append(Path(base) / "Programs" / "Obsidian" / "Obsidian.exe")
         candidates.append(home / "AppData/Local/Obsidian/Obsidian.exe")
+        candidates.append(home / "AppData/Local/Programs/Obsidian/Obsidian.exe")
     elif os_name == "linux":
         candidates.extend([
             Path("/usr/bin/obsidian"),
@@ -77,18 +97,42 @@ def detect_obsidian_app(os_name: str) -> dict[str, object]:
     return {"installed": bool(found) or command_exists("obsidian"), "paths": found}
 
 
-def detect_obsidian_cli() -> dict[str, object]:
-    candidates = ["obsidian", "obsidian-cli"]
-    detected = [cmd for cmd in candidates if command_exists(cmd)]
+def detect_obsidian_cli(os_name: str, app: dict[str, object] | None = None) -> dict[str, object]:
+    app = app or detect_obsidian_app(os_name)
+    candidates: list[str] = []
+    if os_name == "windows":
+        for raw in app.get("paths", []):
+            cli_path = Path(str(raw)).with_name("Obsidian.com")
+            if cli_path.exists():
+                candidates.append(str(cli_path))
+        candidates.extend(["obsidian", "Obsidian.com"])
+    elif os_name == "macos":
+        candidates.extend([
+            "/Applications/Obsidian.app/Contents/MacOS/obsidian-cli",
+            str(user_home() / "Applications/Obsidian.app/Contents/MacOS/obsidian-cli"),
+            "/usr/local/bin/obsidian",
+            "obsidian",
+        ])
+    else:
+        candidates.extend(["obsidian", "obsidian-cli"])
+    detected = []
+    for cmd in candidates:
+        resolved = ""
+        if Path(cmd).is_absolute() and Path(cmd).exists():
+            resolved = cmd
+        elif command_exists(cmd):
+            resolved = shutil.which(cmd) or cmd
+        if resolved and resolved not in detected:
+            detected.append(resolved)
     verified = []
     unverified = []
     for cmd in detected:
-        code, out, err = run([cmd, "--help"])
-        help_text = f"{out}\n{err}"
-        if code == 0 and "Usage: obsidian" in help_text and "backlinks" in help_text:
+        code, out, err = run([cmd, "help"])
+        help_text = f"{out}\n{err}".lower()
+        if code == 0 and all(token in help_text for token in ["backlinks", "search", "vault"]):
             verified.append(cmd)
         else:
-            unverified.append(cmd)
+            unverified.append({"command": cmd, "exit_code": code, "error": err or out[-300:]})
     return {
         "installed": bool(verified),
         "commands": verified,
@@ -140,100 +184,6 @@ def obsidian_config_candidates(os_name: str) -> list[Path]:
         home / ".config/obsidian/obsidian.json",
         home / ".var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json",
     ]
-
-
-def vault_id_for_path(wiki: Path) -> str:
-    return hashlib.sha256(str(wiki).encode("utf-8")).hexdigest()[:16]
-
-
-def quit_obsidian_for_registry(os_name: str) -> dict[str, object]:
-    if os_name != "macos" or os.environ.get("OBSIDIAN_CONFIG_PATH"):
-        return {"attempted": False}
-    result: dict[str, object] = {"attempted": True, "quit": False}
-    subprocess.run(
-        ["osascript", "-e", 'tell application "Obsidian" to quit'],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
-    for _ in range(30):
-        code, _, _ = run(["pgrep", "-x", "Obsidian"])
-        if code != 0:
-            result["quit"] = True
-            return result
-        time.sleep(0.5)
-    result["error"] = "Obsidian did not quit before registry update."
-    return result
-
-
-def open_obsidian_app(os_name: str, vault_id: str) -> bool:
-    if os_name == "macos":
-        proc = subprocess.run(
-            ["open", "-a", "Obsidian"],
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-        return proc.returncode == 0
-    return bool(webbrowser.open(f"obsidian://open?vault={vault_id}"))
-
-
-def register_obsidian_vault(wiki: Path, os_name: str, open_obsidian: bool, dry_run: bool) -> dict[str, object]:
-    config_path = obsidian_config_candidates(os_name)[0]
-    vault_id = vault_id_for_path(wiki)
-    result: dict[str, object] = {
-        "requested": True,
-        "config_path": str(config_path),
-        "vault_id": vault_id,
-        "vault_path": str(wiki),
-        "registered": False,
-        "opened": False,
-    }
-    if dry_run:
-        result["dry_run"] = True
-        return result
-
-    result["obsidian_quit"] = quit_obsidian_for_registry(os_name)
-    if result["obsidian_quit"].get("error"):
-        result["error"] = str(result["obsidian_quit"]["error"])
-        return result
-
-    data: dict[str, object] = {}
-    if config_path.exists():
-        try:
-            data = json.loads(config_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            result["error"] = f"Cannot parse Obsidian config: {exc}"
-            return result
-    vaults = data.setdefault("vaults", {})
-    if not isinstance(vaults, dict):
-        result["error"] = "Obsidian config field `vaults` is not an object."
-        return result
-    existing_id = ""
-    for key, info in vaults.items():
-        if isinstance(info, dict) and Path(str(info.get("path", ""))).expanduser().resolve() == wiki:
-            existing_id = key
-            break
-    vault_id = existing_id or vault_id
-    for info in vaults.values():
-        if isinstance(info, dict):
-            info.pop("open", None)
-    vaults[vault_id] = {
-        "path": str(wiki),
-        "ts": int(time.time() * 1000),
-        "open": True,
-    }
-    data["cli"] = True
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    result["registered"] = True
-    result["vault_id"] = vault_id
-
-    if open_obsidian:
-        result["opened"] = open_obsidian_app(os_name, vault_id)
-    return result
 
 
 def detect_package_managers(os_name: str) -> list[str]:
@@ -349,6 +299,10 @@ def core_files(domains: list[str]) -> dict[Path, str]:
     return {
         Path("AGENTS.md"): (
             "# LLM Wiki Agent Rules\n\n"
+            "- This vault is the only official LLM Wiki for this environment.\n"
+            "- When the user says 做成知识库、加入 Wiki、把资料入库, use the installed Wiki ingestion skill and complete its full SOP.\n"
+            "- Do not reduce ingestion to a summary or merely copy the source file.\n"
+            "- If an ingestion step needs a missing local tool, explain the trusted installation source and install it after confirmation; do not silently bypass the step.\n"
             "- Treat this vault as a durable knowledge base, not a dump folder.\n"
             "- Preserve raw sources under `raw/` and extraction notes under `_meta/extraction-notes/`.\n"
             "- Use Chinese human-facing titles by default when the user's work context is Chinese.\n"
@@ -505,20 +459,62 @@ def nested_vault_blocker(wiki_root: Path, os_name: str, force: bool) -> str:
     return ""
 
 
+def probe_tool(command_names: list[str], version_args: list[str]) -> dict[str, object]:
+    for command in command_names:
+        path = shutil.which(command)
+        if not path:
+            continue
+        code, out, err = run([path, *version_args])
+        text = out or err
+        return {
+            "installed": code == 0,
+            "command": path,
+            "version": text.splitlines()[0] if text else "",
+            "exit_code": code,
+        }
+    return {"installed": False, "command": "", "version": ""}
+
+
+def detect_media_toolchain() -> dict[str, object]:
+    ffmpeg = probe_tool(["ffmpeg"], ["-version"])
+    ffprobe = probe_tool(["ffprobe"], ["-version"])
+    whisper = probe_tool(["whisper-cli", "whisper", "main"], ["--help"])
+    tesseract = probe_tool(["tesseract"], ["--version"])
+    languages: list[str] = []
+    if tesseract.get("installed") and tesseract.get("command"):
+        code, out, _ = run([str(tesseract["command"]), "--list-langs"])
+        if code == 0:
+            languages = [line.strip() for line in out.splitlines()[1:] if line.strip()]
+    tesseract["languages"] = languages
+    tesseract["required_languages_ready"] = all(lang in languages for lang in ["chi_sim", "eng"])
+    imagemagick = probe_tool(["magick", "convert"], ["-version"])
+    return {
+        "ffmpeg": ffmpeg,
+        "ffprobe": ffprobe,
+        "local_asr": whisper,
+        "asr_model": {"configured": bool(os.environ.get("WHISPER_MODEL")), "path": os.environ.get("WHISPER_MODEL", "")},
+        "tesseract": tesseract,
+        "imagemagick_optional": imagemagick,
+        "ready": bool(
+            ffmpeg.get("installed")
+            and ffprobe.get("installed")
+            and whisper.get("installed")
+            and os.environ.get("WHISPER_MODEL")
+            and tesseract.get("installed")
+            and tesseract.get("required_languages_ready")
+        ),
+    }
+
+
 def install_hints(os_name: str, package_managers: list[str]) -> list[str]:
     hints: list[str] = []
     if os_name == "macos":
-        if "brew" in package_managers:
-            hints.append("Obsidian App: brew install --cask obsidian")
-        else:
-            hints.append("Install Homebrew or download Obsidian from https://obsidian.md/download")
-        hints.append("Obsidian CLI: install the CLI package used by your team, then ensure `obsidian` is on PATH.")
+        hints.append("Use the verified Obsidian domestic mirror or the course download; Obsidian 1.12.7+ includes its CLI.")
+        hints.append("For media tools, read references/toolchain-install.md and use temporary Tsinghua Homebrew mirror settings.")
     elif os_name == "windows":
-        if "winget" in package_managers:
-            hints.append("Obsidian App: winget install Obsidian.Obsidian")
-        else:
-            hints.append("Download Obsidian from https://obsidian.md/download or install winget/choco/scoop first.")
-        hints.append("Obsidian CLI: install the CLI package used by your team and ensure `obsidian.exe` is on PATH.")
+        hints.append("Use the verified Obsidian domestic mirror or the course download.")
+        hints.append("Obsidian 1.12.7+ bundles the CLI; verify Obsidian.com beside Obsidian.exe after enabling it in Settings.")
+        hints.append("For media tools, prefer the Tsinghua MSYS2 mirror after native architecture is confirmed.")
     elif os_name == "linux":
         if "flatpak" in package_managers:
             hints.append("Obsidian App: flatpak install flathub md.obsidian.Obsidian")
@@ -526,7 +522,7 @@ def install_hints(os_name: str, package_managers: list[str]) -> list[str]:
             hints.append("Obsidian App: snap install obsidian --classic")
         else:
             hints.append("Install Obsidian through your distribution, Flatpak, Snap, or AppImage.")
-        hints.append("Obsidian CLI: install the CLI package used by your team and ensure `obsidian` is on PATH.")
+        hints.append("Obsidian 1.12.7+ bundles its CLI; verify the installed package launcher.")
     else:
         hints.append("Install Obsidian App and Obsidian CLI manually for your operating system.")
     return hints
@@ -546,16 +542,19 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
     config = build_config(wiki_root, os_name)
     cfg_paths = [Path(args.config_path).expanduser().resolve()] if args.config_path else config_paths(os_name)
     package_managers = detect_package_managers(os_name)
-    obsidian_cli = detect_obsidian_cli()
+    obsidian_app = detect_obsidian_app(os_name)
+    obsidian_cli = detect_obsidian_cli(os_name, obsidian_app)
     obsidian_route = obsidian_route_status(wiki_root, obsidian_cli)
     tools = {
         "os": os_name,
+        "architecture": architecture_status(os_name),
         "shell": shell_family(os_name),
-        "python": True,
+        "python": {"installed": True, "version": platform.python_version(), "executable": sys.executable},
         "git": command_exists("git"),
-        "obsidian_app": detect_obsidian_app(os_name),
+        "obsidian_app": obsidian_app,
         "obsidian_cli": obsidian_cli,
         "obsidian_route": obsidian_route,
+        "media": detect_media_toolchain(),
         "package_managers": package_managers,
     }
     degraded = []
@@ -565,6 +564,8 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
         degraded.append("Verified Obsidian CLI not detected")
     elif not tools["obsidian_route"]["trusted"]:
         degraded.append("Obsidian CLI target vault is unavailable or does not match WIKI_ROOT")
+    if not tools["media"]["ready"]:
+        degraded.append("Media-ingestion toolchain is incomplete")
     return {
         "wiki_root": str(wiki_root),
         "domains": domains,
@@ -578,23 +579,6 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
     }
 
 
-def attach_post_register_route(summary: dict[str, object], wiki_root: Path, wait_for_open: bool) -> None:
-    if wait_for_open:
-        time.sleep(2)
-    cli = detect_obsidian_cli()
-    route = obsidian_route_status(wiki_root, cli)
-    summary["post_register_route"] = {
-        "obsidian_cli": cli,
-        "obsidian_route": route,
-    }
-    register = summary.get("obsidian_register", {})
-    if isinstance(register, dict) and register.get("registered") and not route.get("trusted"):
-        degraded = summary.setdefault("degraded", [])
-        message = "Obsidian vault registered/opened, but CLI route does not currently point to WIKI_ROOT"
-        if isinstance(degraded, list) and message not in degraded:
-            degraded.append(message)
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Bootstrap an LLM Wiki vault.")
     parser.add_argument("--wiki-root", help="Target wiki root. Defaults to WIKI_ROOT or ~/wiki.")
@@ -603,10 +587,11 @@ def main() -> int:
     parser.add_argument("--check-only", action="store_true", help="Only inspect environment and print a summary.")
     parser.add_argument("--dry-run", action="store_true", help="Show planned writes without writing files.")
     parser.add_argument("--force", action="store_true", help="Overwrite existing bootstrap files.")
-    parser.add_argument("--no-git", action="store_true", help="Do not initialize Git.")
-    parser.add_argument("--skip-obsidian-register", action="store_true", help="Do not register the new vault in Obsidian.")
-    parser.add_argument("--open-obsidian", action="store_true", help="Open the registered vault in Obsidian after bootstrap.")
-    parser.add_argument("--register-only", action="store_true", help="Only register an existing wiki root in Obsidian.")
+    parser.add_argument("--git", action="store_true", help="Initialize Git after explicit user confirmation.")
+    parser.add_argument("--no-git", action="store_true", help="Deprecated compatibility flag; Git is skipped by default.")
+    parser.add_argument("--skip-obsidian-register", action="store_true", help="Deprecated compatibility flag; registry edits are always skipped.")
+    parser.add_argument("--open-obsidian", action="store_true", help="Deprecated compatibility flag; open the folder visibly in Obsidian instead.")
+    parser.add_argument("--register-only", action="store_true", help="Deprecated; prints the safe manual vault-opening instruction.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON summary.")
     args = parser.parse_args()
 
@@ -625,11 +610,11 @@ def main() -> int:
             return 2
         summary["config_write_mode"] = "not-written-in-register-only"
         summary["config_written"] = []
-        if args.skip_obsidian_register:
-            summary["obsidian_register"] = {"requested": False, "reason": "Skipped by --skip-obsidian-register"}
-        else:
-            summary["obsidian_register"] = register_obsidian_vault(wiki_root, str(summary["tools"]["os"]), args.open_obsidian, dry_run)
-            attach_post_register_route(summary, wiki_root, args.open_obsidian and not dry_run)
+        summary["obsidian_register"] = {
+            "requested": False,
+            "reason": "Direct registry editing is disabled. In Obsidian choose Open folder as vault and select WIKI_ROOT.",
+            "vault_path": str(wiki_root),
+        }
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
 
@@ -645,12 +630,12 @@ def main() -> int:
 
     summary["config_written"] = write_config_files(cfg_paths, summary["config"], args.force, dry_run)
     summary["wiki_writes"] = create_wiki(wiki_root, summary["domains"], args.force, dry_run)
-    summary["git"] = {"status": "skipped"} if args.no_git else init_git(wiki_root, dry_run)
-    if args.skip_obsidian_register:
-        summary["obsidian_register"] = {"requested": False, "reason": "Skipped by --skip-obsidian-register"}
-    else:
-        summary["obsidian_register"] = register_obsidian_vault(wiki_root, str(summary["tools"]["os"]), args.open_obsidian, dry_run)
-        attach_post_register_route(summary, wiki_root, args.open_obsidian and not dry_run)
+    summary["git"] = init_git(wiki_root, dry_run) if args.git and not args.no_git else {"status": "skipped"}
+    summary["obsidian_register"] = {
+        "requested": False,
+        "reason": "Direct registry editing is disabled. In Obsidian choose Open folder as vault and select WIKI_ROOT.",
+        "vault_path": str(wiki_root),
+    }
 
     if args.json:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
