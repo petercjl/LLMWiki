@@ -540,7 +540,9 @@ def load_snippet(os_name: str, paths: list[Path]) -> str:
 
 def build_summary(args: argparse.Namespace) -> dict[str, object]:
     os_name = detect_os()
-    wiki_root = Path(args.wiki_root or os.environ.get("WIKI_ROOT") or user_home() / "wiki").expanduser().resolve()
+    wiki_root_value = args.wiki_root or os.environ.get("WIKI_ROOT") or user_home() / "wiki"
+    wiki_root_source = "argument" if args.wiki_root else ("environment" if os.environ.get("WIKI_ROOT") else "default proposal")
+    wiki_root = Path(wiki_root_value).expanduser().resolve()
     domains = args.domain or DEFAULT_DOMAINS
     config = build_config(wiki_root, os_name)
     cfg_paths = [Path(args.config_path).expanduser().resolve()] if args.config_path else config_paths(os_name)
@@ -570,7 +572,14 @@ def build_summary(args: argparse.Namespace) -> dict[str, object]:
     if not tools["media"]["ready"]:
         degraded.append("Media-ingestion toolchain is incomplete")
     return {
+        "inspection_mode": "read-only" if args.check_only else "bootstrap",
         "wiki_root": str(wiki_root),
+        "current_state": {
+            "wiki_root_source": wiki_root_source,
+            "wiki_root_exists": wiki_root.exists(),
+            "existing_config_paths": [str(p) for p in cfg_paths if p.exists()],
+            "note": "config_paths and config below are planned bootstrap values; they do not prove that files already exist.",
+        },
         "domains": domains,
         "config_paths": [str(p) for p in cfg_paths],
         "config": config,
