@@ -35,9 +35,11 @@ For each confirmed route defect:
 2. use a stable Wiki-relative link that resolves from the source page;
 3. add missing entries to the narrowest useful domain, topic, or query index;
 4. remove or relabel misleading routes to unpopulated skeletons;
-5. change status only when the underlying content supports it;
-6. preserve knowledge prose unless the defect is in that prose;
-7. update `log.md` when the Wiki's rules require meaningful repair logging.
+5. keep `blocked`, source-less, and audit-only pages out of ordinary query and
+   answer routes; point normal routes only at usable evidence-bearing pages;
+6. change status only when the underlying content supports it;
+7. preserve knowledge prose unless the defect is in that prose;
+8. update `log.md` when the Wiki's rules require meaningful repair logging.
 
 Re-read the changed pages and rerun route checks immediately. Return to the main
 workflow's re-audit step after all route findings in scope are addressed.
@@ -52,7 +54,10 @@ Use only when extraction notes and source evidence can support the rebuilt page.
 4. record omissions or uncertainty instead of silently filling gaps;
 5. remove classroom/source logistics from durable pages unless they are useful
    knowledge;
-6. update affected indexes and query routes after synthesis passes review.
+6. compare every sentence added during synthesis with the declared source;
+   delete or qualify plausible-sounding consequences, examples, or advice that
+   the source does not actually support;
+7. update affected indexes and query routes after synthesis passes review.
 
 If the notes cannot support the repair, switch that finding to full source
 recompile. Never improvise knowledge from the page title alone.
@@ -108,6 +113,9 @@ For every repair mode, verify:
 - no new unresolved link, orphan, dead end, shell, or thin formal page was
   introduced;
 - rebuilt claims remain traceable to notes or raw evidence;
+- every new or materially changed claim passes a source-delta review;
+- blocked, source-less, and audit-only pages are absent from ordinary answer
+  routes even when they remain discoverable for maintenance;
 - noisy ASR/OCR material retains passed semantic validation;
 - raw hashes or contents are unchanged;
 - actual changes match the issue inventory;

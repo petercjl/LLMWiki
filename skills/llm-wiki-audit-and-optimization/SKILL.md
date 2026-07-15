@@ -89,6 +89,12 @@ Probe the target machine for a working Python 3 launcher. On Windows, test
 `python3`. If none works, perform equivalent checks with file tools and report
 degraded verification. Do not install Python merely to audit.
 
+Read Markdown as UTF-8 explicitly. On Windows PowerShell, do not infer file
+corruption from mojibake produced by a shell's default encoding; confirm the
+same file with `Get-Content -Raw -Encoding UTF8`, the file read tool, or the
+working Python launcher. Use PowerShell-compatible command syntax and never use
+POSIX here-doc forms such as `python - <<'PY'`.
+
 Obsidian CLI is optional enrichment. Use it only when it works and its active
 vault matches the resolved Wiki. Git, network access, `rg`, and a source-repo
 checkout are not required.
@@ -236,10 +242,14 @@ continue with other safe repairs.
 After edits:
 
 1. reread every changed file;
-2. rerun the mechanical scan and route audit;
-3. rerun the representative question routes;
-4. compare raw hashes and planned versus actual changed files;
-5. repair and rerun again while a targeted, evidence-backed check still fails.
+2. compare every new or materially changed claim with its declared source and
+   remove, qualify, or block anything the source does not support;
+3. confirm that blocked, source-less, or audit-only pages are excluded from
+   ordinary query routes and cannot be mistaken for answer evidence;
+4. rerun the mechanical scan and route audit;
+5. rerun the representative question routes;
+6. compare raw hashes and planned versus actual changed files;
+7. repair and rerun again while a targeted, evidence-backed check still fails.
 
 Stop only when all supported repairs pass or the exact remaining blocker is
 documented. Do not loop on subjective refinements without a failed gate.
@@ -261,6 +271,8 @@ Before completion, verify:
 - explicit read-only requests caused zero Wiki writes;
 - otherwise, all evidence-backed findings entered the optimization loop;
 - helper paths were verified from the installed Skill;
+- changed claims were checked against their declared sources;
+- blocked or source-less pages are outside normal answer routes;
 - raw sources remained unchanged;
 - only the resolved Wiki and planned files changed;
 - final claims match the post-repair checks.
