@@ -1,16 +1,20 @@
 # LLM Wiki Skill Migration Notes
 
-Date: 2026-06-12
+Last updated: 2026-07-16
 
 ## Published Skill Set
 
-The active LLM Wiki package now publishes five skills:
+The active LLM Wiki package now publishes four skills:
 
 - `llm-wiki`
 - `llm-wiki-bootstrap`
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
-- `llm-wiki-recompile-runner`
+
+`llm-wiki-recompile-runner` was merged into
+`llm-wiki-audit-and-optimization`. The combined skill now audits, applies
+evidence-backed optimization by default, and re-audits the result. Remove the
+old standalone directory and registration during migration.
 
 `ai-agent-skill-registry-sync` is no longer published from this repository. It is a separate agent-operations utility, not part of the LLM Wiki runtime package.
 

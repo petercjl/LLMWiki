@@ -644,6 +644,6 @@ Older source-specific entries have been removed as standalone skills. Their capa
 - `book-to-llm-wiki` -> `llm-wiki-ingest` + `book` adapter
 - `course-transcript-to-knowledge` -> `llm-wiki-ingest` + `transcript` adapter
 - `api-docs-wiki-ingest` -> `llm-wiki-ingest` + `api-docs` adapter
-- `llm-wiki-recompile-runner` remains a separate repair orchestrator and calls this skill's adapters.
+- `llm-wiki-audit-and-optimization` owns post-audit optimization and may call this skill's current adapters when an existing source package needs full recompilation.
 
 Do not recreate compatibility wrapper skills. If a user names an older entry, route the task to this skill and the matching adapter.

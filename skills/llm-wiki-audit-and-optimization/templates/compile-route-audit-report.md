@@ -5,6 +5,7 @@
 - Target path:
 - Audit date:
 - Audit mode: whole-wiki / domain / topic / post-ingest
+- Permission mode: audit-and-optimize / explicit read-only
 - Pages inspected:
 - Raw/extraction sources sampled:
 - Runtime evidence:
@@ -69,21 +70,40 @@
 | P1 |  |  |  |  |
 | P2 |  |  |  |  |
 
-## 8. Optimization Plan
+## 8. Optimizations Applied
 
-### P0 — Blocking
+| Priority | Repair mode | Issue | Files changed | Result |
+| --- | --- | --- | --- | --- |
+| P0 |  |  |  |  |
+| P1 |  |  |  |  |
+| P2 |  |  |  |  |
 
-### P1 — High Value
+For explicit read-only runs, write `None — read-only requested` and keep the
+proposed repairs in Section 7.
 
-### P2 — Nice to Have
+## 9. Changed Files
 
-## 9. Patches Applied
+- Added:
+- Updated:
+- Moved/retired:
+- Unplanned changes: none / list
 
-- None / list files changed
+## 10. Before / After Verification
 
-## 10. Follow-up Verification
+| Gate | Before | After | Pass |
+| --- | --- | --- | --- |
+| SHELL / SKELETON / THIN |  |  |  |
+| Unresolved links / orphans / dead ends |  |  |  |
+| Representative question routes |  |  |  |
+| Targeted findings |  |  |  |
 
-- [ ] Re-run query test
-- [ ] Check indexes
-- [ ] Check Agent-use templates
-- [ ] Check broken links
+## 11. Raw Preservation
+
+- Raw inventory/hash before:
+- Raw inventory/hash after:
+- Result: unchanged / blocked / not applicable
+
+## 12. Remaining Blockers And Residual Risk
+
+| Priority | Unresolved item | Exact blocker | Required next input/capability |
+| --- | --- | --- | --- |

@@ -24,11 +24,11 @@ Active published skills:
 - `llm-wiki-bootstrap`
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
-- `llm-wiki-recompile-runner`
 
 Non-published entries:
 
 - `ai-agent-skill-registry-sync`
+- `llm-wiki-recompile-runner` (merged into `llm-wiki-audit-and-optimization`)
 
 Merged legacy entries:
 

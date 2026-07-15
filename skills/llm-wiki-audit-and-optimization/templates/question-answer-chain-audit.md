@@ -54,13 +54,17 @@ Check all that apply:
 - [ ] input-gap
 - [ ] template-gap
 
-## 7. Recommended Fixes
+## 7. Optimizations Applied
 
-### Answer-level fix
+### Answer-level repair
 
-### Wiki-level fix
+### Wiki-level repair
 
-### Prompt/input fix
+### Prompt/input repair
+
+- Changed files:
+- Explicit read-only: yes / no
+- Blocked fixes and reasons:
 
 ## 8. Should this become a wiki page?
 
@@ -68,3 +72,11 @@ Check all that apply:
 - [ ] Save as `playbooks/...`
 - [ ] Update existing page
 - [ ] No, one-off
+
+## 9. Re-Audit
+
+- Expected route after repair:
+- Actual route after repair:
+- Grounding after repair:
+- Raw sources unchanged: yes / no / not applicable
+- Remaining issue:

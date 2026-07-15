@@ -15,10 +15,10 @@ PUBLISHED = {
     "llm-wiki-bootstrap",
     "llm-wiki-ingest",
     "llm-wiki-audit-and-optimization",
-    "llm-wiki-recompile-runner",
 }
 OBSOLETE = {
     "ai-agent-skill-registry-sync",
+    "llm-wiki-recompile-runner",
     "api-docs-wiki-ingest",
     "wiki-clippings-ingest",
     "book-to-llm-wiki",

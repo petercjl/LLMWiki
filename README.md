@@ -15,7 +15,6 @@ Published skills are under `skills/`:
 - `llm-wiki-bootstrap`
 - `llm-wiki-ingest`
 - `llm-wiki-audit-and-optimization`
-- `llm-wiki-recompile-runner`
 
 Non-published entries:
 

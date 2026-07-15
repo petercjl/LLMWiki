@@ -1,6 +1,6 @@
 ---
 name: llm-wiki
-description: Query and perform routine navigation maintenance on an existing Markdown LLM Wiki. Use when the user asks a question that should be answered from their Wiki, wants to find existing knowledge, compare compiled pages, trace which Wiki pages support an answer, or make small explicit updates to indexes and query entry pages. Delegate new-source ingestion, quality audits, and repair/recompilation to the corresponding LLM Wiki skills.
+description: Query and perform routine navigation maintenance on an existing Markdown LLM Wiki. Use when the user asks a question that should be answered from their Wiki, wants to find existing knowledge, compare compiled pages, trace which Wiki pages support an answer, or make small explicit updates to indexes and query entry pages. Delegate new-source ingestion and all quality audit, optimization, repair, and recompilation work to the corresponding LLM Wiki skills.
 ---
 
 # LLM Wiki Query And Routine Maintenance
@@ -23,10 +23,9 @@ Use the other LLM Wiki Skills for work outside this boundary:
 
 - new files, webpages, books, videos, audio, meetings, or other source material:
   use `llm-wiki-ingest`;
-- compile, route, retrieval, or answer-quality audit: use
+- compile, route, retrieval, or answer-quality audit, followed by optimization,
+  repair, reorganization, or recompilation: use
   `llm-wiki-audit-and-optimization`;
-- repair or reorganize thin, misplaced, or poorly routed knowledge after an audit:
-  use `llm-wiki-recompile-runner`;
 - first-time Wiki and tool setup: use `llm-wiki-bootstrap`.
 
 Do not silently perform one of those larger workflows inside a normal query.
