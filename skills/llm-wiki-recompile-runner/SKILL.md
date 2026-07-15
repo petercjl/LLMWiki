@@ -56,6 +56,18 @@ This skill bundles its own optional verification scripts under `scripts/`:
   selected page routes. It uses filesystem checks when Obsidian CLI is missing
   or points at another vault.
 
+Resolve the script directory from the actual `SKILL.md` file read for this run:
+
+1. take the parent directory of that loaded `SKILL.md`;
+2. confirm the sibling `scripts/` file exists before invoking it;
+3. if the advertised Skill location is inside an application archive such as
+   `app.asar`, or the sibling script is missing, look in the active workspace
+   and Agent Skill registries for a directory named
+   `llm-wiki-recompile-runner` that contains both this `SKILL.md` and the
+   requested script;
+4. use the verified installed copy. Do not compose an executable path from a
+   catalog or built-in package location without checking it first.
+
 Never call a script by reaching into another Skill's directory. To run a bundled
 script, first discover a working Python interpreter on the current machine:
 
