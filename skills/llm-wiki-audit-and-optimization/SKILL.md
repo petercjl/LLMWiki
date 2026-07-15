@@ -242,8 +242,11 @@ continue with other safe repairs.
 After edits:
 
 1. reread every changed file;
-2. compare every new or materially changed claim with its declared source and
-   remove, qualify, or block anything the source does not support;
+2. compare every formal claim in the repaired scope with its declared source,
+   including claims written by earlier runs; the repaired scope includes every
+   finding page, every changed page, and every formal page on the representative
+   question routes. Remove, qualify, or block anything the source does not
+   support. Do not limit this review to text changed in the current run;
 3. confirm that blocked, source-less, or audit-only pages are excluded from
    ordinary query routes and cannot be mistaken for answer evidence;
 4. rerun the mechanical scan and route audit;
@@ -271,11 +274,15 @@ Before completion, verify:
 - explicit read-only requests caused zero Wiki writes;
 - otherwise, all evidence-backed findings entered the optimization loop;
 - helper paths were verified from the installed Skill;
-- changed claims were checked against their declared sources;
+- every formal claim in the repaired scope was checked against its declared
+  source, including claims left by earlier runs;
 - blocked or source-less pages are outside normal answer routes;
 - raw sources remained unchanged;
 - only the resolved Wiki and planned files changed;
 - final claims match the post-repair checks.
+
+A clean mechanical or route scan cannot close the task while source comparison
+still finds an unsupported formal claim.
 
 ## Failure Handling
 

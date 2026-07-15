@@ -112,8 +112,11 @@ For every repair mode, verify:
 - every targeted issue is resolved or has a concrete blocker;
 - no new unresolved link, orphan, dead end, shell, or thin formal page was
   introduced;
-- rebuilt claims remain traceable to notes or raw evidence;
-- every new or materially changed claim passes a source-delta review;
+- every formal claim on finding pages, changed pages, and representative answer
+  routes remains traceable to notes or raw evidence, including claims left by
+  earlier runs;
+- unsupported formal claims are removed, qualified, or blocked even when they
+  were not edited during the current repair;
 - blocked, source-less, and audit-only pages are absent from ordinary answer
   routes even when they remain discoverable for maintenance;
 - noisy ASR/OCR material retains passed semantic validation;
@@ -124,3 +127,5 @@ For every repair mode, verify:
 If an applicable gate fails, repair the cause and rerun that gate. Return to the
 main Skill's re-audit step only when the current mode is stable or blocked by a
 named missing input or capability.
+
+Mechanical and route success never overrides a failed source comparison.
