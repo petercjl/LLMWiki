@@ -86,6 +86,15 @@ if ($nativeExit -ne 0 -or -not (Test-Path -LiteralPath $wav)) {
 }
 ```
 
+For long-running ASR or OCR, do not pipe the native command through
+`Select-Object -Last`, `tail`, or another end-of-stream collector. Those
+collectors can buffer all output until the process exits, making a healthy job
+look stalled and causing repeated empty polling. Stream output to a log with
+`Tee-Object`, or redirect it to a log and monitor the process plus expected
+artifacts at sensible intervals. Silence is not an error while the process is
+alive; completion still requires exit code `0` and the expected transcript or
+OCR file.
+
 ### macOS/Linux
 
 Load `~/.llmwiki/config.env` when it exists, then use the configured absolute

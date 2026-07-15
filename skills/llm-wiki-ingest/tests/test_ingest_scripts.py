@@ -14,6 +14,8 @@ SEARCH_SCRIPT = SKILL_DIR / "scripts" / "wiki_cli_search.py"
 VALIDATE_SCRIPT = SKILL_DIR / "scripts" / "validate_ingest_contract.py"
 VALIDATE_WRAPPER = SKILL_DIR / "scripts" / "run_ingest_validation.sh"
 ROUTE_SCRIPT = SKILL_DIR / "scripts" / "wiki_cli_route_audit.py"
+SKILL_FILE = SKILL_DIR / "SKILL.md"
+VIDEO_REFERENCE = SKILL_DIR / "references" / "transcript" / "video-course-ingest.md"
 
 
 def load_script(path: Path, name: str):
@@ -55,6 +57,18 @@ def audit_handoff_text() -> str:
 
 
 class IngestScriptTests(unittest.TestCase):
+    def test_skill_forbids_unexpanded_paths_in_file_tools(self):
+        text = SKILL_FILE.read_text(encoding="utf-8")
+        self.assertIn("Never pass an unexpanded home shortcut", text)
+        self.assertIn("Do not send a path beginning with `~`", text)
+        self.assertIn("From the resolved installed Skill root", text)
+
+    def test_video_reference_forbids_buffered_long_running_output(self):
+        text = VIDEO_REFERENCE.read_text(encoding="utf-8")
+        self.assertIn("do not pipe the native command through", text)
+        self.assertIn("`Select-Object -Last`", text)
+        self.assertIn("exit code `0`", text)
+
     def test_search_falls_back_to_python_when_rg_is_missing(self):
         module = load_script(SEARCH_SCRIPT, "wiki_cli_search")
         with tempfile.TemporaryDirectory() as td:

@@ -217,23 +217,34 @@ its command is absent from the current `PATH`.
 At the start of the run:
 
 1. Detect the current operating system and shell.
-2. Resolve `WIKI_ROOT` from the current environment. If it is unset, read
+2. Resolve the current user's home directory and this installed Skill's root to
+   absolute paths before using any file-reading tool. Shell commands may expand
+   `~`, `$HOME`, or `%USERPROFILE%`, but file APIs often treat those strings as
+   literal relative paths. Never pass an unexpanded home shortcut, environment
+   variable, or Skill-relative path to a file API. On Windows, derive the home
+   path from `$env:USERPROFILE`; on macOS/Linux, derive it from `$HOME`. Resolve
+   bundled references and adapters from the directory containing the loaded
+   `SKILL.md`, test that the absolute path exists, and then read it. If a read
+   fails with a path containing a literal `~` or variable token, correct that
+   path immediately; do not search unrelated directories or treat the resource
+   as missing.
+3. Resolve `WIKI_ROOT` from the current environment. If it is unset, read
    `~/.llmwiki/config.json` as data before using the default `~/wiki`. This JSON
    file is the cross-platform source of truth and does not depend on shell
    execution policy. Older installations may have only `config.env`,
    `config.ps1`, or `config.cmd`; read those files as plain text and parse their
    variable assignments instead of executing them.
-3. Test whether `$WIKI_ROOT/TOOLS.md` exists before reading it. Its absence on an
+4. Test whether `$WIKI_ROOT/TOOLS.md` exists before reading it. Its absence on an
    older Wiki is normal and must not produce a failed read call. When it exists,
    treat its verified executable and model paths as the primary tool inventory
    for this Wiki.
-4. Resolve `LLMWIKI_MEDIA_BIN` and `WHISPER_MODEL` from the current environment
+5. Resolve `LLMWIKI_MEDIA_BIN` and `WHISPER_MODEL` from the current environment
    or the platform config. Check the recorded absolute paths before probing
    `PATH`, package managers, or common install directories.
-5. Use verified absolute executable paths for the current run. Do not change a
+6. Use verified absolute executable paths for the current run. Do not change a
    shell profile, execution policy, persistent `PATH`, or install a duplicate
    tool merely to make a short command resolve.
-6. If a recorded path is stale, report the exact path and failure, then follow
+7. If a recorded path is stale, report the exact path and failure, then follow
    the applicable adapter's missing-tool branch. Ask before installing or
    replacing software, and return to the ingest main line after repair.
 
@@ -246,6 +257,12 @@ $wikiRoot = [string]$config.WIKI_ROOT
 $mediaBin = [string]$config.LLMWIKI_MEDIA_BIN
 $model = [string]$config.WHISPER_MODEL
 ```
+
+If `config.json` is absent, first build the legacy config paths with
+`Join-Path $env:USERPROFILE '.llmwiki\config.ps1'` and
+`Join-Path $env:USERPROFILE '.llmwiki\config.cmd'`. Test each absolute path and
+read the existing file as plain text. Do not send a path beginning with `~` to
+the file-reading tool.
 
 Do not change PowerShell execution policy to load Wiki configuration. Do not use
 Bash heredocs, `export`, or CMD-only command chaining in PowerShell. Assign an
@@ -286,7 +303,10 @@ If the task will create or modify more than 10 wiki files, present a short execu
 
 ## Source Adapter Selection
 
-Read `references/source-adapter-map.md`, then load only the relevant adapter:
+From the resolved installed Skill root, build absolute paths for
+`references/source-adapter-map.md` and the selected adapter, test them, and read
+them. Do not prepend `~` to the installed Skill path. Then load only the relevant
+adapter:
 
 | Source | Adapter |
 | --- | --- |
