@@ -35,6 +35,7 @@ raw 永不修改。
 ## 3. extraction notes
 
 每个文件都要有独立 extraction 目录，至少包含：
+- `semantic-validation.md`（ASR/OCR 或其他机器提取文本必需）
 - `segment-plan.md`
 - `micro-segment-plan.md`
 - `coverage-matrix.md`
@@ -43,6 +44,10 @@ raw 永不修改。
 如果是大文件，必要时再扩展 `micro-segments/`。
 
 ## 4. 正式输出规则
+
+正式输出前必须完成语义校验：平台/产品/功能名、后台字段、数字与
+时长、否定和合规边界、操作顺序都要有证据支持。系统性错词要检索
+全文并统一纠正；无法确认的词标记 `待确认`，不得写成操作指令。
 
 - 用“顺序化 learning path”优先，不要轻易做一页大总纲
 - 文件名可以是 slug，但：
@@ -152,6 +157,7 @@ raw 永不修改。
 5. omission audit 已完成
 6. 关键案例/数字没有无声丢失
 7. 可直接给 Agent 用于分析、策划、诊断、生成
+8. 机器提取文本的 `semantic-validation.md` 已通过，正式页未使用无证据的 ASR/OCR 词形
 
 ## 11. 最短实战理解
 

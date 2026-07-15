@@ -29,6 +29,28 @@ ALLOWED_STATUS = {
     "unresolved",
 }
 
+MEDIA_SUFFIXES = {
+    ".aac",
+    ".avi",
+    ".flac",
+    ".m4a",
+    ".mkv",
+    ".mov",
+    ".mp3",
+    ".mp4",
+    ".ogg",
+    ".wav",
+    ".webm",
+}
+
+SEMANTIC_CONFIDENCE = {"high", "medium", "low"}
+SEMANTIC_DISPOSITIONS = {
+    "accepted-as-is",
+    "corrected",
+    "unresolved",
+    "excluded-from-formal",
+}
+
 BOILERPLATE_CJK = [
     "本节用于把课程中的口头经验重构成稳定的方法框架",
     "请基于本节方法，分析当前品牌/产品/视觉材料是否存在同类问题",
@@ -314,6 +336,128 @@ def validate_durable_source_inventory(notes_dir: Path, errors: list[str]) -> Non
         errors.append(f"{path}: final source inventory must not reference disposable _meta/working/ paths")
 
 
+def raw_contains_media(raw_paths: list[Path]) -> bool:
+    for path in raw_paths:
+        if path.is_file() and path.suffix.lower() in MEDIA_SUFFIXES:
+            return True
+        if path.is_dir():
+            for child in path.rglob("*"):
+                if child.is_file() and child.suffix.lower() in MEDIA_SUFFIXES:
+                    return True
+    return False
+
+
+def semantic_validation_required(notes_dir: Path, raw_paths: list[Path]) -> bool:
+    if raw_contains_media(raw_paths):
+        return True
+    profile = notes_dir / "source-profile.md"
+    if not profile.is_file():
+        return False
+    text = read(profile).casefold()
+    return bool(
+        re.search(
+            r"\b(?:asr|ocr|whisper|speech-to-text|machine-extracted)\b|"
+            r"local video|local audio|音频转写|视频转写|机器转写",
+            text,
+        )
+    )
+
+
+def field_value(text: str, label: str) -> str:
+    match = re.search(rf"^\s*-\s*{re.escape(label)}\s*:\s*(.*?)\s*$", text, re.MULTILINE | re.IGNORECASE)
+    return match.group(1).strip() if match else ""
+
+
+def validate_semantic_validation(notes_dir: Path, errors: list[str]) -> None:
+    path = notes_dir / "semantic-validation.md"
+    if not path.is_file():
+        errors.append(f"{path}: missing for machine-extracted source")
+        return
+    text = read(path)
+    if not text.strip():
+        errors.append(f"{path}: empty")
+        return
+
+    required_fields = [
+        "Status",
+        "Raw evidence preserved",
+        "Validation scope",
+        "Evidence sources",
+        "Systematic variant search",
+        "Formal text checked against normalized anchors",
+    ]
+    values = {label: field_value(text, label) for label in required_fields}
+    for label, value in values.items():
+        if not value:
+            errors.append(f"{path}: missing required field {label}:")
+
+    if not values["Status"].casefold().startswith("passed"):
+        errors.append(f"{path}: Status must be passed for machine-extracted source")
+    if values["Raw evidence preserved"].casefold() != "yes":
+        errors.append(f"{path}: Raw evidence preserved must be yes")
+    if not values["Systematic variant search"].casefold().startswith("passed"):
+        errors.append(f"{path}: Systematic variant search must be passed")
+    if not values["Formal text checked against normalized anchors"].casefold().startswith("passed"):
+        errors.append(f"{path}: Formal text checked against normalized anchors must be passed")
+    if "## High-Risk Anchor Inventory" not in text:
+        errors.append(f"{path}: missing required section ## High-Risk Anchor Inventory")
+
+    rows = parse_markdown_table_rows(text)
+    if len(rows) < 2:
+        errors.append(f"{path}: high-risk anchor inventory has no data rows")
+        return
+    header = rows[0]
+    required_columns = [
+        "anchor_id",
+        "source_location",
+        "anchor_type",
+        "raw_form",
+        "normalized_form",
+        "evidence",
+        "confidence",
+        "disposition",
+        "formal_handling",
+    ]
+    missing = [column for column in required_columns if column not in header]
+    if missing:
+        errors.append(f"{path}: missing semantic columns: {', '.join(missing)}")
+        return
+    idx = {name: header.index(name) for name in required_columns}
+    seen: set[str] = set()
+    for row_num, row in enumerate(rows[1:], start=2):
+        if len(row) < len(header):
+            errors.append(f"{path}: row {row_num} has too few cells")
+            continue
+        values_by_column = {name: row[index].strip() for name, index in idx.items()}
+        anchor_id = values_by_column["anchor_id"]
+        if not anchor_id:
+            errors.append(f"{path}: row {row_num} missing anchor_id")
+        elif anchor_id in seen:
+            errors.append(f"{path}: duplicate anchor_id {anchor_id!r}")
+        seen.add(anchor_id)
+        for column in ["source_location", "anchor_type", "raw_form", "normalized_form", "evidence", "formal_handling"]:
+            if not values_by_column[column]:
+                errors.append(f"{path}: row {row_num} {anchor_id or '<unknown>'} missing {column}")
+        confidence = values_by_column["confidence"].casefold()
+        disposition = values_by_column["disposition"].casefold()
+        if confidence not in SEMANTIC_CONFIDENCE:
+            errors.append(f"{path}: row {row_num} {anchor_id} invalid confidence {confidence!r}")
+        if disposition not in SEMANTIC_DISPOSITIONS:
+            errors.append(f"{path}: row {row_num} {anchor_id} invalid disposition {disposition!r}")
+        if disposition == "corrected" and values_by_column["raw_form"] == values_by_column["normalized_form"]:
+            errors.append(f"{path}: row {row_num} {anchor_id} corrected forms must differ")
+        if disposition == "unresolved":
+            handling = values_by_column["formal_handling"].casefold()
+            if not re.search(
+                r"待确认|核验|不进入|不把|不写|不得|不可|排除|避免|仅可|"
+                r"exclude|unresolved|verify",
+                handling,
+            ):
+                errors.append(
+                    f"{path}: row {row_num} {anchor_id} unresolved item needs explicit safe formal_handling"
+                )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--wiki-root", default=os.environ.get("WIKI_ROOT", str(Path.home() / "wiki")))
@@ -359,6 +503,8 @@ def main() -> int:
         validate_inventory_against_coverage(notes_dir, coverage, errors)
         validate_audit_handoff(notes_dir, errors)
         validate_durable_source_inventory(notes_dir, errors)
+        if semantic_validation_required(notes_dir, raw_paths):
+            validate_semantic_validation(notes_dir, errors)
 
     for raw in raw_paths:
         if not raw.exists():

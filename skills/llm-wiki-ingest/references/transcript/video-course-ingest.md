@@ -7,7 +7,7 @@ Use this reference when the source is a local video/audio course and the user wa
 The main line is:
 
 ```text
-resolve configured tools -> inspect media -> repair genuinely missing tools with approval -> archive raw media -> extract audio -> ASR -> keyframes/OCR -> source/extraction notes -> ASR correction notes -> coverage -> placement proposal and user confirmation -> formal pages -> index/log -> validation -> audit handoff
+resolve configured tools -> inspect media -> repair genuinely missing tools with approval -> archive raw media -> extract audio -> ASR -> keyframes/OCR -> semantic validation -> source/extraction notes -> coverage -> placement proposal and user confirmation -> formal pages -> index/log -> validation -> audit handoff
 ```
 
 Do not skip good tooling merely because a short command is absent from `PATH`.
@@ -195,6 +195,12 @@ OCR:
 tesseract "$frame" "$work/ocr_frame_001" -l chi_sim+eng --psm 6
 ```
 
+On Windows PowerShell, Tesseract text is UTF-8. When combining OCR files, read
+them with `Get-Content -Raw -Encoding UTF8` and write the combined artifact as
+UTF-8. Treat mojibake such as repeated `鐢`, `鍙`, or `涓` characters as an
+encoding failure, not as semantic evidence; repair the decoding before using
+OCR for correction.
+
 ASR:
 
 ```bash
@@ -215,8 +221,14 @@ Copy final raw ASR artifacts to `raw/transcripts/<source-slug>/`:
 
 Raw ASR is evidence, not truth. For formal pages:
 
+- Read `references/semantic-validation-contract.md` and complete its required
+  artifact before knowledge-unit extraction or the placement proposal.
 - Correct obvious ASR errors only when supported by file names, slide/OCR text, repeated context, or domain knowledge.
-- Record corrections in `knowledge-unit-inventory.md`, `coverage-matrix.md`, or `omission-audit.md`.
+- Record every high-risk accepted, corrected, unresolved, or excluded anchor in
+  `semantic-validation.md`; coverage and omission files may link to it but do
+  not replace it.
+- Search the full raw transcript for confirmed systematic variants such as one
+  product name being rendered several different ways.
 - Keep unresolved terms as `待确认` instead of turning them into operational instructions.
 - Do not silently rewrite raw transcript files.
 
@@ -235,6 +247,7 @@ For video courses, create or update:
 _meta/extraction-notes/<source-slug>/
 ├── source-profile.md
 ├── source-inventory.md
+├── semantic-validation.md
 ├── knowledge-unit-inventory.md
 ├── coverage-matrix.md
 ├── omission-audit.md
@@ -313,8 +326,10 @@ Before finishing:
 1. Confirm raw media exists.
 2. Confirm raw ASR exists for every processed media file.
 3. Confirm keyframes/OCR exist when screen content may carry knowledge.
-4. Confirm every meaningful ASR/OCR unit has a coverage row or omission reason.
-5. Run `validate_ingest_contract.py` with the verified target-machine Python
+4. Confirm `semantic-validation.md` is `passed`, includes a non-empty high-risk
+   anchor inventory, and safely handles every unresolved term.
+5. Confirm every meaningful ASR/OCR unit has a coverage row or omission reason.
+6. Run `validate_ingest_contract.py` with the verified target-machine Python
    launcher. For existing course
    packages with added chapters, pass the package-level notes directory, not
    only `_meta/extraction-notes/<source-slug>/chXX/`, because the required
@@ -322,10 +337,10 @@ Before finishing:
    The validator checks that every formalized/merged coverage row resolves to a
    real target page. It does not require internal source-unit IDs or transcript
    sentences to appear verbatim in learner-facing formal pages.
-6. The same validator checks formal outputs for placeholder markers, thin pages,
+7. The same validator checks formal outputs for placeholder markers, thin pages,
    and duplicate bodies. Any non-zero exit must be repaired and rerun before a
    success claim; do not substitute a manual checklist.
-7. Remove `_meta/working/<source-slug>/` unless there is a deliberate reason to keep it.
-8. Update relevant domain index, root `index.md`, and `log.md`.
+8. Remove `_meta/working/<source-slug>/` unless there is a deliberate reason to keep it.
+9. Update relevant domain index, root `index.md`, and `log.md`.
 
 If an ASR term is uncertain, do not block the whole ingest. Mark it unresolved, keep the raw evidence, formalize the surrounding method safely, and return to the main ingest workflow.

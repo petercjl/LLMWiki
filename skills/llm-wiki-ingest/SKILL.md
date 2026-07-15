@@ -44,6 +44,23 @@ For each source unit, record exactly one disposition:
 
 The final wiki may be longer than a summary. It should reconstruct implicit logic, add interpretation, relationship maps, decision criteria, examples, Agent-usable templates, caveats, and cross-links. Enrichment must never replace source coverage: first preserve the source's knowledge units, then enrich.
 
+## Semantic Accuracy Gate
+
+When source text comes from ASR, OCR, subtitles, speech-to-text, or another
+noisy extraction step, semantic validation is mandatory before knowledge-unit
+extraction, placement proposal, or formal writing. Read
+`references/semantic-validation-contract.md`, preserve the raw extraction, and
+create `semantic-validation.md` in the source's extraction-notes directory.
+
+Do not treat readable sentences as proof of accuracy. Check high-risk anchors:
+platform/product/tool names, UI labels, metrics and limits, negations and
+compliance boundaries, and ordered operating steps. Use filenames, visual
+evidence, repeated context, existing trusted knowledge, authoritative sources,
+or selective re-ASR as evidence. Search confirmed systematic variants across
+the whole raw transcript. Unresolved high-risk terms must be marked `待确认` or
+excluded from operational instructions. Do not continue to formal compilation
+until this gate is `passed`.
+
 ## Memory-First Placement And Fusion
 
 Before planning formal pages, perform a classification and fusion gate.
@@ -375,6 +392,7 @@ For large sources, create:
 _meta/extraction-notes/<source-slug>/
 ├── source-profile.md
 ├── source-inventory.md
+├── semantic-validation.md  # required for ASR/OCR or other noisy extraction
 ├── knowledge-unit-inventory.md
 ├── coverage-matrix.md
 ├── omission-audit.md
@@ -385,6 +403,10 @@ _meta/extraction-notes/<source-slug>/
 Use `references/coverage-contract.md` for required columns and dispositions.
 
 ### 4. Knowledge Unit Extraction
+
+For ASR/OCR or other noisy extraction, complete the Semantic Accuracy Gate
+first. Extract knowledge units from the validated interpretation, not directly
+from unsupported raw wording.
 
 Extract all meaningful source units into reusable knowledge units:
 
@@ -524,7 +546,9 @@ the exact coverage contract, target-page existence, formal frontmatter,
 placeholder/boilerplate markers, thin non-index pages, and duplicate formal
 bodies. It also checks the audit-handoff contract, knowledge-inventory versus
 coverage dispositions, durable source-inventory paths, and required raw plus
-extraction-note citations in formal pages. Do not call another Skill's
+extraction-note citations in formal pages. For machine-extracted sources, it
+also requires a passed `semantic-validation.md` contract with a non-empty
+high-risk anchor inventory. Do not call another Skill's
 placeholder scanner as a required ingest dependency.
 
 Choose `.cmd` or `.sh` by the shell that is actually executing the validation,
@@ -578,6 +602,7 @@ The ingest skill must hand off:
 - adapter used
 - formal pages created/updated
 - source inventory path
+- semantic validation path and status for machine-extracted sources
 - coverage matrix path
 - omission audit path
 - audit handoff path
@@ -587,8 +612,10 @@ The ingest skill must hand off:
 
 The audit skill checks two primary concerns:
 
-1. **Completeness**: whether source knowledge was fully represented or explicitly classified.
-2. **Agent usability**: whether compiled pages are easy for future AI agents to route to, read, and apply.
+1. **Semantic accuracy**: whether machine-extracted high-risk anchors were
+   accepted, corrected, or safely left unresolved with evidence.
+2. **Completeness**: whether source knowledge was fully represented or explicitly classified.
+3. **Agent usability**: whether compiled pages are easy for future AI agents to route to, read, and apply.
 
 ## Output Report
 
@@ -598,6 +625,7 @@ End with:
 - adapter(s) used
 - raw files created/moved
 - extraction notes created
+- semantic validation result when applicable
 - formal pages created/updated
 - query entries created/updated, or no-query reason
 - index/log updates

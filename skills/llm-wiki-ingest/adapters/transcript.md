@@ -15,6 +15,8 @@ For dense course material, especially business, ecommerce, brand, visual-product
 - convert source-specific classroom identities into neutral formal knowledge
 - mark uncertain transcript-derived claims as `待确认`
 - preserve evidence anchors or classify omissions with reasons
+- complete the main Skill's Semantic Accuracy Gate before extracting knowledge
+  units from ASR, OCR, subtitles, or another noisy transcript source
 
 Load `references/transcript/checklist-v1.2.0.md` before processing long or noisy transcripts.
 
@@ -34,6 +36,7 @@ Record:
 - timestamp availability
 - transcript quality issues
 - ASR/OCR tool and model used, when generated during ingest
+- semantic-validation artifact and status when text was machine-extracted
 - repeated filler/noise pattern
 - source language and desired formal language
 
