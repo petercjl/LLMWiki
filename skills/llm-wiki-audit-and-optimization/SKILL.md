@@ -156,7 +156,9 @@ Run:
 Interpret:
 
 - `SHELL`: P0 failed compilation;
-- `SKELETON`: unpopulated index scaffold; inspect status and route impact;
+- `SKELETON`: unpopulated index scaffold; inspect status and route impact. A
+  deliberately planned category may remain a short `draft` maintenance stub,
+  but must stay out of ordinary answer routes;
 - `THIN`: manual depth review, normally P1;
 - `OK`: mechanical pass only, not semantic proof.
 
@@ -249,10 +251,13 @@ After edits:
    support. Do not limit this review to text changed in the current run;
 3. confirm that blocked, source-less, or audit-only pages are excluded from
    ordinary query routes and cannot be mistaken for answer evidence;
-4. rerun the mechanical scan and route audit;
-5. rerun the representative question routes;
-6. compare raw hashes and planned versus actual changed files;
-7. repair and rerun again while a targeted, evidence-backed check still fails.
+4. confirm that planned or empty categories were not padded with generic future
+   modules, invented criteria, or boilerplate merely to pass a size or outline
+   check; a short, clearly labeled `draft` maintenance stub is valid;
+5. rerun the mechanical scan and route audit;
+6. rerun the representative question routes;
+7. compare raw hashes and planned versus actual changed files;
+8. repair and rerun again while a targeted, evidence-backed check still fails.
 
 Stop only when all supported repairs pass or the exact remaining blocker is
 documented. Do not loop on subjective refinements without a failed gate.
@@ -277,6 +282,8 @@ Before completion, verify:
 - every formal claim in the repaired scope was checked against its declared
   source, including claims left by earlier runs;
 - blocked or source-less pages are outside normal answer routes;
+- planned empty categories remain minimal draft maintenance stubs rather than
+  padded pseudo-knowledge;
 - raw sources remained unchanged;
 - only the resolved Wiki and planned files changed;
 - final claims match the post-repair checks.

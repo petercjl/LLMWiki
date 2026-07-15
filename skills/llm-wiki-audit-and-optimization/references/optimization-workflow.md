@@ -37,9 +37,15 @@ For each confirmed route defect:
 4. remove or relabel misleading routes to unpopulated skeletons;
 5. keep `blocked`, source-less, and audit-only pages out of ordinary query and
    answer routes; point normal routes only at usable evidence-bearing pages;
-6. change status only when the underlying content supports it;
-7. preserve knowledge prose unless the defect is in that prose;
-8. update `log.md` when the Wiki's rules require meaningful repair logging.
+6. when an empty category is intentionally reserved, keep only a short `draft`
+   maintenance stub stating that no answer-ready knowledge exists; a root
+   maintenance section may link to it when the link is visibly labeled `draft`,
+   but query entries and evidence routes must not;
+7. do not add generic future module lists, invented activation criteria, or
+   boilerplate merely to push a draft page over a byte or outline threshold;
+8. change status only when the underlying content supports it;
+9. preserve knowledge prose unless the defect is in that prose;
+10. update `log.md` when the Wiki's rules require meaningful repair logging.
 
 Re-read the changed pages and rerun route checks immediately. Return to the main
 workflow's re-audit step after all route findings in scope are addressed.
@@ -119,6 +125,8 @@ For every repair mode, verify:
   were not edited during the current repair;
 - blocked, source-less, and audit-only pages are absent from ordinary answer
   routes even when they remain discoverable for maintenance;
+- empty planned categories remain concise draft maintenance stubs and are not
+  expanded with speculative taxonomies or generic prose;
 - noisy ASR/OCR material retains passed semantic validation;
 - raw hashes or contents are unchanged;
 - actual changes match the issue inventory;
