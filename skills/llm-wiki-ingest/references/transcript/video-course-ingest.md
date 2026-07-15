@@ -95,6 +95,13 @@ artifacts at sensible intervals. Silence is not an error while the process is
 alive; completion still requires exit code `0` and the expected transcript or
 OCR file.
 
+Treat ASR and batch keyframe OCR as CPU-heavy work. Do not run them concurrently
+by default on a virtual machine or an unmeasured learner computer; they can
+compete for the same cores and make both jobs slower. Run the main extraction
+steps in this order: audio extraction, ASR, keyframe extraction, then OCR. Use
+parallel ASR/OCR only after checking that the machine has enough idle CPU and
+memory headroom and that a short representative run is actually faster.
+
 ### macOS/Linux
 
 Load `~/.llmwiki/config.env` when it exists, then use the configured absolute

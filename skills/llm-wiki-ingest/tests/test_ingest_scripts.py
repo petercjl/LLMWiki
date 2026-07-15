@@ -68,6 +68,8 @@ class IngestScriptTests(unittest.TestCase):
         self.assertIn("do not pipe the native command through", text)
         self.assertIn("`Select-Object -Last`", text)
         self.assertIn("exit code `0`", text)
+        self.assertIn("Do not run them concurrently", text)
+        self.assertIn("audio extraction, ASR, keyframe extraction, then OCR", text)
 
     def test_search_falls_back_to_python_when_rg_is_missing(self):
         module = load_script(SEARCH_SCRIPT, "wiki_cli_search")
