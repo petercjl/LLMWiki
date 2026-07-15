@@ -211,6 +211,20 @@ class IngestScriptTests(unittest.TestCase):
         self.assertFalse(status["trusted"])
         self.assertIn("Command", status["error"])
 
+    def test_route_audit_rejects_file_error_as_cli_lines(self):
+        module = load_script(ROUTE_SCRIPT, "wiki_cli_route_audit_lines")
+        with mock.patch.object(module, "run", return_value=(0, 'Error: File "missing.md" not found.', "")):
+            self.assertEqual(module.cli_lines(["obsidian", "links"]), [])
+
+    def test_route_audit_normalizes_absolute_target_path(self):
+        module = load_script(ROUTE_SCRIPT, "wiki_cli_route_audit_paths")
+        with tempfile.TemporaryDirectory() as td:
+            wiki = Path(td) / "wiki"
+            target = wiki / "queries" / "demo.md"
+            target.parent.mkdir(parents=True)
+            target.write_text("# demo\n", encoding="utf-8")
+            self.assertEqual(module.normalize_route_path(wiki.resolve(), str(target.resolve())), "queries/demo.md")
+
 
 if __name__ == "__main__":
     unittest.main()

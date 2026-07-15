@@ -493,7 +493,7 @@ Before final response:
 
 ```text
 Windows PowerShell:
-& <skill-dir>/scripts/run_ingest_validation.ps1 -WikiRoot <wiki-root> -NotesDir <notes-dir> -RawPath @(<raw-paths>) -FormalPath @(<formal-paths>)
+& <skill-dir>/scripts/run_ingest_validation.cmd --wiki-root <wiki-root> --notes-dir <notes-dir> --raw <raw-path> --formal <formal-path>
 
 macOS/Linux:
 <skill-dir>/scripts/run_ingest_validation.sh --wiki-root <wiki-root> --notes-dir <notes-dir> --raw <raw-path> --formal <formal-path>
@@ -507,7 +507,7 @@ coverage dispositions, durable source-inventory paths, and required raw plus
 extraction-note citations in formal pages. Do not call another Skill's
 placeholder scanner as a required ingest dependency.
 
-Choose `.ps1` or `.sh` by the shell that is actually executing the validation,
+Choose `.cmd` or `.sh` by the shell that is actually executing the validation,
 not by the operating system where the Wiki files originated. Include every
 newly created or modified formal page in validation. If a query entry or parent
 index sits outside the main formal directory, pass it as an additional formal

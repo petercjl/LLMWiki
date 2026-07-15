@@ -38,6 +38,11 @@ def run(cmd: list[str]) -> tuple[int, str, str]:
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
+def command_failed(code: int, out: str, err: str) -> bool:
+    combined = "\n".join(part for part in [out, err] if part).strip()
+    return code != 0 or bool(re.search(r"(^|\n)\s*Error:", combined, re.IGNORECASE))
+
+
 def find_vault_selector(wiki: Path) -> str | None:
     """Return the Obsidian vault id for the target path when available.
 
@@ -71,7 +76,7 @@ def cli_status(wiki: Path) -> dict:
     selector = find_vault_selector(wiki)
     code, out, err = run(obsidian_cmd(wiki, "vault", "info=path"))
     combined = "\n".join(part for part in [out, err] if part).strip()
-    command_error = code != 0 or bool(re.search(r"(^|\n)\s*Error:", combined, re.IGNORECASE))
+    command_error = command_failed(code, out, err)
     available = not command_error
     active = out.splitlines()[-1] if available and out else ""
     return {
@@ -124,10 +129,20 @@ def filesystem_outline(wiki: Path, rel: str) -> list[str]:
 
 
 def cli_lines(cmd: list[str]) -> list[str]:
-    code, out, _ = run(cmd)
-    if code != 0 or not out:
+    code, out, err = run(cmd)
+    if command_failed(code, out, err) or not out:
         return []
     return [line for line in out.splitlines() if line.strip()]
+
+
+def normalize_route_path(wiki: Path, value: str) -> str:
+    candidate = Path(value).expanduser()
+    if candidate.is_absolute():
+        try:
+            return candidate.resolve().relative_to(wiki).as_posix()
+        except ValueError:
+            return str(candidate)
+    return value.replace("\\", "/").removeprefix("./")
 
 
 def main() -> int:
@@ -151,8 +166,8 @@ def main() -> int:
 
     reports = []
     warnings = []
-    for rel in args.paths:
-        rel = rel.removeprefix(str(wiki) + "/")
+    for value in args.paths:
+        rel = normalize_route_path(wiki, value)
         p = wiki / rel
         exists = p.exists()
         if status["trusted"]:

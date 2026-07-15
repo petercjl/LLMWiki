@@ -22,6 +22,11 @@ and reuse that exact verified launcher for every bundled Python script in the
 current ingest. Do not independently choose `python`, `python3`, or `py` again at
 the validation step.
 
+For final ingest validation on Windows, use the bundled
+`scripts/run_ingest_validation.cmd`. It performs this discovery without relying
+on PowerShell script execution policy. Do not change execution policy merely to
+run validation.
+
 ## Windows PowerShell
 
 Probe these command forms in order:
