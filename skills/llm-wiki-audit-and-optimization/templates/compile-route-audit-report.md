@@ -20,6 +20,7 @@
 
 - Formal pages scanned:
 - SHELL:
+- SKELETON:
 - THIN:
 - OK:
 - Blocked scopes:

@@ -16,7 +16,8 @@ Usage:
     python3 placeholder_scan.py <target_dir> [--min-bytes 500] [--json]
 
 Verdicts per page:
-    SHELL  — duplicate body shared with other pages, OR contains known boilerplate
+    SHELL  — duplicate body shared with other formal pages, OR known boilerplate
+    SKELETON — empty/duplicate index scaffold; review route visibility, not ingest
     THIN   — formal (non-index) page whose stripped body is below --min-bytes
     OK     — passes the mechanical checks (still needs human depth audit)
 
@@ -153,7 +154,10 @@ def scan(target_dir: str, min_bytes: int):
             continue
         dup_id = dup_hash_to_id.get(p["body_hash"])
         p["dup_group"] = dup_id
-        if p["body_hash"] == "EMPTY" or p["boilerplate_hits"] or dup_id is not None:
+        shell_signal = p["body_hash"] == "EMPTY" or p["boilerplate_hits"] or dup_id is not None
+        if p["is_index"] and shell_signal:
+            p["verdict"] = "SKELETON"
+        elif shell_signal:
             p["verdict"] = "SHELL"
         elif (not p["is_index"]) and p["body_bytes"] < min_bytes:
             p["verdict"] = "THIN"
@@ -189,25 +193,29 @@ def main():
         return
 
     shells = [p for p in pages if p.get("verdict") == "SHELL"]
+    skeletons = [p for p in pages if p.get("verdict") == "SKELETON"]
     thins = [p for p in pages if p.get("verdict") == "THIN"]
     oks = [p for p in pages if p.get("verdict") == "OK"]
 
     print(f"Scanned: {len(pages)} markdown pages under {args.target_dir}")
-    print(f"  SHELL: {len(shells)}   THIN: {len(thins)}   OK: {len(oks)}")
+    print(
+        f"  SHELL: {len(shells)}   SKELETON: {len(skeletons)}   "
+        f"THIN: {len(thins)}   OK: {len(oks)}"
+    )
     print()
 
     if dup_groups:
-        print("=== DUPLICATE-BODY GROUPS (template clones — P0) ===")
+        print("=== DUPLICATE-BODY GROUPS (formal clones are P0; index scaffolds need route review) ===")
         for h, ps in sorted(dup_groups.items(), key=lambda kv: dup_hash_to_id[kv[0]]):
             print(f"  group {dup_hash_to_id[h]}: {len(ps)} pages share one body")
             for p in ps:
                 print(f"      {p['rel']}")
         print()
 
-    if shells or thins:
+    if shells or skeletons or thins:
         print("=== FLAGGED PAGES ===")
         print(f"  {'verdict':7} {'body_B':>7} {'dup':>3}  page")
-        for p in shells + thins:
+        for p in shells + skeletons + thins:
             dup = p.get("dup_group") or "-"
             tag = " ".join(p["boilerplate_hits"])[:30]
             print(f"  {p['verdict']:7} {p['body_bytes']:>7} {str(dup):>3}  {p['rel']}"
@@ -217,6 +225,9 @@ def main():
     if shells:
         print("VERDICT: compile-placeholder shells present — treat as P0. "
               "Recompile from raw sources before scoring routing/reasoning.")
+    elif skeletons:
+        print("VERDICT: no formal compile shells, but index SKELETON pages exist — "
+              "review whether navigation clearly marks them as unpopulated.")
     elif thins:
         print("VERDICT: no duplicate shells, but THIN pages exist — review depth manually.")
     else:

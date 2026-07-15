@@ -76,6 +76,12 @@ checks and uses Obsidian CLI signals only when the command works and its active
 vault matches the target Wiki. Git, `rg`, network access, an LLMWiki source
 checkout, and a specific Agent product are not required.
 
+Treat the resolved Wiki files as the authoritative evidence. Do not call an
+Agent product's generic memory search during this workflow. Prefer the bundled
+helpers and direct file reads over improvised inline scripts. If an extra check
+truly requires an inline command, use syntax supported by the current shell; in
+Windows PowerShell, do not use Unix heredoc syntax.
+
 ## Main Flow
 
 ### 1. Resolve Exactly One Wiki Root
@@ -141,6 +147,10 @@ formal pages for:
 Interpret the results:
 
 - `SHELL`: `compile-placeholder`, P0;
+- `SKELETON`: an empty or duplicate index scaffold. It is not evidence that an
+  ingest failed. Review whether it is clearly marked as unpopulated and whether
+  exposing it in navigation could mislead retrieval; classify the route impact
+  as P1 or P2 instead of blocking the compiled areas;
 - `THIN`: manual depth review required, normally P1 unless essential knowledge
   is missing;
 - `OK`: passed mechanical checks only, not proof of semantic quality.
@@ -300,6 +310,8 @@ Report the candidates checked and ask the user to choose. Do not create a Wiki.
 
 Report the actual command and error, then perform the equivalent checks with file
 tools. Do not download a replacement helper or look for the author's repository.
+After an optional-tool or ad hoc check fails, return to the current main-flow
+step and still produce the report; do not detour into generic memory search.
 
 ### Raw Source Or Extraction Notes Missing
 
