@@ -85,7 +85,46 @@ systems/tooling area unless the tool is clearly a platform-native feature.
 The source type, such as course, book, webpage, or transcript, must not become
 the final classification.
 
-### 0.2 Search Existing Memory Before Creating Pages
+### 0.2 Mandatory Placement Proposal And User Confirmation
+
+Every ingest has one deliberate confirmation gate before formal knowledge is
+created or merged. This gate applies even when the Agent believes the placement
+is obvious.
+
+First preserve the raw source and complete enough extraction to understand what
+the material actually teaches. Then inspect the Wiki's current domain tree,
+indexes, query entries, and representative pages. Do not ask the user to design
+the taxonomy from scratch. Present a concrete recommendation containing:
+
+- a short description of the knowledge contained in the source
+- the best existing category, if one is suitably specific
+- the recommended final location and whether pages should be merged, extended,
+  split, or created
+- any minimal new category or subcategory that is needed
+- why this placement will make future retrieval and Agent use clearer
+- a split and cross-link proposal when one source contains distinct domains
+- at most one or two meaningful alternatives when there is a real tradeoff
+
+Then stop and wait for the user's explicit confirmation or correction. A batch
+of closely related sources may share one confirmed placement plan, but silence
+or prior confirmation of a different source is not approval.
+
+Before confirmation, the Agent may archive raw material, inspect media, run
+ASR/OCR, build source inventories, and write extraction notes. It must not create
+or modify formal domain pages, query entries, or formal indexes.
+
+If the Wiki is empty or its taxonomy is immature, say so and propose the
+smallest useful initial hierarchy based on the knowledge's meaning and likely
+future retrieval. Do not place material directly into a broad top-level folder
+merely because that folder is generally related, and do not pre-create a large
+tree of empty directories. If the Wiki already contains categories, use one
+only when it is semantically and operationally specific enough for the current
+knowledge; otherwise propose a minimal new subcategory and ask for confirmation.
+
+Record the confirmed choice, confirmation evidence, final path, and disposition
+in `formal-page-plan.md` and `audit-handoff.md`.
+
+### 0.3 Search Existing Memory Before Creating Pages
 
 Search existing pages for the source title, core concepts, synonyms, Chinese
 terms, English terms, brands, platforms, tools, formulas, and cases.
@@ -100,10 +139,10 @@ For every planned formal page, choose one disposition:
 - `source-package-only`: keep a source map, course map, or audit trail, but do
   not make it the main knowledge home.
 
-When the choice is ambiguous or would reorganize important knowledge, ask the user
-to confirm the classification and merge plan before editing.
+The search results inform the mandatory placement proposal above. They do not
+replace the user confirmation gate.
 
-### 0.3 Human-Facing Chinese Names
+### 0.4 Human-Facing Chinese Names
 
 Use Chinese titles and Chinese index labels by default for formal knowledge
 pages, because the user navigates and reviews the wiki in Chinese. English slugs
@@ -122,7 +161,7 @@ numeric prefix to the filename, such as `01-基础概念/`,
 navigation contract, not decoration: choose it so the user can tell which file to
 read first in Obsidian or any plain file browser.
 
-### 0.4 Associative Fusion
+### 0.5 Associative Fusion
 
 Do not destroy an older knowledge structure merely because a new source overlaps
 with it. If the old page still has its own context or curriculum value, preserve
@@ -137,7 +176,7 @@ it and connect the new durable page through:
 Use destructive merging only when two pages are genuinely duplicate theories and
 the user has confirmed the merge.
 
-### 0.4.1 Case Library Layer
+### 0.5.1 Case Library Layer
 
 Dense business, ecommerce, brand, finance, or visual courses often contain many
 named cases. Do not leave important cases buried only inside theory chapters.
@@ -162,13 +201,51 @@ For each durable case page, prefer this structure:
 Case libraries should be organized by problem type as well as by module, so an
 agent can route from a user question to the right example before reasoning.
 
-### 0.5 Source Packages Are Secondary
+### 0.6 Source Packages Are Secondary
 
 Use `raw/` and `_meta/extraction-notes/` for source preservation and audit.
 If a course/book needs a navigable source-oriented overview, place it in a
 source/course package area such as `source-packages/`, `course-packages/`, or a
 Chinese equivalent like `课程包/`. The package should point to the formal domain
 pages; it should not become the only home of the knowledge.
+
+## Cross-Platform Environment Resolution
+
+Do not conclude that the Wiki or a required media tool is missing merely because
+its command is absent from the current `PATH`.
+
+At the start of the run:
+
+1. Detect the current operating system and shell.
+2. Resolve `WIKI_ROOT` from the current environment. If it is unset, read the
+   bootstrap configuration for the current platform before using the default
+   `~/wiki`:
+   - macOS/Linux: `~/.llmwiki/config.env`
+   - Windows PowerShell: `%USERPROFILE%\.llmwiki\config.ps1`
+   - Windows cmd: `%USERPROFILE%\.llmwiki\config.cmd`
+3. Read `$WIKI_ROOT/TOOLS.md` when it exists. Treat its verified executable and
+   model paths as the primary tool inventory for this Wiki.
+4. Resolve `LLMWIKI_MEDIA_BIN` and `WHISPER_MODEL` from the current environment
+   or the platform config. Check the recorded absolute paths before probing
+   `PATH`, package managers, or common install directories.
+5. Use verified absolute executable paths for the current run. Do not change a
+   shell profile, execution policy, persistent `PATH`, or install a duplicate
+   tool merely to make a short command resolve.
+6. If a recorded path is stale, report the exact path and failure, then follow
+   the applicable adapter's missing-tool branch. Ask before installing or
+   replacing software, and return to the ingest main line after repair.
+
+On Windows PowerShell, load an existing config into the current process with
+PowerShell syntax, for example:
+
+```powershell
+. "$env:USERPROFILE\.llmwiki\config.ps1"
+```
+
+Do not use Bash heredocs, `export`, or CMD-only command chaining in PowerShell.
+For video/audio ingestion, read
+`references/transcript/video-course-ingest.md` before declaring `ffmpeg`,
+`ffprobe`, OCR, or ASR unavailable.
 
 ## Required Orientation
 
@@ -180,7 +257,10 @@ Before editing the wiki:
 4. Read recent `$WIKI_ROOT/log.md`.
 5. Search existing wiki pages for source title, product names, concepts, APIs, brands, model IDs, and major keywords.
 6. Run the bundled `scripts/wiki_cli_search.py` with the current system's Python launcher to probe the source title and core concepts. Pass the resolved Wiki root with `--wiki`. If it cannot run, record the exact error and perform the equivalent filesystem search before returning to the main flow.
-7. Run `git -C $WIKI_ROOT status --short` and avoid reverting unrelated work.
+7. If `$WIKI_ROOT/.git` exists, run `git -C $WIKI_ROOT status --short` and avoid
+   reverting unrelated work. If the Wiki is not a Git repository, skip Git;
+   Git is not required for ingestion and must not be installed or initialized
+   just for this step.
 
 If the task will create or modify more than 10 wiki files, present a short execution plan before editing unless the user already approved a batch run.
 
@@ -224,6 +304,7 @@ Create a source profile with:
 - domain placement candidate and alternative candidates
 - existing pages found during memory search
 - proposed fusion disposition: merge, extend, split, create, or source-package-only
+- placement confirmation status, confirmed path, and confirmation evidence
 - sensitivity check
 - time-sensitivity/current-doc check requirement
 - expected formal artifacts
@@ -279,6 +360,12 @@ Extract all meaningful source units into reusable knowledge units:
 ### 5. Knowledge Architecture
 
 Plan formal pages by future Agent usability, not by source shape alone.
+
+Do not begin this step until the mandatory placement proposal has been explicitly
+confirmed. Use the confirmed location and disposition as the boundary for the
+formal page plan. If extraction reveals that the confirmed plan is materially
+wrong, return to the user with a revised recommendation instead of silently
+changing the taxonomy.
 
 Choose artifact types:
 
@@ -365,6 +452,8 @@ _meta/extraction-notes/<source-slug>/audit-handoff.md
 ```
 
 Use `references/audit-handoff-contract.md`. This file is the interface with `llm-wiki-audit-and-optimization`.
+Include the proposed placement, the user's confirmed choice, the confirmation
+evidence, and any taxonomy alternative that was rejected.
 
 ### 9. Self-Validation
 
@@ -394,6 +483,9 @@ If the active Obsidian vault is not `$WIKI_ROOT`, treat the script's degraded fi
 4. `rg` representative source terms across formal pages.
 5. Verify every `formalized` source unit has a target page.
 6. Verify every raw-only or omitted source unit has a reason.
+7. Verify `formal-page-plan.md` and `audit-handoff.md` record an explicit
+   placement confirmation and that no formal domain page, query entry, or formal
+   index was written before that confirmation.
 
 ## Audit Skill Coordination
 
@@ -408,6 +500,7 @@ The ingest skill must hand off:
 - coverage matrix path
 - omission audit path
 - audit handoff path
+- confirmed placement, confirmation evidence, and final fusion disposition
 - known unresolved items
 - expected future Agent use cases
 

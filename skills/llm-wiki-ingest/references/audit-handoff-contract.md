@@ -43,6 +43,17 @@ status: active
 - Formal page plan:
 - Formal pages:
 
+## Placement Confirmation
+
+- Source understanding:
+- Existing category considered:
+- Recommended placement:
+- Recommended disposition:
+- Alternatives considered:
+- User confirmation:
+- Confirmation evidence:
+- Final confirmed path:
+
 ## Coverage Summary
 
 - Source units:
@@ -67,6 +78,7 @@ status: active
 
 ## Self-Validation
 
+- No formal write before placement confirmation:
 - Placeholder scan:
 - Representative term search:
 - Index/log check:

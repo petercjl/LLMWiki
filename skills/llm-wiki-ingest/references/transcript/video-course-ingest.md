@@ -7,12 +7,76 @@ Use this reference when the source is a local video/audio course and the user wa
 The main line is:
 
 ```text
-inspect media -> install missing tools -> archive raw media -> extract audio -> ASR -> keyframes/OCR -> source/extraction notes -> ASR correction notes -> coverage -> formal pages -> index/log -> validation -> audit handoff
+resolve configured tools -> inspect media -> repair genuinely missing tools with approval -> archive raw media -> extract audio -> ASR -> keyframes/OCR -> source/extraction notes -> ASR correction notes -> coverage -> placement proposal and user confirmation -> formal pages -> index/log -> validation -> audit handoff
 ```
 
-Do not skip good tooling merely because it is not already installed. If a high-quality local ASR or OCR tool is missing, install it when feasible, then continue on the main line. Avoid low-quality shortcuts that would shrink or distort the course.
+Do not skip good tooling merely because a short command is absent from `PATH`.
+Resolve the bootstrap config, `$WIKI_ROOT/TOOLS.md`, and recorded absolute paths
+first. If a high-quality local ASR or OCR tool is genuinely missing, explain
+what is needed and ask before installing or replacing software, then continue
+on the main line. Avoid low-quality shortcuts that would shrink or distort the
+course.
 
-## Tool Nodes
+## Tool Resolution On Every Platform
+
+The bootstrap process may have installed the media tools in a Wiki-specific
+directory instead of the global `PATH`. That is valid and preferred over
+duplicate installation.
+
+Resolve tools in this order:
+
+1. current process variables `LLMWIKI_MEDIA_BIN` and `WHISPER_MODEL`
+2. the platform config under `~/.llmwiki/`
+3. the verified absolute paths recorded in `$WIKI_ROOT/TOOLS.md`
+4. the current `PATH`
+5. platform-standard install locations
+
+If the configured media directory exists, build absolute paths to `ffprobe`,
+`ffmpeg`, `tesseract`, and the installed Whisper CLI (including `.exe` on
+Windows) and execute those paths directly. Check that `WHISPER_MODEL` exists
+before starting ASR. Record the resolved executable and model paths in
+`source-profile.md` or extraction notes.
+
+### Windows PowerShell
+
+Load the existing bootstrap config into the current process before probing
+tools:
+
+```powershell
+$config = Join-Path $env:USERPROFILE '.llmwiki\config.ps1'
+if (Test-Path $config) { . $config }
+
+$wikiRoot = $env:WIKI_ROOT
+$mediaBin = $env:LLMWIKI_MEDIA_BIN
+$model = $env:WHISPER_MODEL
+$ffprobe = if ($mediaBin) { Join-Path $mediaBin 'ffprobe.exe' }
+$ffmpeg = if ($mediaBin) { Join-Path $mediaBin 'ffmpeg.exe' }
+$tesseract = if ($mediaBin) { Join-Path $mediaBin 'tesseract.exe' }
+$whisper = if ($mediaBin) { Join-Path $mediaBin 'whisper-cli.exe' }
+```
+
+Read `Join-Path $wikiRoot 'TOOLS.md'` when present. Test those absolute paths
+with `& $ffprobe -version`, `& $ffmpeg -version`,
+`& $tesseract --version`, and `& $whisper --help`. If the recorded Whisper
+executable uses another name, use the exact path in `TOOLS.md`. A failed
+`Get-Command ffmpeg` is not evidence that the configured executable is missing.
+Use PowerShell syntax throughout; do not translate the Bash examples below
+literally.
+
+### macOS/Linux
+
+Load `~/.llmwiki/config.env` when it exists, then use the configured absolute
+paths before global commands:
+
+```bash
+test -f "$HOME/.llmwiki/config.env" && source "$HOME/.llmwiki/config.env"
+test -f "$WIKI_ROOT/TOOLS.md" && sed -n '1,220p' "$WIKI_ROOT/TOOLS.md"
+```
+
+The following probes and optional Homebrew example apply only after configured
+paths have been checked.
+
+## macOS Tool Nodes
 
 Prefer these tools on macOS:
 
@@ -30,7 +94,8 @@ which ffmpeg ffprobe whisper-cli tesseract
 tesseract --list-langs
 ```
 
-If `whisper-cpp` is missing and Homebrew is available:
+If `whisper-cpp` is genuinely missing, the user approves installation, and
+Homebrew is available:
 
 ```bash
 brew install whisper-cpp
@@ -164,6 +229,12 @@ Track both spoken units and visual units:
 - watermarks, decorative covers, and garbled OCR as raw-only when appropriate
 
 ## Formal Compilation
+
+Before creating or updating formal pages, follow the main Skill's mandatory
+placement proposal. Show the user the recommended category/path and
+merge/create/split plan, then wait for explicit confirmation. Raw preservation,
+ASR/OCR, and extraction notes may be completed before this gate; formal domain
+pages, query entries, and formal indexes may not.
 
 Formal pages should be domain knowledge, not video notes. A video-course package may have a source-summary index, but the durable pages should normally be:
 
