@@ -1,12 +1,14 @@
-# Compile / Route Audit Report Template
+# LLM Wiki Audit Report Template
 
 ## 1. Basic Info
 
 - Target path:
 - Audit date:
-- Audit mode: domain / learning-path / post-ingest
+- Audit mode: whole-wiki / domain / topic / post-ingest
 - Pages inspected:
 - Raw/extraction sources sampled:
+- Runtime evidence:
+- Degraded branches:
 
 ## 2. Executive Summary
 
@@ -14,7 +16,15 @@
 - Main bottleneck: compile / route / reasoning / input
 - Can this wiki support real tasks now? yes / partially / no
 
-## 3. Compile Audit
+## 3. Mechanical Gate
+
+- Formal pages scanned:
+- SHELL:
+- THIN:
+- OK:
+- Blocked scopes:
+
+## 4. Compile Audit
 
 | Dimension | Score 1-5 | Findings | Evidence / file path | Fix |
 | --- | --- | --- | --- | --- |
@@ -29,7 +39,7 @@
 | Noise removal |  |  |  |  |
 | Actionability |  |  |  |  |
 
-## 4. Route Audit
+## 5. Route Audit
 
 - Main index quality:
 - Domain index quality:
@@ -37,15 +47,20 @@
 - Agent template availability:
 - Duplicate / overlapping routes:
 - Missing route maps:
+- Unresolved links / orphans / dead ends:
 
-## 5. Reasoning Readiness
+## 6. Reasoning Readiness
 
 - What user task types are well supported?
 - What user task types are weakly supported?
 - What inputs would an Agent need from the user?
 - What pages should be read first for common tasks?
 
-## 6. Issues
+| Test question | Expected route | Result | Gap |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
+## 7. Issues
 
 | Priority | Label | Issue | File path | Suggested fix |
 | --- | --- | --- | --- | --- |
@@ -53,7 +68,7 @@
 | P1 |  |  |  |  |
 | P2 |  |  |  |  |
 
-## 7. Optimization Plan
+## 8. Optimization Plan
 
 ### P0 — Blocking
 
@@ -61,11 +76,11 @@
 
 ### P2 — Nice to Have
 
-## 8. Patches Applied
+## 9. Patches Applied
 
 - None / list files changed
 
-## 9. Follow-up Verification
+## 10. Follow-up Verification
 
 - [ ] Re-run query test
 - [ ] Check indexes

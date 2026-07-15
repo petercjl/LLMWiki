@@ -20,6 +20,10 @@ Verdicts per page:
     THIN   — formal (non-index) page whose stripped body is below --min-bytes
     OK     — passes the mechanical checks (still needs human depth audit)
 
+Raw sources, extraction metadata, audit reports, hidden application folders, and
+root operating files are excluded by default so a whole-Wiki scan measures formal
+knowledge rather than internal working notes.
+
 Exit code is 0 always; this is a diagnostic, not a gate. Parse the output.
 """
 import argparse
@@ -29,6 +33,22 @@ import os
 import re
 import sys
 from collections import defaultdict
+
+
+EXCLUDED_DIRS = {
+    ".git",
+    ".obsidian",
+    "_meta",
+    "raw",
+    "audits",
+    "attachments",
+}
+EXCLUDED_FILES = {
+    "AGENTS.md",
+    "SCHEMA.md",
+    "TOOLS.md",
+    "log.md",
+}
 
 # Boilerplate / scaffold phrases that must NOT survive into a real formal page.
 # Keep these UNAMBIGUOUS: each must be a marker that would never appear in real
@@ -91,9 +111,10 @@ def is_index_page(path: str) -> bool:
 
 def scan(target_dir: str, min_bytes: int):
     pages = []
-    for root, _dirs, files in os.walk(target_dir):
+    for root, dirs, files in os.walk(target_dir):
+        dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS and not d.startswith(".")]
         for fn in sorted(files):
-            if not fn.endswith(".md"):
+            if not fn.endswith(".md") or fn in EXCLUDED_FILES:
                 continue
             full = os.path.join(root, fn)
             try:
@@ -132,7 +153,7 @@ def scan(target_dir: str, min_bytes: int):
             continue
         dup_id = dup_hash_to_id.get(p["body_hash"])
         p["dup_group"] = dup_id
-        if p["boilerplate_hits"] or dup_id is not None:
+        if p["body_hash"] == "EMPTY" or p["boilerplate_hits"] or dup_id is not None:
             p["verdict"] = "SHELL"
         elif (not p["is_index"]) and p["body_bytes"] < min_bytes:
             p["verdict"] = "THIN"
