@@ -81,9 +81,26 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(fake_obsidian_config.read_text(encoding="utf-8"), sentinel)
             self.assertFalse(result["obsidian_register"]["requested"])
             self.assertTrue((wiki / "domains" / "电商运营" / "index.md").exists())
+            self.assertTrue((wiki / "TOOLS.md").exists())
             agents = (wiki / "AGENTS.md").read_text(encoding="utf-8")
             self.assertIn("only official LLM Wiki", agents)
             self.assertIn("做成知识库", agents)
+
+    def test_windows_config_includes_execution_policy_independent_json(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as td:
+            with mock.patch.object(module, "user_home", return_value=Path(td)):
+                paths = module.config_paths("windows")
+                self.assertEqual(paths[0].name, "config.json")
+                written = module.write_config_files(
+                    paths,
+                    {"WIKI_ROOT": r"C:\Users\learner\wiki"},
+                    force=False,
+                    dry_run=False,
+                )
+            self.assertEqual(len(written), 3)
+            data = json.loads((Path(td) / ".llmwiki" / "config.json").read_text(encoding="utf-8"))
+            self.assertEqual(data["WIKI_ROOT"], r"C:\Users\learner\wiki")
 
     def test_check_only_lists_even_empty_target_subdirectories(self):
         with tempfile.TemporaryDirectory() as td:

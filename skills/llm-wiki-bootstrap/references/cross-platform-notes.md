@@ -2,17 +2,24 @@
 
 The normative installation and verification branches are in `toolchain-install.md`. Use this short reference for environment loading only.
 
-macOS/Linux:
+All platforms should prefer reading `~/.llmwiki/config.json` as data. Shell
+compatibility files remain available for interactive use.
+
+macOS/Linux compatibility:
 
 ```bash
 source "$HOME/.llmwiki/config.env"
 ```
 
-PowerShell:
+PowerShell (preferred, execution-policy independent):
 
 ```powershell
-. "$env:USERPROFILE\.llmwiki\config.ps1"
+$config = Get-Content -Raw -LiteralPath "$env:USERPROFILE\.llmwiki\config.json" | ConvertFrom-Json
+$wikiRoot = [string]$config.WIKI_ROOT
 ```
+
+Do not change execution policy merely to load `config.ps1`. Older shell config
+files may be read as plain text when `config.json` is not yet present.
 
 cmd:
 

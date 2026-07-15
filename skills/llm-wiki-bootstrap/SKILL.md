@@ -72,11 +72,11 @@ The script creates files but does not install packages, edit shell profiles, edi
 
 ## Configuration Contract
 
-Prefer a per-user config file:
+Prefer a per-user data config plus shell-compatibility files:
 
-- macOS/Linux: `~/.llmwiki/config.env`
-- Windows PowerShell: `%USERPROFILE%\.llmwiki\config.ps1`
-- Windows cmd: `%USERPROFILE%\.llmwiki\config.cmd`
+- Cross-platform data config: `~/.llmwiki/config.json`
+- macOS/Linux compatibility config: `~/.llmwiki/config.env`
+- Windows compatibility configs: `%USERPROFILE%\.llmwiki\config.ps1` and `config.cmd`
 
 Core variables:
 
@@ -85,6 +85,9 @@ Core variables:
 - `LLMWIKI_MEDIA_BIN`: optional verified directory containing the media/OCR executables.
 - `WHISPER_MODEL`: optional verified local ASR model path.
 - Agent-specific skill directory variables are optional and used only by registry synchronization.
+
+Downstream Skills should read `config.json` as data. They must not change
+PowerShell execution policy or require `config.ps1` to be executable.
 
 Ask before adding config loading or tool paths to a profile. Prefer absolute executable paths for the current run before proposing a persistent PATH change.
 

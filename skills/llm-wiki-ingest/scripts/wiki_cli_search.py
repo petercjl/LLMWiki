@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -14,7 +15,10 @@ DEFAULT_WIKI = Path(os.environ.get("WIKI_ROOT", str(Path.home() / "wiki")))
 
 
 def run(cmd: list[str]) -> tuple[int, str, str]:
-    proc = subprocess.run(cmd, text=True, capture_output=True)
+    try:
+        proc = subprocess.run(cmd, text=True, capture_output=True)
+    except OSError as exc:
+        return 127, "", str(exc)
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
@@ -44,7 +48,7 @@ def obsidian_search(query: str, path: str | None, limit: int) -> list[str]:
         return [line for line in out.splitlines() if line.strip()]
 
 
-def rg_search(wiki: Path, query: str, path: str | None, limit: int) -> list[str]:
+def filesystem_search(wiki: Path, query: str, path: str | None, limit: int) -> list[str]:
     base = wiki / path if path else wiki
     if not base.exists():
         return []
@@ -52,14 +56,25 @@ def rg_search(wiki: Path, query: str, path: str | None, limit: int) -> list[str]
     if not terms:
         return []
     scores: dict[Path, int] = {}
-    for term in terms:
-        cmd = ["rg", "-l", "--glob", "*.md", term, str(base)]
-        code, out, _ = run(cmd)
-        if code != 0:
-            continue
-        for abs_path in out.splitlines():
-            p = Path(abs_path)
-            scores[p] = scores.get(p, 0) + 1
+    if shutil.which("rg"):
+        for term in terms:
+            cmd = ["rg", "-l", "--glob", "*.md", term, str(base)]
+            code, out, _ = run(cmd)
+            if code not in {0, 1}:
+                continue
+            for abs_path in out.splitlines():
+                p = Path(abs_path)
+                scores[p] = scores.get(p, 0) + 1
+    else:
+        lowered_terms = [term.casefold() for term in terms]
+        for candidate in base.rglob("*.md"):
+            try:
+                text = candidate.read_text(encoding="utf-8", errors="ignore").casefold()
+            except OSError:
+                continue
+            score = sum(1 for term in lowered_terms if term in text)
+            if score:
+                scores[candidate] = score
     ranked = sorted(scores, key=lambda p: (-scores[p], len(str(p)), str(p)))
     return [str(p.relative_to(wiki)) for p in ranked[:limit]]
 
@@ -83,7 +98,7 @@ def main() -> int:
 
     wiki = Path(args.wiki).expanduser().resolve()
     status = cli_status(wiki)
-    search = obsidian_search if status["trusted"] else lambda q, p, l: rg_search(wiki, q, p, l)
+    search = obsidian_search if status["trusted"] else lambda q, p, l: filesystem_search(wiki, q, p, l)
 
     query = args.query
     pack = {

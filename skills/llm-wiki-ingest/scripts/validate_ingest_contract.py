@@ -61,7 +61,11 @@ def validate_frontmatter(path: Path, errors: list[str]) -> None:
             errors.append(f"{path}: frontmatter missing {field}")
 
 
-def validate_coverage(notes_dir: Path, formal_pages: list[Path], errors: list[str], warnings: list[str]) -> None:
+def split_target_paths(value: str) -> list[str]:
+    return [part.strip().strip("`") for part in re.split(r"[;,]", value) if part.strip().strip("`")]
+
+
+def validate_coverage(notes_dir: Path, wiki_root: Path, errors: list[str]) -> None:
     coverage_path = notes_dir / "coverage-matrix.md"
     text = read(coverage_path)
     rows = parse_markdown_table_rows(text)
@@ -78,7 +82,6 @@ def validate_coverage(notes_dir: Path, formal_pages: list[Path], errors: list[st
     if missing_required_columns:
         return
     idx = {name: header.index(name) for name in header}
-    formal_text = "\n".join(read(path) for path in formal_pages if path.exists())
     for row_num, row in enumerate(rows[1:], start=2):
         if len(row) < len(header):
             errors.append(f"{coverage_path}: row {row_num} has too few cells")
@@ -93,8 +96,16 @@ def validate_coverage(notes_dir: Path, formal_pages: list[Path], errors: list[st
             errors.append(f"{coverage_path}: row {row_num} {unit_id} requires reason_or_notes")
         if status in {"formalized", "merged"} and not target:
             errors.append(f"{coverage_path}: row {row_num} {unit_id} requires target_pages")
-        if status == "formalized" and unit_id and formal_text and unit_id not in formal_text:
-            warnings.append(f"{coverage_path}: row {row_num} {unit_id} not found verbatim in formal pages")
+        if status in {"formalized", "merged"} and target:
+            targets = split_target_paths(target)
+            if not targets:
+                errors.append(f"{coverage_path}: row {row_num} {unit_id} has no parseable target path")
+            for value in targets:
+                candidate = Path(value)
+                if not candidate.is_absolute():
+                    candidate = wiki_root / candidate
+                if not candidate.is_file():
+                    errors.append(f"{coverage_path}: row {row_num} {unit_id} target page missing: {candidate}")
 
 
 def main() -> int:
@@ -109,11 +120,16 @@ def main() -> int:
     notes_dir = Path(args.notes_dir)
     if not notes_dir.is_absolute():
         notes_dir = wiki_root / notes_dir
-    formal_pages = [Path(p) if Path(p).is_absolute() else wiki_root / p for p in args.formal]
+    formal_inputs = [Path(p) if Path(p).is_absolute() else wiki_root / p for p in args.formal]
+    formal_pages: list[Path] = []
+    for item in formal_inputs:
+        if item.is_dir():
+            formal_pages.extend(sorted(item.rglob("*.md")))
+        else:
+            formal_pages.append(item)
     raw_paths = [Path(p) if Path(p).is_absolute() else wiki_root / p for p in args.raw]
 
     errors: list[str] = []
-    warnings: list[str] = []
 
     if not notes_dir.is_dir():
         errors.append(f"{notes_dir}: notes directory missing")
@@ -125,7 +141,7 @@ def main() -> int:
             elif not read(path).strip():
                 errors.append(f"{path}: empty")
         if (notes_dir / "coverage-matrix.md").exists():
-            validate_coverage(notes_dir, formal_pages, errors, warnings)
+            validate_coverage(notes_dir, wiki_root, errors)
 
     for raw in raw_paths:
         if not raw.exists():
@@ -136,8 +152,6 @@ def main() -> int:
         else:
             validate_frontmatter(formal, errors)
 
-    for warning in warnings:
-        print(f"WARNING: {warning}")
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

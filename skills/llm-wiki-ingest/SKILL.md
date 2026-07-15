@@ -217,14 +217,16 @@ its command is absent from the current `PATH`.
 At the start of the run:
 
 1. Detect the current operating system and shell.
-2. Resolve `WIKI_ROOT` from the current environment. If it is unset, read the
-   bootstrap configuration for the current platform before using the default
-   `~/wiki`:
-   - macOS/Linux: `~/.llmwiki/config.env`
-   - Windows PowerShell: `%USERPROFILE%\.llmwiki\config.ps1`
-   - Windows cmd: `%USERPROFILE%\.llmwiki\config.cmd`
-3. Read `$WIKI_ROOT/TOOLS.md` when it exists. Treat its verified executable and
-   model paths as the primary tool inventory for this Wiki.
+2. Resolve `WIKI_ROOT` from the current environment. If it is unset, read
+   `~/.llmwiki/config.json` as data before using the default `~/wiki`. This JSON
+   file is the cross-platform source of truth and does not depend on shell
+   execution policy. Older installations may have only `config.env`,
+   `config.ps1`, or `config.cmd`; read those files as plain text and parse their
+   variable assignments instead of executing them.
+3. Test whether `$WIKI_ROOT/TOOLS.md` exists before reading it. Its absence on an
+   older Wiki is normal and must not produce a failed read call. When it exists,
+   treat its verified executable and model paths as the primary tool inventory
+   for this Wiki.
 4. Resolve `LLMWIKI_MEDIA_BIN` and `WHISPER_MODEL` from the current environment
    or the platform config. Check the recorded absolute paths before probing
    `PATH`, package managers, or common install directories.
@@ -235,14 +237,20 @@ At the start of the run:
    the applicable adapter's missing-tool branch. Ask before installing or
    replacing software, and return to the ingest main line after repair.
 
-On Windows PowerShell, load an existing config into the current process with
-PowerShell syntax, for example:
+On Windows PowerShell, read the JSON config without executing a script:
 
 ```powershell
-. "$env:USERPROFILE\.llmwiki\config.ps1"
+$configPath = Join-Path $env:USERPROFILE '.llmwiki\config.json'
+$config = Get-Content -Raw -LiteralPath $configPath | ConvertFrom-Json
+$wikiRoot = [string]$config.WIKI_ROOT
+$mediaBin = [string]$config.LLMWIKI_MEDIA_BIN
+$model = [string]$config.WHISPER_MODEL
 ```
 
-Do not use Bash heredocs, `export`, or CMD-only command chaining in PowerShell.
+Do not change PowerShell execution policy to load Wiki configuration. Do not use
+Bash heredocs, `export`, or CMD-only command chaining in PowerShell. Assign an
+`if` result to a variable before building a hashtable; Windows PowerShell 5 does
+not accept `(if (...) {...})` as a value expression.
 For video/audio ingestion, read
 `references/transcript/video-course-ingest.md` before declaring `ffmpeg`,
 `ffprobe`, OCR, or ASR unavailable.
@@ -256,7 +264,7 @@ Before editing the wiki:
 3. Read `$WIKI_ROOT/index.md`.
 4. Read recent `$WIKI_ROOT/log.md`.
 5. Search existing wiki pages for source title, product names, concepts, APIs, brands, model IDs, and major keywords.
-6. Run the bundled `scripts/wiki_cli_search.py` with the current system's Python launcher to probe the source title and core concepts. Pass the resolved Wiki root with `--wiki`. If it cannot run, record the exact error and perform the equivalent filesystem search before returning to the main flow.
+6. Run the bundled `scripts/wiki_cli_search.py` with the current system's Python launcher to probe the source title and core concepts. Pass the resolved Wiki root with `--wiki`. The script falls back to a Python filesystem search when Obsidian CLI or `rg` is unavailable. If it still cannot run, record the exact error and perform the equivalent filesystem search before returning to the main flow.
 7. If `$WIKI_ROOT/.git` exists, run `git -C $WIKI_ROOT status --short` and avoid
    reverting unrelated work. If the Wiki is not a Git repository, skip Git;
    Git is not required for ingestion and must not be installed or initialized
@@ -459,7 +467,7 @@ evidence, and any taxonomy alternative that was rejected.
 
 Before final response:
 
-1. Run `scripts/validate_ingest_contract.py` with source slug or paths when possible.
+1. Run `scripts/validate_ingest_contract.py` with source slug or paths when possible. `--formal` accepts either a Markdown file or a directory; when validating a directory, pass it as one argument instead of trying to read the directory as a file.
 2. Run placeholder scan on formal output when available:
 
 ```bash
@@ -480,7 +488,9 @@ as unavailable.
 
 If the active Obsidian vault is not `$WIKI_ROOT`, treat the script's degraded filesystem checks as partial route validation and say so.
 
-4. `rg` representative source terms across formal pages.
+4. Search representative source terms across formal pages with `rg`,
+   `Select-String`, or an equivalent filesystem search available on the current
+   platform. Do not require `rg` merely for this check.
 5. Verify every `formalized` source unit has a target page.
 6. Verify every raw-only or omitted source unit has a reason.
 7. Verify `formal-page-plan.md` and `audit-handoff.md` record an explicit

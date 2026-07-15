@@ -26,7 +26,7 @@ duplicate installation.
 Resolve tools in this order:
 
 1. current process variables `LLMWIKI_MEDIA_BIN` and `WHISPER_MODEL`
-2. the platform config under `~/.llmwiki/`
+2. `~/.llmwiki/config.json`, read as data without executing a shell script
 3. the verified absolute paths recorded in `$WIKI_ROOT/TOOLS.md`
 4. the current `PATH`
 5. platform-standard install locations
@@ -39,29 +39,52 @@ before starting ASR. Record the resolved executable and model paths in
 
 ### Windows PowerShell
 
-Load the existing bootstrap config into the current process before probing
-tools:
+Read the bootstrap JSON config before probing tools. Do not dot-source
+`config.ps1` and do not change execution policy:
 
 ```powershell
-$config = Join-Path $env:USERPROFILE '.llmwiki\config.ps1'
-if (Test-Path $config) { . $config }
-
-$wikiRoot = $env:WIKI_ROOT
-$mediaBin = $env:LLMWIKI_MEDIA_BIN
-$model = $env:WHISPER_MODEL
+$configPath = Join-Path $env:USERPROFILE '.llmwiki\config.json'
+$config = if (Test-Path -LiteralPath $configPath) {
+  Get-Content -Raw -LiteralPath $configPath | ConvertFrom-Json
+} else {
+  $null
+}
+$wikiRoot = if ($config) { [string]$config.WIKI_ROOT } else { Join-Path $env:USERPROFILE 'wiki' }
+$mediaBin = if ($config) { [string]$config.LLMWIKI_MEDIA_BIN } else { '' }
+$model = if ($config) { [string]$config.WHISPER_MODEL } else { '' }
 $ffprobe = if ($mediaBin) { Join-Path $mediaBin 'ffprobe.exe' }
 $ffmpeg = if ($mediaBin) { Join-Path $mediaBin 'ffmpeg.exe' }
 $tesseract = if ($mediaBin) { Join-Path $mediaBin 'tesseract.exe' }
 $whisper = if ($mediaBin) { Join-Path $mediaBin 'whisper-cli.exe' }
 ```
 
-Read `Join-Path $wikiRoot 'TOOLS.md'` when present. Test those absolute paths
-with `& $ffprobe -version`, `& $ffmpeg -version`,
+Set `$toolsFile = Join-Path $wikiRoot 'TOOLS.md'`; call the read tool or
+`Get-Content` only after `Test-Path -LiteralPath $toolsFile` succeeds. An absent
+file on an older Wiki is not an error. Test the resolved absolute paths with
+`& $ffprobe -version`, `& $ffmpeg -version`,
 `& $tesseract --version`, and `& $whisper --help`. If the recorded Whisper
 executable uses another name, use the exact path in `TOOLS.md`. A failed
 `Get-Command ffmpeg` is not evidence that the configured executable is missing.
 Use PowerShell syntax throughout; do not translate the Bash examples below
 literally.
+
+Windows PowerShell can surface normal native stderr output from FFmpeg or
+Whisper as `NativeCommandError`, especially when `$ErrorActionPreference` is
+`Stop`. Do not use that preference around native media commands. Run the native
+command, capture its log, and decide success only from `$LASTEXITCODE` plus the
+expected output file. For example:
+
+```powershell
+$previousPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+& $ffmpeg -y -i $video -vn -ac 1 -ar 16000 -c:a pcm_s16le $wav 2>&1 |
+  Tee-Object -FilePath $ffmpegLog
+$nativeExit = $LASTEXITCODE
+$ErrorActionPreference = $previousPreference
+if ($nativeExit -ne 0 -or -not (Test-Path -LiteralPath $wav)) {
+  throw "FFmpeg failed with exit code $nativeExit; see $ffmpegLog"
+}
+```
 
 ### macOS/Linux
 
@@ -279,9 +302,9 @@ Before finishing:
    packages with added chapters, pass the package-level notes directory, not
    only `_meta/extraction-notes/<source-slug>/chXX/`, because the required
    profile, inventory, formal plan, and audit handoff live at package root.
-   Treat verbatim-match warnings as review prompts, not automatic failure, when
-   formal pages intentionally reconstruct source units instead of copying
-   transcript wording; record the rationale in `audit-handoff.md`.
+   The validator checks that every formalized/merged coverage row resolves to a
+   real target page. It does not require internal source-unit IDs or transcript
+   sentences to appear verbatim in learner-facing formal pages.
 6. Run placeholder scan on formal outputs.
 7. Remove `_meta/working/<source-slug>/` unless there is a deliberate reason to keep it.
 8. Update relevant domain index, root `index.md`, and `log.md`.

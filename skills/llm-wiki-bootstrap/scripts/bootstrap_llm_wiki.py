@@ -275,8 +275,8 @@ def build_config(
 def config_paths(os_name: str) -> list[Path]:
     base = user_home() / ".llmwiki"
     if os_name == "windows":
-        return [base / "config.ps1", base / "config.cmd"]
-    return [base / "config.env"]
+        return [base / "config.json", base / "config.ps1", base / "config.cmd"]
+    return [base / "config.json", base / "config.env"]
 
 
 def quote_posix(value: str) -> str:
@@ -292,7 +292,9 @@ def write_config_files(paths: list[Path], config: dict[str, str], force: bool, d
             written.append(str(path))
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
-        if path.suffix == ".ps1":
+        if path.suffix == ".json":
+            text = json.dumps(config, ensure_ascii=False, indent=2) + "\n"
+        elif path.suffix == ".ps1":
             text = "\n".join(f'$env:{key} = "{value}"' for key, value in config.items()) + "\n"
         elif path.suffix == ".cmd":
             text = "\n".join(f"set {key}={value}" for key, value in config.items()) + "\n"
@@ -367,6 +369,39 @@ def core_files(domains: list[str]) -> dict[Path, str]:
     }
 
 
+def tools_markdown(tools: dict[str, object]) -> str:
+    media = tools.get("media") or {}
+    obsidian_app = tools.get("obsidian_app") or {}
+    obsidian_cli = tools.get("obsidian_cli") or {}
+    architecture = tools.get("architecture") or {}
+    rows = [
+        ("Obsidian App", ", ".join(str(x) for x in obsidian_app.get("paths", [])), "detected" if obsidian_app.get("installed") else "missing"),
+        ("Obsidian CLI", ", ".join(str(x) for x in obsidian_cli.get("commands", [])), "verified" if obsidian_cli.get("installed") else "missing"),
+        ("FFmpeg", str((media.get("ffmpeg") or {}).get("command") or ""), str((media.get("ffmpeg") or {}).get("version") or "")),
+        ("FFprobe", str((media.get("ffprobe") or {}).get("command") or ""), str((media.get("ffprobe") or {}).get("version") or "")),
+        ("Whisper CLI", str((media.get("local_asr") or {}).get("command") or ""), str((media.get("local_asr") or {}).get("version") or "")),
+        ("Whisper model", str((media.get("asr_model") or {}).get("path") or ""), "configured" if (media.get("asr_model") or {}).get("configured") else "missing"),
+        ("Tesseract", str((media.get("tesseract") or {}).get("command") or ""), str((media.get("tesseract") or {}).get("version") or "")),
+    ]
+    lines = [
+        "# Wiki Tool Inventory",
+        "",
+        f"- Generated: {dt.datetime.now().astimezone().isoformat(timespec='seconds')}",
+        f"- Operating system: {tools.get('os', '')}",
+        f"- Native architecture: {architecture.get('native', '')}",
+        "- Purpose: verified executable and model locations for Wiki ingestion. This file contains no credentials.",
+        "",
+        "| Tool | Executable or model path | Verification |",
+        "| --- | --- | --- |",
+    ]
+    for name, command, verification in rows:
+        safe_command = command.replace("|", "\\|") or "—"
+        safe_verification = verification.replace("|", "\\|") or "—"
+        lines.append(f"| {name} | `{safe_command}` | {safe_verification} |")
+    lines.extend(["", "Prefer these recorded absolute paths before probing PATH or installing another copy.", ""])
+    return "\n".join(lines)
+
+
 def domain_index(domain: str) -> str:
     return (
         frontmatter(domain, "index", domain)
@@ -383,7 +418,13 @@ def domain_index(domain: str) -> str:
     )
 
 
-def create_wiki(wiki_root: Path, domains: list[str], force: bool, dry_run: bool) -> dict[str, list[str]]:
+def create_wiki(
+    wiki_root: Path,
+    domains: list[str],
+    force: bool,
+    dry_run: bool,
+    tool_inventory: str = "",
+) -> dict[str, list[str]]:
     created: list[str] = []
     skipped: list[str] = []
     dirs = [
@@ -407,6 +448,8 @@ def create_wiki(wiki_root: Path, domains: list[str], force: bool, dry_run: bool)
             created.append(str(path))
 
     files = core_files(domains)
+    if tool_inventory:
+        files[Path("TOOLS.md")] = tool_inventory
     for domain in domains:
         files[Path("domains") / domain / "index.md"] = domain_index(domain)
 
@@ -752,9 +795,10 @@ def install_hints(os_name: str, package_managers: list[str]) -> list[str]:
 
 def load_snippet(os_name: str, paths: list[Path]) -> str:
     if os_name == "windows":
-        ps1 = next((p for p in paths if p.suffix == ".ps1"), paths[0])
-        return f'. "{ps1}"'
-    return f"source {quote_posix(str(paths[0]))}"
+        config_json = next((p for p in paths if p.suffix == ".json"), paths[0])
+        return f"Get-Content -Raw -LiteralPath '{config_json}' | ConvertFrom-Json"
+    config_json = next((p for p in paths if p.suffix == ".json"), paths[0])
+    return f"read JSON config {quote_posix(str(config_json))}"
 
 
 def build_summary(args: argparse.Namespace) -> dict[str, object]:
@@ -896,7 +940,13 @@ def main() -> int:
         wiki_root.mkdir(parents=True, exist_ok=True)
 
     summary["config_written"] = write_config_files(cfg_paths, summary["config"], args.force, dry_run)
-    summary["wiki_writes"] = create_wiki(wiki_root, summary["domains"], args.force, dry_run)
+    summary["wiki_writes"] = create_wiki(
+        wiki_root,
+        summary["domains"],
+        args.force,
+        dry_run,
+        tools_markdown(summary["tools"]),
+    )
     summary["git"] = init_git(wiki_root, dry_run) if args.git and not args.no_git else {"status": "skipped"}
     summary["obsidian_register"] = {
         "requested": False,
