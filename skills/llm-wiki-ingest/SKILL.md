@@ -255,6 +255,18 @@ For video/audio ingestion, read
 `references/transcript/video-course-ingest.md` before declaring `ffmpeg`,
 `ffprobe`, OCR, or ASR unavailable.
 
+### Python Launcher Gate
+
+Before the first bundled Python script, read
+`references/python-launcher-resolution.md`. Resolve a working Python launcher on
+the target computer by running its mandatory probe. Command discovery alone is
+not proof: Windows Store aliases must be rejected when the probe fails.
+
+Record the verified executable plus any prefix arguments, such as the `-3` in
+`py -3`, and reuse that same launcher for every Python script in the ingest.
+Never hard-code an author-machine path and never switch to `python3` merely
+because an example command uses that spelling.
+
 ## Required Orientation
 
 Before editing the wiki:
@@ -264,7 +276,7 @@ Before editing the wiki:
 3. Read `$WIKI_ROOT/index.md`.
 4. Read recent `$WIKI_ROOT/log.md`.
 5. Search existing wiki pages for source title, product names, concepts, APIs, brands, model IDs, and major keywords.
-6. Run the bundled `scripts/wiki_cli_search.py` with the current system's Python launcher to probe the source title and core concepts. Pass the resolved Wiki root with `--wiki`. The script falls back to a Python filesystem search when Obsidian CLI or `rg` is unavailable. If it still cannot run, record the exact error and perform the equivalent filesystem search before returning to the main flow.
+6. Run the bundled `scripts/wiki_cli_search.py` with the verified Python launcher to probe the source title and core concepts. Pass the resolved Wiki root with `--wiki`. The script falls back to a Python filesystem search when Obsidian CLI or `rg` is unavailable. If it still cannot run, record the exact error and perform the equivalent filesystem search before returning to the main flow.
 7. If `$WIKI_ROOT/.git` exists, run `git -C $WIKI_ROOT status --short` and avoid
    reverting unrelated work. If the Wiki is not a Git repository, skip Git;
    Git is not required for ingestion and must not be installed or initialized
@@ -416,6 +428,9 @@ The query entry page should be small and operational. It should contain:
 - answer or execution boundaries
 - standard diagnostic / planning / output steps
 
+It is a formal page and must use all frontmatter fields required by
+`references/formal-page-standards.md`, including both `created:` and `updated:`.
+
 If no query page is needed, record `query-entry: not-needed` plus the reason in
 the formal page plan or audit handoff. Do not silently omit the decision.
 
@@ -433,6 +448,10 @@ Formal pages must:
 - be readable by future agents without reopening raw for normal use
 
 Read `references/formal-page-standards.md` before writing formal pages.
+The coverage matrix is also a machine-validated contract. Copy the exact
+English column names from `references/coverage-contract.md`; do not translate,
+rename, or omit them. Adapter-specific columns may be added after the required
+columns.
 
 ### 7. Index, Log, and Cleanup
 
@@ -467,15 +486,43 @@ evidence, and any taxonomy alternative that was rejected.
 
 Before final response:
 
-1. Run `scripts/validate_ingest_contract.py` with source slug or paths when possible. `--formal` accepts either a Markdown file or a directory; when validating a directory, pass it as one argument instead of trying to read the directory as a file.
-2. Run placeholder scan on formal output when available:
+1. Run the platform validation entry point below. It discovers and runtime-tests
+   Python on the target computer, rejects broken command aliases, and invokes
+   the bundled validator with fixed parameter names. Repeat raw/formal inputs as
+   needed. A formal input may be a Markdown file or a directory.
 
-```bash
-python3 <llm-wiki-audit-and-optimization-skill>/scripts/placeholder_scan.py <formal_path>
+```text
+Windows PowerShell:
+& <skill-dir>/scripts/run_ingest_validation.ps1 -WikiRoot <wiki-root> -NotesDir <notes-dir> -RawPath @(<raw-paths>) -FormalPath @(<formal-paths>)
+
+macOS/Linux:
+<skill-dir>/scripts/run_ingest_validation.sh --wiki-root <wiki-root> --notes-dir <notes-dir> --raw <raw-path> --formal <formal-path>
 ```
 
-3. Run the route audit helper bundled with this Skill. Resolve the current
-   system's Python launcher, then run:
+The bundled validator is self-contained. It checks required extraction notes,
+the exact coverage contract, target-page existence, formal frontmatter,
+placeholder/boilerplate markers, thin non-index pages, and duplicate formal
+bodies. It also checks the audit-handoff contract, knowledge-inventory versus
+coverage dispositions, durable source-inventory paths, and required raw plus
+extraction-note citations in formal pages. Do not call another Skill's
+placeholder scanner as a required ingest dependency.
+
+Choose `.ps1` or `.sh` by the shell that is actually executing the validation,
+not by the operating system where the Wiki files originated. Include every
+newly created or modified formal page in validation. If a query entry or parent
+index sits outside the main formal directory, pass it as an additional formal
+input instead of assuming the directory scan includes it.
+
+2. Treat any non-zero validation exit as a repair instruction, not as an optional
+   warning. Fix the reported artifacts, rerun the same command with the same
+   inputs, and repeat until it exits `0`. Never replace a failed
+   validator with a manual file listing or claim complete/100% coverage while
+   validation is failing. If the environment cannot run the validator after the
+   launcher discovery procedure, record an incomplete result and stop before a
+   success claim.
+
+3. Run the route audit helper bundled with this Skill using the same verified
+   Python launcher:
 
 ```bash
 <python> <skill-dir>/scripts/wiki_cli_route_audit.py <new-entry-page.md> --wiki "<wiki-root>"
@@ -491,7 +538,11 @@ If the active Obsidian vault is not `$WIKI_ROOT`, treat the script's degraded fi
 4. Search representative source terms across formal pages with `rg`,
    `Select-String`, or an equivalent filesystem search available on the current
    platform. Do not require `rg` merely for this check.
-5. Verify every `formalized` source unit has a target page.
+5. Verify every `formalized` source unit has a target page. For each row, verify
+   the target page contains the actual claim, rule, example, parameter, or
+   operation represented by that source unit; file existence alone is not
+   enough. Use distinctive source terms as anchors and correct inaccurate target
+   mappings before completion.
 6. Verify every raw-only or omitted source unit has a reason.
 7. Verify `formal-page-plan.md` and `audit-handoff.md` record an explicit
    placement confirmation and that no formal domain page, query entry, or formal

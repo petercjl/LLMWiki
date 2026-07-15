@@ -298,14 +298,17 @@ Before finishing:
 2. Confirm raw ASR exists for every processed media file.
 3. Confirm keyframes/OCR exist when screen content may carry knowledge.
 4. Confirm every meaningful ASR/OCR unit has a coverage row or omission reason.
-5. Run `validate_ingest_contract.py` where possible. For existing course
+5. Run `validate_ingest_contract.py` with the verified target-machine Python
+   launcher. For existing course
    packages with added chapters, pass the package-level notes directory, not
    only `_meta/extraction-notes/<source-slug>/chXX/`, because the required
    profile, inventory, formal plan, and audit handoff live at package root.
    The validator checks that every formalized/merged coverage row resolves to a
    real target page. It does not require internal source-unit IDs or transcript
    sentences to appear verbatim in learner-facing formal pages.
-6. Run placeholder scan on formal outputs.
+6. The same validator checks formal outputs for placeholder markers, thin pages,
+   and duplicate bodies. Any non-zero exit must be repaired and rerun before a
+   success claim; do not substitute a manual checklist.
 7. Remove `_meta/working/<source-slug>/` unless there is a deliberate reason to keep it.
 8. Update relevant domain index, root `index.md`, and `log.md`.
 

@@ -70,14 +70,17 @@ def obsidian_cmd(wiki: Path, *args: str) -> list[str]:
 def cli_status(wiki: Path) -> dict:
     selector = find_vault_selector(wiki)
     code, out, err = run(obsidian_cmd(wiki, "vault", "info=path"))
-    active = out.splitlines()[-1] if out else ""
+    combined = "\n".join(part for part in [out, err] if part).strip()
+    command_error = code != 0 or bool(re.search(r"(^|\n)\s*Error:", combined, re.IGNORECASE))
+    available = not command_error
+    active = out.splitlines()[-1] if available and out else ""
     return {
-        "available": code == 0,
+        "available": available,
         "active_vault_path": active,
         "vault_selector": selector or "",
         "target_wiki_path": str(wiki),
-        "trusted": code == 0 and Path(active).expanduser() == wiki,
-        "error": err if code else "",
+        "trusted": available and bool(active) and Path(active).expanduser() == wiki,
+        "error": combined if command_error else "",
     }
 
 

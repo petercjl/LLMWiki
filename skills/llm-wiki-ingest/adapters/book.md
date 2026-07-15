@@ -16,11 +16,11 @@ Load these only when doing a book task:
 For EPUB files, prefer these scripts:
 
 ```bash
-python3 <skill>/scripts/book/inspect_epub.py /path/to/book.epub --output source-profile.json
-python3 <skill>/scripts/book/extract_epub_source.py /path/to/book.epub --output-dir "$WIKI_ROOT/raw/books/<book-slug>-<year>"
-python3 <skill>/scripts/book/build_book_inventory.py "$WIKI_ROOT/raw/books/<book-slug>-<year>" --output "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>/chapter-inventory.md"
-python3 <skill>/scripts/book/generate_coverage_matrix.py "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>/chapter-inventory.md" --output "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>/coverage-matrix.md"
-python3 <skill>/scripts/book/validate_book_ingest.py --wiki-root "$WIKI_ROOT" --raw-dir "$WIKI_ROOT/raw/books/<book-slug>-<year>" --notes-dir "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>" --formal-dir "$WIKI_ROOT/domains/<domain>/learning-paths/<path>"
+<verified-python> <skill>/scripts/book/inspect_epub.py /path/to/book.epub --output source-profile.json
+<verified-python> <skill>/scripts/book/extract_epub_source.py /path/to/book.epub --output-dir "$WIKI_ROOT/raw/books/<book-slug>-<year>"
+<verified-python> <skill>/scripts/book/build_book_inventory.py "$WIKI_ROOT/raw/books/<book-slug>-<year>" --output "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>/chapter-inventory.md"
+<verified-python> <skill>/scripts/book/generate_coverage_matrix.py "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>/chapter-inventory.md" --output "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>/coverage-matrix.md"
+<verified-python> <skill>/scripts/book/validate_book_ingest.py --wiki-root "$WIKI_ROOT" --raw-dir "$WIKI_ROOT/raw/books/<book-slug>-<year>" --notes-dir "$WIKI_ROOT/_meta/extraction-notes/<book-slug>-<year>" --formal-dir "$WIKI_ROOT/domains/<domain>/learning-paths/<path>"
 ```
 
 The scripts are mechanical helpers. They do not replace source reading, knowledge-unit extraction, synthesis, or audit handoff.

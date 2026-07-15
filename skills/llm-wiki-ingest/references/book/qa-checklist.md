@@ -22,9 +22,9 @@ Use this checklist before declaring a book ingest complete.
 
 Run:
 
-```bash
-python3 <llm-wiki-audit-and-optimization-skill>/scripts/placeholder_scan.py <formal_path>
-```
+Use this Skill's platform `run_ingest_validation` entry point. Its bundled
+validator performs the placeholder, thin-page, duplicate-body, frontmatter,
+coverage, and target-page checks without depending on another Skill.
 
 Expected:
 

@@ -21,6 +21,12 @@ status: active
 ---
 ```
 
+The target Wiki's current `SCHEMA.md` is authoritative for enumerated values
+such as `type` and `domain`. The example above shows common values, not a license
+to introduce a value that the target schema does not allow. If a query or source
+summary needs a role that is not an allowed `type`, use an allowed type and
+express the routing role through its path, tags, headings, and links.
+
 ## Content Requirements
 
 Use the artifact shape that fits the source. A strong formal page usually includes:
