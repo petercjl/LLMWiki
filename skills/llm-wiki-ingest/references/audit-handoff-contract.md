@@ -37,6 +37,8 @@ status: active
 
 - Source profile:
 - Source inventory:
+- Image inventory: <required for image-bearing sources>
+- Image analysis: <required when images are formalized or merged>
 - Knowledge-unit inventory:
 - Coverage matrix:
 - Omission audit:
@@ -62,6 +64,7 @@ status: active
 - raw-only:
 - omitted-with-reason:
 - unresolved:
+- Image coverage: <archived / formalized / merged / raw-only / unresolved / embedded>
 
 ## Expected Agent Use
 
@@ -73,6 +76,7 @@ status: active
 
 - Time-sensitive claims:
 - Sensitive data removed:
+- Sensitive image handling:
 - Weak source areas:
 - User confirmation needed:
 
@@ -93,6 +97,8 @@ The audit skill should use the handoff to check:
 2. Compilation quality: pages are not summaries, shells, or fact dumps.
 3. Routing quality: indexes and titles lead agents to the right page.
 4. Reasoning readiness: pages contain decision rules, examples, caveats, and templates.
+5. Visual evidence: knowledge/procedural images have durable assets, semantic
+   anchors, target-page embeds, and safe dispositions.
 
 ## Failure Labels
 
@@ -104,6 +110,9 @@ Suggested audit labels:
 - `compile-fact-dump`
 - `compile-missing-example`
 - `compile-missing-code-or-field`
+- `compile-image-missing`
+- `compile-image-unsearchable`
+- `compile-image-unsafe`
 - `route-missing-index`
 - `route-no-agent-entry`
 - `agent-usability-low`

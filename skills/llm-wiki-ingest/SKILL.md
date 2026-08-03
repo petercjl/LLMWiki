@@ -1,6 +1,6 @@
 ---
 name: llm-wiki-ingest
-description: Unified and only LLM Wiki ingestion skill for the user's $WIKI_ROOT. Use for any source that should be compiled into the wiki, including Obsidian Clippings, webpages, books, EPUB/PDF, course transcripts, meeting transcripts, API docs, XMind files, spreadsheets, markdown docs, product/tool docs, PPT/courseware, and unknown source types. Enforces memory-first classification, fusion with existing knowledge, lossless knowledge-unit coverage, raw preservation, extraction notes, formal pages, index/log updates, Obsidian route audit, and audit handoff.
+description: Unified and only LLM Wiki ingestion skill for the user's $WIKI_ROOT. Use for any source that should be compiled into the wiki, including image-rich or dynamic webpages, Obsidian Clippings, books, EPUB/PDF, course transcripts, meeting transcripts, API docs, XMind files, spreadsheets, markdown docs, product/tool docs, PPT/courseware, and unknown source types. Enforces memory-first classification, text and image evidence preservation, semantic image anchoring, lossless knowledge-unit coverage, formal pages, index/log updates, route audit, and audit handoff.
 ---
 
 # LLM Wiki Ingest
@@ -43,6 +43,27 @@ For each source unit, record exactly one disposition:
 - `unresolved`: requires user judgment, current-source verification, or missing context.
 
 The final wiki may be longer than a summary. It should reconstruct implicit logic, add interpretation, relationship maps, decision criteria, examples, Agent-usable templates, caveats, and cross-links. Enrichment must never replace source coverage: first preserve the source's knowledge units, then enrich.
+
+## Visual Evidence Gate
+
+Treat informative images as first-class source units rather than attachments or
+decoration. When a source contains screenshots, diagrams, charts, figures, or
+scanned tables, read `references/image-knowledge-contract.md` before inventory
+or formal compilation.
+
+Separate acquisition from ingestion. A CLI, API client, exporter, browser
+controller, or debugging session may supply source bytes, but none is part of
+the Wiki knowledge method or a required dependency. The portable workflow owns
+only durable asset preservation, image classification, semantic anchoring,
+coverage, formal embedding, and validation.
+
+Archive original assets under `raw/assets/<source-slug>/`. Create
+`image-inventory.md` whenever images are part of the validated raw inputs. If
+any image is formalized or merged, also create `image-analysis.md`. A future
+text-first Agent must be able to find each useful image through its section,
+surrounding explanation, and knowledge-bearing caption. Do not claim pixel-level
+or visual-similarity search unless a separate multimodal index was configured
+and tested.
 
 ## Semantic Accuracy Gate
 
@@ -381,6 +402,10 @@ raw/assets/
 
 Do not edit raw after archiving except mechanical filename/path fixes before logging.
 
+For image-bearing sources, keep original assets in `raw/assets/<source-slug>/`
+and use Wiki-relative paths in inventories and formal pages. An authenticated or
+expiring external image URL is not a durable archive.
+
 ### 3. Source Inventory
 
 Build an inventory of all source units before writing final pages.
@@ -399,6 +424,11 @@ _meta/extraction-notes/<source-slug>/
 ├── formal-page-plan.md
 └── audit-handoff.md
 ```
+
+Add `image-inventory.md` when validated raw inputs include images, and add
+`image-analysis.md` when at least one image is formalized or merged. Follow the
+exact columns and classification rules in
+`references/image-knowledge-contract.md`.
 
 Use `references/coverage-contract.md` for required columns and dispositions.
 
@@ -488,6 +518,8 @@ Formal pages must:
 - include decision rules, templates, checklists, or code snippets when useful
 - mark time-sensitive claims and outdated-risk
 - be readable by future agents without reopening raw for normal use
+- embed formalized knowledge/procedural images beside the claim or operation
+  they support, using durable Wiki-relative paths and semantic captions
 
 Read `references/formal-page-standards.md` before writing formal pages.
 The coverage matrix is also a machine-validated contract. Copy the exact
@@ -524,6 +556,10 @@ Use `references/audit-handoff-contract.md`. This file is the interface with `llm
 Include the proposed placement, the user's confirmed choice, the confirmation
 evidence, and any taxonomy alternative that was rejected.
 
+For image-bearing sources, include archived, formalized, raw-only, unresolved,
+and embedded image counts plus any sensitive-image handling in the coverage
+summary and known risks.
+
 ### 9. Self-Validation
 
 Before final response:
@@ -548,7 +584,9 @@ bodies. It also checks the audit-handoff contract, knowledge-inventory versus
 coverage dispositions, durable source-inventory paths, and required raw plus
 extraction-note citations in formal pages. For machine-extracted sources, it
 also requires a passed `semantic-validation.md` contract with a non-empty
-high-risk anchor inventory. Do not call another Skill's
+high-risk anchor inventory. For image-bearing raw inputs, it also checks the
+image inventory, durable asset existence and signatures, target-page embeds,
+semantic anchors, and image-analysis handoff. Do not call another Skill's
 placeholder scanner as a required ingest dependency.
 
 Choose `.cmd` or `.sh` by the shell that is actually executing the validation,

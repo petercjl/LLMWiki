@@ -9,6 +9,7 @@ import os
 import re
 from collections import defaultdict
 from pathlib import Path
+from urllib.parse import unquote
 
 
 REQUIRED_NOTE_FILES = [
@@ -41,6 +42,17 @@ MEDIA_SUFFIXES = {
     ".ogg",
     ".wav",
     ".webm",
+}
+
+IMAGE_SUFFIXES = {".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
+IMAGE_CLASSES = {
+    "knowledge",
+    "procedural",
+    "evidence",
+    "duplicate",
+    "decorative",
+    "sensitive",
+    "unresolved",
 }
 
 SEMANTIC_CONFIDENCE = {"high", "medium", "low"}
@@ -347,6 +359,175 @@ def raw_contains_media(raw_paths: list[Path]) -> bool:
     return False
 
 
+def raw_image_files(raw_paths: list[Path]) -> list[Path]:
+    images: list[Path] = []
+    for path in raw_paths:
+        if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES:
+            images.append(path.resolve())
+        elif path.is_dir():
+            images.extend(
+                child.resolve()
+                for child in path.rglob("*")
+                if child.is_file() and child.suffix.lower() in IMAGE_SUFFIXES
+            )
+    return sorted(set(images))
+
+
+def validate_image_signature(path: Path, errors: list[str]) -> None:
+    if not path.is_file():
+        errors.append(f"{path}: archived image missing")
+        return
+    data = path.read_bytes()
+    if not data:
+        errors.append(f"{path}: archived image is empty")
+        return
+    suffix = path.suffix.lower()
+    valid = True
+    if suffix == ".png":
+        valid = data.startswith(b"\x89PNG\r\n\x1a\n")
+    elif suffix in {".jpg", ".jpeg"}:
+        valid = data.startswith(b"\xff\xd8") and data.endswith(b"\xff\xd9")
+    elif suffix == ".gif":
+        valid = data.startswith((b"GIF87a", b"GIF89a"))
+    elif suffix == ".webp":
+        valid = len(data) >= 12 and data.startswith(b"RIFF") and data[8:12] == b"WEBP"
+    elif suffix == ".svg":
+        head = data[:4096].decode("utf-8", errors="ignore").casefold()
+        valid = "<svg" in head
+    if not valid:
+        errors.append(f"{path}: archived image signature does not match {suffix}")
+
+
+def resolve_wiki_path(wiki_root: Path, value: str) -> Path | None:
+    cleaned = unquote(value.strip().strip("`\"'").strip("<>"))
+    if not cleaned or re.match(r"^(?:https?:|data:)", cleaned, re.IGNORECASE):
+        return None
+    candidate = Path(cleaned)
+    if not candidate.is_absolute():
+        candidate = wiki_root / candidate
+    return candidate.resolve()
+
+
+def validate_image_contract(
+    notes_dir: Path,
+    wiki_root: Path,
+    raw_paths: list[Path],
+    errors: list[str],
+) -> None:
+    raw_images = raw_image_files(raw_paths)
+    if not raw_images:
+        return
+
+    inventory_path = notes_dir / "image-inventory.md"
+    if not inventory_path.is_file():
+        errors.append(f"{inventory_path}: missing for image-bearing source")
+        return
+    if not read(inventory_path).strip():
+        errors.append(f"{inventory_path}: empty")
+        return
+
+    rows = parse_markdown_table_rows(read(inventory_path))
+    if len(rows) < 2:
+        errors.append(f"{inventory_path}: image inventory has no data rows")
+        return
+    header = rows[0]
+    required = [
+        "image_id",
+        "source_location",
+        "archived_path",
+        "image_class",
+        "semantic_anchor",
+        "target_pages",
+        "status",
+        "reason_or_notes",
+    ]
+    missing = [column for column in required if column not in header]
+    if missing:
+        errors.append(f"{inventory_path}: missing image columns: {', '.join(missing)}")
+        return
+    idx = {name: header.index(name) for name in required}
+    seen_ids: set[str] = set()
+    inventoried_paths: set[Path] = set()
+    has_formalized_image = False
+
+    for row_num, row in enumerate(rows[1:], start=2):
+        if len(row) < len(header):
+            errors.append(f"{inventory_path}: row {row_num} has too few cells")
+            continue
+        values = {name: row[index].strip() for name, index in idx.items()}
+        image_id = values["image_id"]
+        if not image_id:
+            errors.append(f"{inventory_path}: row {row_num} missing image_id")
+        elif image_id in seen_ids:
+            errors.append(f"{inventory_path}: duplicate image_id {image_id!r}")
+        seen_ids.add(image_id)
+
+        image_class = values["image_class"].casefold()
+        status = values["status"]
+        if image_class not in IMAGE_CLASSES:
+            errors.append(f"{inventory_path}: row {row_num} {image_id} invalid image_class {image_class!r}")
+        if status not in ALLOWED_STATUS:
+            errors.append(f"{inventory_path}: row {row_num} {image_id} invalid status {status!r}")
+
+        archived = resolve_wiki_path(wiki_root, values["archived_path"])
+        if archived is None:
+            errors.append(
+                f"{inventory_path}: row {row_num} {image_id} archived_path must be a durable Wiki-relative file"
+            )
+        else:
+            raw_archived_value = unquote(values["archived_path"].strip().strip("`\"'").strip("<>"))
+            if Path(raw_archived_value).is_absolute() or not archived.is_relative_to(wiki_root):
+                errors.append(
+                    f"{inventory_path}: row {row_num} {image_id} archived_path must stay inside the Wiki root"
+                )
+            inventoried_paths.add(archived)
+            if archived.suffix.lower() not in IMAGE_SUFFIXES:
+                errors.append(f"{inventory_path}: row {row_num} {image_id} unsupported image suffix: {archived}")
+            else:
+                validate_image_signature(archived, errors)
+
+        if image_class == "sensitive" and status in {"formalized", "merged"}:
+            errors.append(f"{inventory_path}: row {row_num} {image_id} sensitive image cannot be formalized unredacted")
+
+        if status in {"formalized", "merged"}:
+            has_formalized_image = True
+            if not values["semantic_anchor"]:
+                errors.append(f"{inventory_path}: row {row_num} {image_id} requires semantic_anchor")
+            targets = split_target_paths(values["target_pages"])
+            if not targets:
+                errors.append(f"{inventory_path}: row {row_num} {image_id} requires target_pages")
+            for target_value in targets:
+                target = resolve_wiki_path(wiki_root, target_value)
+                if target is None or not target.is_file():
+                    errors.append(f"{inventory_path}: row {row_num} {image_id} target page missing: {target_value}")
+                    continue
+                target_text = read(target)
+                archived_ref = values["archived_path"].strip().strip("`\"'").strip("<>").replace("\\", "/")
+                if archived_ref not in target_text.replace("\\", "/"):
+                    errors.append(f"{target}: missing image embed for {image_id} ({archived_ref})")
+                if values["semantic_anchor"] and values["semantic_anchor"] not in target_text:
+                    errors.append(f"{target}: missing semantic anchor for {image_id}: {values['semantic_anchor']!r}")
+        elif not values["reason_or_notes"]:
+            errors.append(f"{inventory_path}: row {row_num} {image_id} requires reason_or_notes")
+
+    for raw_image in raw_images:
+        if raw_image not in inventoried_paths:
+            errors.append(f"{inventory_path}: raw image missing inventory disposition: {raw_image}")
+
+    if has_formalized_image:
+        analysis_path = notes_dir / "image-analysis.md"
+        if not analysis_path.is_file() or not read(analysis_path).strip():
+            errors.append(f"{analysis_path}: missing or empty for formalized images")
+
+    handoff_path = notes_dir / "audit-handoff.md"
+    if handoff_path.is_file() and not re.search(
+        r"^\s*-\s*(?:Image coverage|Images|图片覆盖|图片)\s*:",
+        read(handoff_path),
+        re.MULTILINE | re.IGNORECASE,
+    ):
+        errors.append(f"{handoff_path}: image-bearing source requires image coverage counts")
+
+
 def semantic_validation_required(notes_dir: Path, raw_paths: list[Path]) -> bool:
     if raw_contains_media(raw_paths):
         return True
@@ -505,6 +686,7 @@ def main() -> int:
         validate_durable_source_inventory(notes_dir, errors)
         if semantic_validation_required(notes_dir, raw_paths):
             validate_semantic_validation(notes_dir, errors)
+        validate_image_contract(notes_dir, wiki_root, raw_paths, errors)
 
     for raw in raw_paths:
         if not raw.exists():

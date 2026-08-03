@@ -72,3 +72,19 @@ Avoid both extremes:
 - too huge: all source knowledge buried in one mega-page
 
 Use learning paths, capability maps, reference manuals, playbooks, and query pages when the source supports repeated Agent tasks.
+
+## Image Evidence
+
+When formal knowledge depends on an image:
+
+- use a durable Wiki-relative embed, never an author-machine absolute path;
+- place the image beside the claim, operation, case, or relation it supports;
+- provide a semantic caption or adjacent sentence that states what the image
+  proves or where the user acts;
+- keep the searchable rule and decision logic in text;
+- preserve unique visual relations instead of replacing them with a generic
+  summary;
+- omit or redact sensitive account, credential, personal, or session data.
+
+Do not embed every archived image by default. Decorative and duplicate images
+may remain raw-only when the image inventory records the reason.

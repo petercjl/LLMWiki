@@ -1,6 +1,6 @@
 ---
 name: llm-wiki-audit-and-optimization
-description: Audit and optimize an existing Markdown LLM Wiki for compilation depth, navigation and retrieval routes, and answer-readiness. Use when the user asks to check Wiki quality, verify a recent ingest, find why knowledge cannot be found or used correctly, diagnose a question-and-answer result, optimize or repair the Wiki, rebuild weak or shell pages, fix routes or taxonomy, or recompile existing source material. By default, continue from audit findings into evidence-backed optimization and re-audit; remain read-only only when the user explicitly says not to modify files.
+description: Audit and optimize an existing Markdown LLM Wiki for compilation depth, text and image evidence coverage, navigation and retrieval routes, and answer-readiness. Use when the user asks to check Wiki quality, verify a recent ingest, find why knowledge or embedded images cannot be found or delivered, diagnose a question-and-answer result, optimize or repair the Wiki, rebuild weak pages, fix routes or taxonomy, or recompile existing source material. By default, continue from audit findings into evidence-backed optimization and re-audit; remain read-only only when the user explicitly says not to modify files.
 ---
 
 # LLM Wiki Audit And Optimization
@@ -171,6 +171,15 @@ Compare formal pages with source evidence and extraction notes where available.
 Check transformation depth, reasoning, conditions, caveats, cases, numbers,
 evidence anchors, transfer rules, traceability, domain placement, and actionability.
 
+For image-bearing sources, inspect `image-inventory.md` and
+`image-analysis.md` when present. Check that every source image has a disposition;
+every knowledge/procedural image has a durable local asset, semantic anchor,
+coverage row, and target-page embed; captions state what the image proves; and
+decorative, duplicate, unresolved, or sensitive images have explicit safe
+handling. Treat acquisition CLIs, browser controllers, exporters, and debugging
+connections as source-layer capabilities, not Wiki dependencies or formal
+knowledge requirements.
+
 Use labels when applicable:
 
 - `compile-placeholder`
@@ -178,6 +187,9 @@ Use labels when applicable:
 - `compile-scattered`
 - `compile-omission`
 - `compile-biased`
+- `compile-image-missing`
+- `compile-image-unsearchable`
+- `compile-image-unsafe`
 
 ### 6. Audit Routes
 
@@ -192,6 +204,11 @@ Run with Wiki-relative targets:
 Review unresolved links, backlinks, orphans, dead ends, outlines, missing
 index/query entry points, conflicting routes, and unclear titles. Filesystem
 results remain authoritative when Obsidian CLI is unavailable or untrusted.
+
+For image-bearing routes, confirm that a text-first query can reach the image
+through its page title, section, surrounding explanation, or semantic caption.
+Do not require or claim pixel-level image search unless a separate multimodal
+index is in scope and has runtime evidence.
 
 Use labels when applicable:
 
@@ -285,6 +302,9 @@ Before completion, verify:
 - planned empty categories remain minimal draft maintenance stubs rather than
   padded pseudo-knowledge;
 - raw sources remained unchanged;
+- image assets remained durable and every formalized visual has a valid embed,
+  semantic anchor, coverage disposition, and safe handling;
+- optional source-acquisition tools were not converted into Wiki dependencies;
 - only the resolved Wiki and planned files changed;
 - final claims match the post-repair checks.
 

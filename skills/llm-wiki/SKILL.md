@@ -1,6 +1,6 @@
 ---
 name: llm-wiki
-description: Query and perform routine navigation maintenance on an existing Markdown LLM Wiki. Use when the user asks a question that should be answered from their Wiki, wants to find existing knowledge, compare compiled pages, trace which Wiki pages support an answer, or make small explicit updates to indexes and query entry pages. Delegate new-source ingestion and all quality audit, optimization, repair, and recompilation work to the corresponding LLM Wiki skills.
+description: Query and perform routine navigation maintenance on an existing Markdown LLM Wiki. Use when the user asks a question that should be answered from their Wiki, wants to find existing knowledge, compare compiled pages, trace which Wiki pages or embedded image evidence support an answer, display a relevant stored screenshot or diagram, or make small explicit updates to indexes and query entry pages. Delegate new-source ingestion and all quality audit, optimization, repair, and recompilation work to the corresponding LLM Wiki skills.
 ---
 
 # LLM Wiki Query And Routine Maintenance
@@ -110,6 +110,25 @@ Prefer formal knowledge under `queries/`, `domains/`, `shared/`, `projects/`,
 extraction notes only when the user asks for source verification or the formal
 pages expose an unresolved evidence gap.
 
+### 4.1 Resolve Relevant Image Evidence
+
+Treat image retrieval as a routed evidence branch, not as independent pixel
+search. When a selected formal page embeds a screenshot, diagram, chart, or
+figure, use its heading, surrounding explanation, and semantic caption to decide
+whether it materially helps the current question.
+
+Open the linked original asset when the user asks to see the interface, visual
+procedure, diagram, chart, example, or source evidence, or when visual
+inspection is necessary to answer accurately. Resolve Wiki-relative embeds
+against the selected Wiki root. Do not infer that a broken local path is usable
+on another machine.
+
+If the active Agent has vision and the answer channel supports media, inspect
+and display or attach the relevant image. Otherwise return its semantic caption
+and an accessible Wiki-relative link or clearly state the delivery limitation.
+Do not claim visual-similarity or pixel-level indexing unless a separate
+multimodal index was actually configured and tested.
+
 ### 5. Answer From Wiki Evidence
 
 Give the conclusion first. Then explain the reasoning at the level the user needs.
@@ -122,6 +141,11 @@ separate:
 - what the Wiki directly supports;
 - what is a synthesis across several pages;
 - what the Wiki does not yet establish.
+
+When returning visual evidence, include only images relevant to the answer and
+briefly state what each image proves. A local absolute path is acceptable only
+as a current-client rendering adapter; it must not be written back into formal
+Wiki pages or presented as a portable link for remote users.
 
 Do not fill a Wiki gap with an uncited model assumption and present it as Wiki
 knowledge. If the answer requires current external facts, say that the Wiki alone
@@ -175,6 +199,9 @@ Before reporting completion, verify:
 - the query pack or its manual equivalent was completed;
 - every material claim is supported by the named Wiki pages or labeled as a
   synthesis/uncertainty;
+- relevant image evidence was resolved, inspected when needed, and delivered
+  only through capabilities the current Agent and user channel actually support;
+- no pixel-level image retrieval capability was implied without tested evidence;
 - the answer is useful for the user's task rather than a dump of search results;
 - no Wiki file changed during a read-only query;
 - any explicit writeback preserved `raw/`, updated navigation/logging as needed,

@@ -17,6 +17,8 @@ ROUTE_SCRIPT = SKILL_DIR / "scripts" / "wiki_cli_route_audit.py"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 VIDEO_REFERENCE = SKILL_DIR / "references" / "transcript" / "video-course-ingest.md"
 SEMANTIC_REFERENCE = SKILL_DIR / "references" / "semantic-validation-contract.md"
+IMAGE_REFERENCE = SKILL_DIR / "references" / "image-knowledge-contract.md"
+WEB_ADAPTER = SKILL_DIR / "adapters" / "web-clipping.md"
 
 
 def load_script(path: Path, name: str):
@@ -101,6 +103,17 @@ class IngestScriptTests(unittest.TestCase):
         self.assertIn("## High-Risk Anchor Inventory", reference_text)
         self.assertIn("Search the whole raw transcript", reference_text)
         self.assertIn("selective re-ASR", reference_text)
+
+    def test_image_contract_separates_acquisition_from_wiki_ingestion(self):
+        skill_text = SKILL_FILE.read_text(encoding="utf-8")
+        reference_text = IMAGE_REFERENCE.read_text(encoding="utf-8")
+        adapter_text = WEB_ADAPTER.read_text(encoding="utf-8")
+        combined = "\n".join([skill_text, reference_text, adapter_text]).casefold()
+        self.assertIn("## Visual Evidence Gate", skill_text)
+        self.assertIn("Keep source acquisition separate from Wiki ingestion", reference_text)
+        self.assertIn("Dynamic page reading is a source-acquisition concern", adapter_text)
+        self.assertNotIn("tbcli", combined)
+        self.assertNotIn("9223", combined)
 
     def test_search_falls_back_to_python_when_rg_is_missing(self):
         module = load_script(SEARCH_SCRIPT, "wiki_cli_search")
@@ -347,6 +360,99 @@ class IngestScriptTests(unittest.TestCase):
             errors: list[str] = []
             module.validate_semantic_validation(notes, errors)
             self.assertEqual(errors, [])
+
+    def test_validator_checks_image_inventory_embed_and_semantic_anchor(self):
+        with tempfile.TemporaryDirectory() as td:
+            wiki = Path(td) / "wiki"
+            notes = wiki / "_meta" / "extraction-notes" / "demo"
+            raw = wiki / "raw" / "assets" / "demo"
+            formal = wiki / "domains" / "demo" / "page.md"
+            notes.mkdir(parents=True)
+            raw.mkdir(parents=True)
+            formal.parent.mkdir(parents=True)
+            image = raw / "01.png"
+            image.write_bytes(b"\x89PNG\r\n\x1a\n")
+
+            for name in ["source-profile.md", "source-inventory.md", "omission-audit.md", "formal-page-plan.md"]:
+                (notes / name).write_text(f"# {name}\n", encoding="utf-8")
+            (notes / "knowledge-unit-inventory.md").write_text(
+                "| ID | knowledge | disposition |\n"
+                "| --- | --- | --- |\n"
+                "| IMG01 | 设置入口图片 | formalized |\n",
+                encoding="utf-8",
+            )
+            (notes / "coverage-matrix.md").write_text(
+                "| source_unit_id | source_location | source_unit | knowledge_role | target_pages | status | reason_or_notes |\n"
+                "| --- | --- | --- | --- | --- | --- | --- |\n"
+                "| IMG01 | image:01 | 设置入口图片 | procedural | domains/demo/page.md | formalized | represented |\n",
+                encoding="utf-8",
+            )
+            (notes / "image-inventory.md").write_text(
+                "| image_id | source_location | archived_path | image_class | semantic_anchor | target_pages | status | reason_or_notes |\n"
+                "| --- | --- | --- | --- | --- | --- | --- | --- |\n"
+                "| IMG01 | source image 1 | raw/assets/demo/01.png | procedural | 图：设置入口位于计划面板底部。 | domains/demo/page.md | formalized | embedded |\n",
+                encoding="utf-8",
+            )
+            (notes / "image-analysis.md").write_text(
+                "# Image Analysis\n\nIMG01 shows the durable settings entry.\n",
+                encoding="utf-8",
+            )
+            handoff = audit_handoff_text().replace(
+                "## Coverage Summary\n- Source units: 1",
+                "## Coverage Summary\n- Source units: 1\n- Images: 1 archived, 1 formalized, 1 embedded",
+            )
+            (notes / "audit-handoff.md").write_text(handoff, encoding="utf-8")
+            formal.write_text(
+                "---\n"
+                "title: Demo\n"
+                "type: playbook\n"
+                "created: 2026-08-03\n"
+                "updated: 2026-08-03\n"
+                "domain: demo\n"
+                "tags: []\n"
+                "sources:\n"
+                "  - raw/assets/demo/01.png\n"
+                "  - _meta/extraction-notes/demo/coverage-matrix.md\n"
+                "status: active\n"
+                "---\n\n# Demo\n\n"
+                + ("这是可检索的操作说明和决策条件。" * 45)
+                + "\n\n![[raw/assets/demo/01.png]]\n\n"
+                "> 图：设置入口位于计划面板底部。\n",
+                encoding="utf-8",
+            )
+
+            command = [
+                sys.executable,
+                str(VALIDATE_SCRIPT),
+                "--wiki-root",
+                str(wiki),
+                "--notes-dir",
+                str(notes),
+                "--raw",
+                str(raw),
+                "--formal",
+                str(formal),
+            ]
+            passed = subprocess.run(command, text=True, capture_output=True, check=False)
+            self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+
+            formal.write_text(formal.read_text(encoding="utf-8").replace("图：设置入口位于计划面板底部。", "图：入口。"), encoding="utf-8")
+            failed = subprocess.run(command, text=True, capture_output=True, check=False)
+            self.assertEqual(failed.returncode, 1)
+            self.assertIn("missing semantic anchor", failed.stdout)
+
+    def test_validator_requires_image_inventory_for_raw_images(self):
+        module = load_script(VALIDATE_SCRIPT, "validate_ingest_contract_images")
+        with tempfile.TemporaryDirectory() as td:
+            wiki = Path(td) / "wiki"
+            notes = wiki / "_meta" / "extraction-notes" / "demo"
+            raw = wiki / "raw" / "assets" / "demo"
+            notes.mkdir(parents=True)
+            raw.mkdir(parents=True)
+            (raw / "01.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+            errors: list[str] = []
+            module.validate_image_contract(notes, wiki, [raw], errors)
+            self.assertTrue(any("image-inventory.md: missing" in error for error in errors))
 
     def test_route_audit_rejects_cli_error_with_zero_exit(self):
         module = load_script(ROUTE_SCRIPT, "wiki_cli_route_audit")

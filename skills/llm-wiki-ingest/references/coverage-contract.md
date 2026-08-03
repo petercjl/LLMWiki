@@ -47,6 +47,12 @@ Add adapter-specific columns:
 - Transcript: `time_range`, `speaker`, `micro_segment_id`
 - Spreadsheet: `sheet`, `range`, `columns`, `metric_units`
 
+For image-bearing sources, keep image-specific fields in
+`image-inventory.md` using `references/image-knowledge-contract.md`. Give every
+image that carries unique knowledge its own coverage row; the coverage row may
+reference the corresponding `image_id` in `source_location` or
+`reason_or_notes`.
+
 ## Omission Rules
 
 Never use vague reasons like:
@@ -60,6 +66,8 @@ Acceptable reasons:
 
 - duplicate of source unit X and merged into page Y
 - decorative image with no additional information
+- duplicate image content already preserved by a named source unit
+- sensitive image excluded from formal pages, with the safe handling recorded
 - navigation/frontmatter/noise
 - raw credentials or sensitive data removed
 - obsolete platform UI, preserved raw-only with date
@@ -76,3 +84,5 @@ An ingest is incomplete if:
 - raw-only items have no reason
 - formal pages are only summaries
 - coverage matrix exists but target pages do not contain the referenced knowledge
+- a knowledge/procedural image lacks a durable local asset, semantic anchor,
+  target-page embed, or explicit unresolved disposition
